@@ -37,17 +37,30 @@ document.addEventListener("DOMContentLoaded", () => {
       };
 
       try {
-        const apiBase = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+        // prefer backend from auth-config (set by auth-links.js). Fallback to localhost or origin.
+        const apiBase = window.AUTH_SERVER || ((window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
           ? `${window.location.protocol}//${window.location.hostname}:3000`
-          : window.location.origin;
+          : window.location.origin);
 
-        const response = await fetch(`${apiBase}/login-cliente`, {
+        const response = await fetch(`${apiBase.replace(/\/$/, '')}/login-cliente`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(dados)
         });
 
-        const data = await response.json();
+        // handle non-JSON responses gracefully
+        let data;
+        const contentType = response.headers.get('content-type') || '';
+        if (contentType.includes('application/json')) {
+          data = await response.json();
+        } else {
+          const text = await response.text();
+          // if server returned HTML (error page), surface clearer message
+          console.warn('login-cliente: expected JSON but received:', text.slice(0,200));
+          msgLogin.textContent = '❌ Erro de comunicação com o servidor (resposta inválida).';
+          msgLogin.style.color = 'red';
+          return;
+        }
 
         if (response.ok && data.sucesso) {
           msgLogin.textContent = "✅ Login realizado com sucesso!";
