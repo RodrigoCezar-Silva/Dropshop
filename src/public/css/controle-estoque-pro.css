@@ -8,6 +8,13 @@ html, body { overflow-x: hidden; }
   width: 100%;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
+  
+  /* esconder barra de rolagem visualmente, mantendo a rolagem funcional */
+  -ms-overflow-style: none; /* IE/Edge */
+  scrollbar-width: none; /* Firefox */
+}
+.table-responsive::-webkit-scrollbar {
+  height: 0; /* esconder scrollbar horizontal no WebKit */
 }
 
 /* Garante que o container não exceda a viewport */
