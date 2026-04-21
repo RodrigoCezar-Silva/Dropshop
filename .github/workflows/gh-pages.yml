@@ -62,4 +62,6 @@ jobs:
         with:
           publish_dir: ./docs
           publish_branch: gh-pages
+          # prefer GITHUB_TOKEN, but allow using a PAT if the repo or org blocks the bot
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          personal_token: ${{ secrets.GH_PAGES_PAT }}
