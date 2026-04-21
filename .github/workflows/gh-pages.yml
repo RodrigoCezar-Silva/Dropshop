@@ -10,18 +10,49 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          persist-credentials: false
+          # permitir que o workflow faça push (necessário para actions-gh-pages)
+          persist-credentials: true
+          fetch-depth: 0
 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: '18'
 
-      - name: Install dependencies
-        run: npm ci || npm install
+      - name: Environment and repo diagnostics
+        run: |
+          echo "Runner: $(uname -a)"
+          node -v || true
+          npm -v || true
+          echo '--- git status ---'
+          git status --porcelain || true
+          echo '--- repo files (root) ---'
+          ls -la || true
+          echo '--- package.json ---'
+          cat package.json || true
+          echo '--- check for LFS pointers ---'
+          git grep -n "git-lfs.github.com/spec/v1" || true
+
+      - name: Install dependencies (safe)
+        run: |
+          # prefer `npm ci` when lockfile exists, otherwise fallback to `npm install`
+          if [ -f package-lock.json ]; then
+            echo 'Using npm ci'
+            npm ci
+          else
+            echo 'No package-lock.json, using npm install'
+            npm install
+          fi
 
       - name: Build docs folder
         run: npm run build:docs
+
+      - name: Build docs diagnostics
+        run: |
+          echo '--- docs contents ---'
+          ls -la docs || true
+          echo '--- docs tree ---'
+          find docs -maxdepth 3 -type f | sed -n '1,200p' || true
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
