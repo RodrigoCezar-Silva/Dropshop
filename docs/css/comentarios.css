@@ -1,0 +1,426 @@
+
+/* Comentários */
+.comentario {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 15px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  font-family: 'Segoe UI', sans-serif;
+  display: flex;
+  flex-direction: column; /* mantém em coluna */
+  gap: 12px;
+}
+
+/* Linha superior: nome + estrelas + botão remover */
+.comentario-topo {
+  display: flex;
+  justify-content: space-between; /* nome/estrelas à esquerda, botão à direita */
+  align-items: center;
+  width: 100%;
+}
+
+/* Nome e estrelas juntos */
+.comentario-info {
+  display: flex;
+  align-items: center;
+  gap: 10px; /* espaço entre nome e estrelas */
+}
+
+.comentario-info strong {
+  font-size: 16px;
+  color: #1565C0;
+}
+
+.comentario-info .estrelas {
+  font-size: 16px;
+  color: #f5a623; /* dourado para estrelas */
+}
+
+/* Texto do comentário */
+.comentario p {
+  font-size: 14px;
+  color: #444;
+  margin: 0;
+  text-align: left;
+}
+
+/* Botão remover */
+.btn-remover {
+  background: #e53935;
+  color: #fff;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+.btn-remover:hover {
+  background: #c62828;
+}
+
+/* Container de mídia abaixo */
+.comentario-midia {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+/* Miniaturas de fotos */
+.comentario-midia img {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 2px solid #eee;
+  cursor: pointer;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+.comentario-midia img:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+/* Miniatura de vídeo */
+.comentario-midia video {
+  width: 240px;
+  height: 160px;
+  border-radius: 8px;
+  border: 2px solid #eee;
+  cursor: pointer;
+  transition: box-shadow 0.3s;
+}
+.comentario-midia video:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+
+/* Avaliações */
+#avaliacoes-produto {
+  margin-top: 30px;
+  padding: 20px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  font-family: "Segoe UI", Arial, sans-serif;
+}
+
+#avaliacoes-produto h3 {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.nota-geral {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+#notaMedia {
+  font-size: 18px;
+  font-weight: bold;
+  color: #222;
+}
+
+#estrelasMedia {
+  font-size: 22px;
+  color: #f5a623; /* dourado para estrelas */
+}
+
+#distribuicao-estrelas {
+  margin-bottom: 20px;
+}
+
+#distribuicao-estrelas div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 6px 0;
+  font-size: 14px;
+  color: #555;
+}
+
+.barra {
+  flex: 1;
+  height: 10px;
+  background: #eee;
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+}
+
+.barra span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #f5a623, #ffcc00);
+  border-radius: 6px;
+}
+
+/* Filtros */
+.filtros-avaliacoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.filtros-avaliacoes button {
+  background: #f5f5f5;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+.filtros-avaliacoes button:hover {
+  background: #e63946;
+  color: #fff;
+}
+
+/* Paginação */
+#paginacao-comentarios {
+  margin-top: 15px;
+  text-align: center;
+}
+
+#paginacao-comentarios button {
+  margin: 0 4px;
+  padding: 6px 12px;
+  border: 1px solid #ddd;
+  background: #f9f9f9;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+#paginacao-comentarios button:hover {
+  background: #0077ff;
+  color: #fff;
+}
+
+#paginacao-comentarios button.active {
+  background: #0077ff;
+  color: #fff;
+  font-weight: bold;
+}
+
+/* Responsividade */
+@media (max-width: 600px) {
+  .comentario {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+/* Botão avaliar */
+.btn-avaliar {
+  background: linear-gradient(135deg, #FF9800, #F57C00);
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  margin: 10px 0;
+  transition: 0.3s;
+}
+
+.btn-avaliar:hover {
+  background: linear-gradient(135deg, #FFA726, #EF6C00);
+}
+
+/* Fundo do popup */
+#popupComentario {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.6);
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+/* Caixa do formulário */
+#popupComentario .conteudo {
+  background: #fff;
+  padding: 30px;
+  border-radius: 12px;
+  width: 500px;
+  max-width: 90%;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.25);
+  animation: fadeIn 0.4s ease;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+/* Título */
+#popupComentario h2 {
+  margin-top: 0;
+  font-size: 22px;
+  color: #333;
+  border-bottom: 2px solid #f0f0f0;
+  padding-bottom: 10px;
+}
+
+/* Botão fechar */
+#fecharPopup {
+  float: right;
+  font-size: 24px;
+  cursor: pointer;
+  color: #888;
+}
+#fecharPopup:hover { color: #000; }
+
+/* Inputs e textarea */
+#formComentario input,
+#formComentario textarea,
+#formComentario select {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+#formComentario input:focus,
+#formComentario textarea:focus,
+#formComentario select:focus {
+  border-color: #2196F3;
+  box-shadow: 0 0 6px rgba(33,150,243,0.4);
+  outline: none;
+}
+
+#formComentario textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+/* Labels */
+#formComentario label {
+  font-weight: 600;
+  color: #444;
+  margin-top: 10px;
+  display: block;
+}
+
+/* Botão enviar */
+#formComentario button[type="submit"] {
+  background: linear-gradient(135deg, #2196F3, #1565C0);
+  color: white;
+  border: none;
+  padding: 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  width: 100%;
+  transition: 0.3s;
+  margin-top: 15px;
+}
+
+#formComentario button[type="submit"]:hover {
+  background: linear-gradient(135deg, #42A5F5, #1E88E5);
+}
+
+/* Pré-visualização de fotos */
+#previewFotos img {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  margin: 5px;
+  border-radius: 8px;
+  border: 2px solid #ddd;
+  transition: transform 0.3s;
+}
+#previewFotos img:hover { 
+  transform: scale(1.1); 
+}
+
+/* Pré-visualização de vídeo */
+#previewVideo video {
+  width: 160px;
+  height: 100px;
+  margin-top: 10px;
+  border-radius: 8px;
+  border: 2px solid #ddd;
+}
+
+/* Animação do popup */
+@keyframes fadeIn {
+  from {opacity: 0; transform: translateY(-20px);}
+  to {opacity: 1; transform: translateY(0);}
+}
+
+/* Popup de mídia (imagem/vídeo ampliado) */
+#mediaPopup {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.8);
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+}
+
+#mediaPopup #mediaContent img,
+#mediaPopup #mediaContent video {
+  max-width: 90%;
+  max-height: 90%;
+  border-radius: 10px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.5);
+}
+
+#closeMedia {
+  position: absolute;
+  top: 20px; right: 30px;
+  font-size: 32px;
+  color: #fff;
+  cursor: pointer;
+}
+#closeMedia:hover { 
+  color: #ff4444; 
+}
+
+/* Container de mídia abaixo */
+.comentario-midia {
+  display: flex;
+  flex-wrap: wrap;   /* permite quebrar linha se precisar */
+  gap: 8px;          /* espaço entre itens */
+  align-items: center;
+}
+
+/* Miniaturas de fotos menores */
+.comentario-midia img {
+  width: 80px;       /* reduz tamanho */
+  height: 80px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  cursor: pointer;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+.comentario-midia img:hover {
+  transform: scale(1.05);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+/* Miniatura de vídeo ajustada para ficar junto das fotos */
+.comentario-midia video {
+  width: 120px;      /* menor que antes */
+  height: 90px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  cursor: pointer;
+  transition: box-shadow 0.3s;
+}
+.comentario-midia video:hover {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}

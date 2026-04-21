@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description"
+        content="MIX-PROMOÇÃO - Produtos exclusivos com qualidade e preço justo. Promoções todos os dias!" />
+  <title>MIX-PROMOÇÃO</title>
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="./css/style-index.css">
+  <link rel="stylesheet" href="./css/carrinho.css" />
+  <link rel="stylesheet" href="./css/QuemSomos.css">
+  <link rel="stylesheet" href="./css/menu.css" />
+  <link rel="stylesheet" href="./css/logo.css" />
+  <link rel="stylesheet" href="./css/statusLogin.css" />
+  <link rel="stylesheet" href="./css/minhaConta.css" />
+  <link rel="stylesheet" href="./css/btn-topo.css" />
+  <link rel="stylesheet" href="./css/footer.css" />
+
+  <!-- Ícones Font Awesome -->
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="./css/chatbot-widget.css" />
+  <link rel="stylesheet" href="./css/responsive.css" />
+</head>
+<body>
+  <!-- Cabeçalho -->
+  <header class="site-header">
+    <div class="logo">
+      <span class="logo-icon">🛒</span>
+      <span class="logo-text">
+        <span class="mix">MIX</span><span class="promocao">PROMOÇÃO</span>
+      </span>
+    </div> 
+
+    <!-- Menu -->
+    <nav class="menu" aria-label="Menu principal">
+      <ul>
+        <li><a href="index.html" class="active"><i class="fa-solid fa-house menu-link-icon" aria-hidden="true"></i><span>Início</span></a></li>
+        <li><a href="loja.html"><i class="fa-solid fa-store menu-link-icon" aria-hidden="true"></i><span>Nossa Loja</span></a></li>
+        <li><a href="QuemSomos.html"><i class="fa-solid fa-circle-info menu-link-icon" aria-hidden="true"></i><span>Sobre</span></a></li>
+        
+        <li><a href="trocas-devolucoes.html"><i class="fa-solid fa-right-left menu-link-icon" aria-hidden="true"></i><span>Trocas e Devoluções</span></a></li>
+        <li><a href="ajuda.html"><i class="fa-solid fa-circle-question menu-link-icon" aria-hidden="true"></i><span>Ajuda</span></a></li>
+      </ul>
+    </nav>
+
+    <!-- Botões de login -->
+    <div id="loginButtons">
+      <a href="login-cliente.html" class="btn-login cliente">👤 Login Cliente</a>
+      <a href="admin-login.html" class="btn-login admin">👤 Login Administrativo</a>
+    </div>
+
+    <!-- Status de login administrador -->
+    <div id="statusLogado" class="status-admin" style="display:none;">
+      <span class="status-text">👑 Administrador: <strong id="nomeUsuario"></strong></span>
+      <button id="logout" class="btn-logout">Sair</button>
+    </div>
+
+    <!-- Status de login cliente -->
+    <div id="clienteStatus" style="display:none;">
+  <img id="fotoCliente" class="foto-perfil" src="" alt="Foto Cliente">
+  <span id="nomeCliente"></span>
+  <span id="sobrenomeCliente"></span>
+  
+  <!-- Botão Minha Conta -->
+  <button id="btnMinhaConta" class="btn-minha-conta">👤 Minha Conta</button>
+
+  <!-- Botão Sair -->
+  <button id="logoutBtn" class="btn-logout">Sair</button>
+</div>
+
+    <!-- Ícone do carrinho -->
+    <a href="carrinho.html" class="cart-icon" aria-label="Carrinho de Compras">
+      <i class="fas fa-shopping-cart"></i>
+      <span id="cart-count">0</span>
+    </a>
+  </header>
+
+  <!-- Hero Sobre -->
+  <section class="sobre-hero">
+    <div class="sobre-hero-content">
+      <span class="sobre-badge"><i class="fa-solid fa-sparkles"></i> Conheça Nossa História</span>
+      <h1>Somos a <span class="destaque">Mix Promoção</span></h1>
+      <p>Nascemos com o objetivo de oferecer produtos exclusivos, modernos e de qualidade, sempre com preços acessíveis. Uma empresa jovem e inovadora que acredita que comprar online deve ser simples, seguro e vantajoso.</p>
+    </div>
+  </section>
+
+  <main>
+    <!-- Missão & Modelo -->
+    <section class="sobre-missao">
+      <div class="missao-grid">
+        <div class="missao-card">
+          <div class="missao-icon"><i class="fa-solid fa-bullseye"></i></div>
+          <h3>Nosso Objetivo</h3>
+          <p>Proporcionar aos clientes acesso às melhores ofertas do mercado, garantindo praticidade e economia em cada compra.</p>
+        </div>
+        <div class="missao-card">
+          <div class="missao-icon"><i class="fa-solid fa-truck-fast"></i></div>
+          <h3>Modelo Dropshipping</h3>
+          <p>Trabalhamos com <strong>dropshipping</strong>, o que nos permite disponibilizar uma ampla variedade de produtos, entregando direto do fornecedor para você.</p>
+        </div>
+        <div class="missao-card">
+          <div class="missao-icon"><i class="fa-solid fa-eye"></i></div>
+          <h3>Nossa Visão</h3>
+          <p>Ser referência em vendas online com estilo e qualidade, oferecendo a melhor experiência de compra do mercado.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Números -->
+    <section class="sobre-stats">
+      <div class="stats-grid">
+        <div class="stat-item">
+          <span class="stat-numero">500+</span>
+          <span class="stat-label">Produtos</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-numero">1.000+</span>
+          <span class="stat-label">Clientes Satisfeitos</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-numero">24h</span>
+          <span class="stat-label">Suporte Rápido</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-numero">100%</span>
+          <span class="stat-label">Seguro</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Por que escolher -->
+    <section class="sobre-vantagens">
+      <h2 class="secao-titulo">Por que escolher a <span>Mix Promoção</span>?</h2>
+      <div class="vantagens-grid">
+        <div class="vantagem-card">
+          <div class="vantagem-icon"><i class="fa-solid fa-gem"></i></div>
+          <h4>Produtos Exclusivos</h4>
+          <p>Curadoria de produtos atualizados com as últimas tendências do mercado.</p>
+        </div>
+        <div class="vantagem-card">
+          <div class="vantagem-icon"><i class="fa-solid fa-tags"></i></div>
+          <h4>Preços Competitivos</h4>
+          <p>Promoções constantes e os melhores preços para nossos clientes.</p>
+        </div>
+        <div class="vantagem-card">
+          <div class="vantagem-icon"><i class="fa-solid fa-truck"></i></div>
+          <h4>Frete Grátis</h4>
+          <p>Frete grátis em todas as compras acima de R$100 para todo o Brasil.</p>
+        </div>
+        <div class="vantagem-card">
+          <div class="vantagem-icon"><i class="fa-solid fa-headset"></i></div>
+          <h4>Atendimento Rápido</h4>
+          <p>Suporte transparente e eficiente para tirar todas as suas dúvidas.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Envios -->
+    <section class="sobre-envios">
+      <h2 class="secao-titulo">Nossos Parceiros de <span>Entrega</span></h2>
+      <p class="envios-desc">Trabalhamos com as melhores transportadoras para garantir entregas rápidas e seguras.</p>
+      <div class="envios-logos">
+        <img src="https://copilot.microsoft.com/th/id/BCO.44cfdd97-8abb-4e73-b520-e779dd4a849e.png" 
+             alt="Logos de entrega Correios, SEDEX, PAC e Jadlog">
+      </div>
+    </section>
+  </main>
+
+  <!-- Rodapé -->
+  <footer class="site-footer">
+    <div class="footer-top-bar"></div>
+    <div class="footer-main">
+      <div class="footer-brand">
+        <div class="footer-logo">
+          <span class="footer-logo-icon">🛒</span>
+          <span class="footer-logo-text"><span class="mix">MIX</span><span class="promo">PROMOÇÃO</span></span>
+        </div>
+        <p class="footer-desc">Oferecemos os melhores produtos com qualidade e preço justo. Promoções exclusivas e ofertas imperdíveis todos os dias!</p>
+        <div class="footer-social">
+          <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+          <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+          <a href="#" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+          <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+        </div>
+      </div>
+      <div class="footer-links">
+        <h4>Navegação</h4>
+        <ul>
+          <li><a href="index.html"><i class="fa-solid fa-chevron-right"></i> Início</a></li>
+          <li><a href="loja.html"><i class="fa-solid fa-chevron-right"></i> Nossa Loja</a></li>
+          <li><a href="QuemSomos.html"><i class="fa-solid fa-chevron-right"></i> Sobre Nós</a></li>
+        </ul>
+      </div>
+      <div class="footer-links suporte">
+        <h4>Suporte</h4>
+        <ul>
+          <li><a href="trocas-devolucoes.html"><i class="fa-solid fa-chevron-right"></i> Trocas e Devoluções</a></li>
+          <li><a href="carrinho.html"><i class="fa-solid fa-chevron-right"></i> Meu Carrinho</a></li>
+        </ul>
+      </div>
+      <!-- Contato removido -->
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-bottom-inner">
+        <p>&copy; 2026 MIX-PROMOÇÃO. Todos os direitos reservados.</p>
+        <div class="footer-pagamentos">
+          <span>Pagamentos:</span>
+          <i class="fab fa-cc-visa"></i>
+          <i class="fab fa-cc-mastercard"></i>
+          <i class="fab fa-pix"></i>
+          <i class="fa-solid fa-barcode"></i>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="./js/carrinho.js"></script>
+  <script src="./js/VoltaraoTopo.js"></script>
+  <script src="./js/statusLogin.js"></script>
+  <script src="./js/meu-perfil.js"></script>
+  <script src="./js/logo.js"></script>
+  <script src="./js/btn-topo.js"></script>
+  <script src="./js/bloquear-copia.js"></script>
+  <script src="./js/chatbot-widget.js"></script>
+  <script src="./js/responsive-nav.js"></script>
+</body>
+</body>
+
+</html>
