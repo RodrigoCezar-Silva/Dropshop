@@ -1,8 +1,8 @@
 // Sets GitHub OAuth links on login pages using /auth-config.json
 (async function(){
   try{
-    const resp = await fetch('./auth-config.json');
-    const cfg = resp && resp.ok ? await resp.json() : { authServer: window.location.origin };
+    const resp = await fetch('/auth-config.json');
+    const cfg = resp.ok ? await resp.json() : { authServer: window.location.origin };
     const authServer = (cfg && cfg.authServer) ? cfg.authServer.replace(/\/$/, '') : window.location.origin;
 
     const btnClient = document.getElementById('githubLoginClient');

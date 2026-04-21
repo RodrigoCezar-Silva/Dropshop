@@ -5,16 +5,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   const formLogin = document.getElementById("formLogin");
   const mensagemErro = document.getElementById("mensagemErro");
-  let BACKEND_URL = "http://localhost:3000"; // default for local dev
-
-  // carregar configuração de backend de forma relativa (evita 404 em GitHub Pages)
-  try {
-    fetch('./auth-config.json')
-      .then(res => res.ok ? res.json() : null)
-      .then(cfg => {
-        if (cfg && cfg.authServer) BACKEND_URL = cfg.authServer;
-      })
-      .catch(() => { /* mantém o padrão localhost */ });
 
   if (formLogin) {
     formLogin.addEventListener("submit", async (e) => {
@@ -32,8 +22,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       try {
-        const endpoint = (BACKEND_URL || 'http://localhost:3000').replace(/\/$/, '') + '/login-admin';
-        const response = await fetch(endpoint, {
+        const response = await fetch("http://localhost:3000/login-admin", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ usuario, senha })
