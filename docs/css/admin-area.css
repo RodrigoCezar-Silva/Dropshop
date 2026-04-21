@@ -1,0 +1,248 @@
+.admin-area-main {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 28px 20px 48px;
+}
+
+.admin-area-hero {
+  background: linear-gradient(135deg, #031d32 60%, #0a3d62 80%, #0d6e6e 100%);
+  color: #fff;
+  border-radius: 26px;
+  padding: 38px 36px 34px 36px;
+  box-shadow: 0 24px 64px 0 rgba(3, 29, 50, 0.28), 0 2px 12px 0 #00eaff22;
+  margin-bottom: 32px;
+  position: relative;
+  overflow: hidden;
+  border: 2.5px solid #00eaff33;
+  transition: box-shadow 0.22s, border-color 0.22s, transform 0.22s;
+}
+.admin-area-hero::before {
+  content: '';
+  position: absolute;
+  top: -40px;
+  right: -40px;
+  width: 160px;
+  height: 160px;
+  background: radial-gradient(circle, #00eaff55 0%, transparent 80%);
+  opacity: 0.25;
+  z-index: 0;
+  pointer-events: none;
+}
+.admin-area-hero:hover {
+  box-shadow: 0 36px 80px 0 #00eaff33, 0 8px 32px 0 #031d3233;
+  border-color: #00eaff;
+  transform: translateY(-4px) scale(1.012);
+}
+.admin-area-hero > * {
+  position: relative;
+  z-index: 1;
+}
+
+
+.admin-area-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #9ff3ea;
+  margin-bottom: 12px;
+}
+
+.admin-area-hero h1 {
+  margin: 0 0 10px;
+  font-size: clamp(1.8rem, 3vw, 2.6rem);
+  color: #fff;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.admin-area-hero p {
+  margin: 0;
+  max-width: 720px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.admin-area-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 18px;
+}
+
+.admin-card {
+  background: #fff;
+  border: 1px solid #dbe6ef;
+  border-radius: 16px;
+  padding: 22px;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.admin-card-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+  color: #fff;
+  background: linear-gradient(135deg, #00b8ab, #0f5fa8);
+}
+
+.admin-card h2 {
+  margin: 0;
+  font-size: 1.2rem;
+  color: #0f2740;
+}
+
+.admin-card p {
+  margin: 0;
+  color: #4f6475;
+  line-height: 1.6;
+}
+
+.admin-card-link {
+  margin-top: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: #0d5fa8;
+  font-weight: 700;
+}
+
+.admin-card-link:hover {
+  color: #083f71;
+}
+
+.admin-area-notes {
+  margin-top: 24px;
+  background: #fff;
+  border-radius: 16px;
+  padding: 22px;
+  border: 1px solid #dbe6ef;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+}
+
+.admin-area-notes h2 {
+  margin: 0 0 14px;
+  color: #0f2740;
+}
+
+.admin-area-notes ul {
+  margin: 0;
+  padding-left: 18px;
+  color: #4f6475;
+  line-height: 1.8;
+}
+
+@media (max-width: 768px) {
+  .admin-area-main {
+    padding: 20px 14px 34px;
+  }
+
+  .admin-area-hero,
+  .admin-card,
+  .admin-area-notes {
+    padding: 18px;
+  }
+}
+
+/* ========== Card destaque (Pedidos) ========== */
+.admin-card-destaque {
+  border: 2px solid #0d6e6e;
+}
+
+.admin-card-destaque .icon-pedidos {
+  background: linear-gradient(135deg, #f59e0b, #ef4444);
+}
+
+/* ========== Card destaque (Reclamações) ========== */
+.admin-card-reclamacoes {
+  border: 2px solid #7c3aed;
+}
+
+.admin-card-reclamacoes .icon-reclamacoes {
+  background: linear-gradient(135deg, #7c3aed, #a855f7);
+}
+
+.admin-card-reclamacoes .admin-card-link {
+  color: #7c3aed;
+}
+
+.admin-card-reclamacoes .admin-card-link:hover {
+  color: #5b21b6;
+}
+
+/* ========== Card destaque (Emails) ========== */
+.admin-card-emails {
+  border: 2px solid #0891b2;
+}
+
+.admin-card-emails .icon-emails {
+  background: linear-gradient(135deg, #0891b2, #06b6d4);
+}
+
+.admin-card-emails .admin-card-link {
+  color: #0891b2;
+}
+
+.admin-card-emails .admin-card-link:hover {
+  color: #0e7490;
+}
+
+/* ========== Card destaque (WhatsApp) ========== */
+.admin-card-whatsapp {
+  border: 2px solid #25d366;
+}
+
+.admin-card-whatsapp .icon-whatsapp {
+  background: linear-gradient(135deg, #128c7e, #25d366);
+}
+
+.admin-card-whatsapp .admin-card-link {
+  color: #128c7e;
+}
+
+.admin-card-whatsapp .admin-card-link:hover {
+  color: #075e54;
+}
+
+/* ========== Card destaque (Criar Imagens IA) ========== */
+.admin-card-imagens {
+  border: 2px solid #ec4899;
+}
+
+.admin-card-imagens .icon-imagens {
+  background: linear-gradient(135deg, #db2777, #f97316);
+}
+
+.admin-card-imagens .admin-card-link {
+  color: #db2777;
+}
+
+.admin-card-imagens .admin-card-link:hover {
+  color: #9d174d;
+}
+
+/* ========== Card destaque (Chatbot IA) ========== */
+.admin-card-chatbot {
+  border: 2px solid #0072ff;
+}
+
+.admin-card-chatbot .icon-chatbot {
+  background: linear-gradient(135deg, #0072ff, #00c6ff);
+}
+
+.admin-card-chatbot .admin-card-link {
+  color: #0072ff;
+}
+
+.admin-card-chatbot .admin-card-link:hover {
+  color: #0052cc;
+}

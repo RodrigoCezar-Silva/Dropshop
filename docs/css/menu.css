@@ -1,0 +1,281 @@
+/* Itens lado a lado */
+.menu ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+.menu ul li {
+  margin: 0;
+}
+
+/* Botões principais */
+.menu ul li a {
+  text-decoration: none;
+  color: #fff;
+  font-weight: bold;
+  font-size: 16px;
+  padding: 12px 20px;
+  border-radius: 6px;
+  transition: background 0.3s ease, color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+  position: relative;
+  background: rgba(255,255,255,0.1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+/* Evita quebra de linha especificamente para os links 'Trocas e Devoluções' e 'Nossa Loja' */
+.menu ul li a[href="trocas-devolucoes.html"],
+.menu ul li a[href="/src/public/html/trocas-devolucoes.html"],
+.menu ul li a[href="loja.html"],
+.menu ul li a[href="/src/public/html/loja.html"] {
+  white-space: nowrap;
+}
+
+.menu-link-icon {
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
+/* Efeito hover com animação */
+.menu ul li a:hover {
+  background: #fff;
+  color: #2a5298;
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+}
+
+/* Efeito underline animado */
+.menu ul li a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0; /* 🔹 alinhado na base */
+  width: 0%;
+  height: 3px;
+  background: #ffcc00;
+  transition: width 0.3s ease;
+}
+
+.menu ul li a:hover::after {
+  width: 100%;
+}
+
+.btn-login {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.1em;
+  font-weight: bold;
+  padding: 12px 24px;
+  border: none;              /* remove borda padrão */
+  outline: none;             /* remove linha de foco */
+  border-radius: 8px;
+  cursor: pointer;
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  text-decoration: none;     /* remove sublinhado se for <a> */
+}
+
+
+/* Botão Cliente (azul) */
+.btn-login.cliente {
+  background: linear-gradient(135deg, #3498db, #2980b9);
+}
+
+/* Botão Administrativo (vermelho) */
+.btn-login.admin {
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
+}
+
+/* Hover com sombra */
+.btn-login:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+}
+
+/* 🔹 Efeito de brilho animado */
+.btn-login::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -75%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    120deg,
+    rgba(255,255,255,0.2) 0%,
+    rgba(255,255,255,0.6) 50%,
+    rgba(255,255,255,0.2) 100%
+  );
+  transform: skewX(-25deg);
+}
+
+/* Animação do brilho */
+.btn-login:hover::after {
+  animation: shine 1s forwards;
+}
+
+@keyframes shine {
+  0% { left: -75%; }
+  100% { left: 125%; }
+}
+
+
+/* 🔹 Responsividade */
+@media (max-width: 768px) {
+  /* Mobile: esconder menu por padrão e usar toggle */
+  .menu {
+    position: relative;
+  }
+  .menu ul {
+    display: none;
+    flex-direction: column;
+    gap: 12px;
+    align-items: center;
+    width: 100%;
+    margin: 12px 0 0 0;
+    padding: 12px 0;
+    background: transparent;
+  }
+  .menu.open ul,
+  .menu ul.open {
+    display: flex;
+  }
+
+  /* Botão hamburger */
+  .menu-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 1.2rem;
+    padding: 8px;
+    margin-left: 8px;
+    cursor: pointer;
+  }
+  .menu-toggle:focus { outline: 2px solid rgba(255,255,255,0.2); }
+  .menu-toggle .hamburger-line {
+    width: 22px;
+    height: 2px;
+    background: #fff;
+    display: block;
+    position: relative;
+  }
+  .menu-toggle .hamburger-line::before,
+  .menu-toggle .hamburger-line::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    width: 22px;
+    height: 2px;
+    background: #fff;
+    transition: transform 0.2s ease;
+  }
+  .menu-toggle .hamburger-line::before { top: -7px; }
+  .menu-toggle .hamburger-line::after { top: 7px; }
+}
+
+/* Área de usuário logado / botões de login */
+#areaUsuario {
+  margin-left: auto; /* joga para o canto direito */
+  display: flex;
+  align-items: center;
+  gap: 12px; /* espaço entre os botões */
+}
+
+/* Botões de login */
+.btn-login {
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-login.cliente {
+  background-color: #2196f3;
+  color: #fff;
+}
+.btn-login.cliente:hover {
+  background-color: #1976d2;
+}
+
+.btn-login.admin {
+  background-color: #f44336;
+  color: #fff;
+}
+.btn-login.admin:hover {
+  background-color: #d32f2f;
+}
+
+/* Carrinho à direita */
+.cart-icon {
+  color: #fff;
+  font-size: 1.4rem;
+  position: relative;
+  cursor: pointer;
+}
+.cart-icon .badge {
+  position: absolute;
+  top: -6px;
+  right: -10px;
+  background: #f44336;
+  color: #fff;
+  font-size: 12px;
+  font-weight: bold;
+  border-radius: 50%;
+  padding: 2px 6px;
+}
+
+/* Garante posicionamento correto dos botões de login no header */
+header.site-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+}
+
+header.site-header .menu {
+  flex: 1 1 auto;
+}
+
+#loginButtons {
+  margin-left: auto;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+/* Estilo para o botão 'Minha Conta' criado dinamicamente */
+.btn-minha-conta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background: linear-gradient(135deg,#2c3e50,#34495e);
+  color: #fff;
+  border-radius: 8px;
+  text-decoration: none;
+  white-space: nowrap; /* evita quebra de linha */
+  min-width: 140px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn-minha-conta i { font-size: 1rem; line-height:1; }
+.btn-minha-conta:hover { transform: translateY(-2px); box-shadow: 0 6px 12px rgba(0,0,0,0.25); }
+
