@@ -1,0 +1,36 @@
+<svg width="1080" height="1080" viewBox="0 0 1080 1080" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="instaBg" x1="120" y1="80" x2="960" y2="980" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#6D28D9"/>
+      <stop offset="0.45" stop-color="#DB2777"/>
+      <stop offset="1" stop-color="#F97316"/>
+    </linearGradient>
+    <linearGradient id="instaCard" x1="200" y1="200" x2="880" y2="880" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF" stop-opacity="0.22"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0.08"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1080" height="1080" rx="48" fill="url(#instaBg)"/>
+  <circle cx="910" cy="170" r="120" fill="#FFFFFF" fill-opacity="0.08"/>
+  <circle cx="170" cy="930" r="160" fill="#FFFFFF" fill-opacity="0.08"/>
+
+  <rect x="80" y="80" width="920" height="920" rx="42" fill="url(#instaCard)" stroke="#FFFFFF" stroke-opacity="0.25"/>
+
+  <text x="130" y="180" fill="#FFF7ED" font-size="42" font-family="Segoe UI, Arial, sans-serif" font-weight="700">@mixpromocao</text>
+  <text x="130" y="280" fill="#FFFFFF" font-size="72" font-family="Segoe UI, Arial, sans-serif" font-weight="800">OFERTA DA</text>
+  <text x="130" y="360" fill="#FDE68A" font-size="84" font-family="Segoe UI, Arial, sans-serif" font-weight="900">SEMANA</text>
+
+  <rect x="130" y="415" width="420" height="98" rx="24" fill="#111827" fill-opacity="0.88"/>
+  <text x="170" y="478" fill="#FFFFFF" font-size="56" font-family="Segoe UI, Arial, sans-serif" font-weight="900">ATÉ 50% OFF</text>
+
+  <text x="130" y="590" fill="#FFF7ED" font-size="38" font-family="Segoe UI, Arial, sans-serif" font-weight="600">✔ Frete grátis acima de R$100</text>
+  <text x="130" y="650" fill="#FFF7ED" font-size="38" font-family="Segoe UI, Arial, sans-serif" font-weight="600">✔ Novidades todos os dias</text>
+  <text x="130" y="710" fill="#FFF7ED" font-size="38" font-family="Segoe UI, Arial, sans-serif" font-weight="600">✔ Produtos selecionados com desconto</text>
+
+  <rect x="130" y="780" width="370" height="108" rx="22" fill="#FFFFFF"/>
+  <text x="182" y="848" fill="#7C3AED" font-size="44" font-family="Segoe UI, Arial, sans-serif" font-weight="800">COMPRE AGORA</text>
+
+  <text x="130" y="955" fill="#FFFFFF" font-size="48" font-family="Segoe UI, Arial, sans-serif" font-weight="900">MIX PROMOÇÃO</text>
+  <text x="660" y="955" fill="#FDE68A" font-size="32" font-family="Segoe UI, Arial, sans-serif" font-weight="700">mixpromocao.com</text>
+</svg>

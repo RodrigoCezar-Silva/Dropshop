@@ -1,0 +1,38 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="fbBg" x1="0" y1="0" x2="1200" y2="630" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0F172A"/>
+      <stop offset="0.5" stop-color="#1D4ED8"/>
+      <stop offset="1" stop-color="#38BDF8"/>
+    </linearGradient>
+    <linearGradient id="fbPanel" x1="60" y1="60" x2="1140" y2="570" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF" stop-opacity="0.16"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0.06"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="630" rx="36" fill="url(#fbBg)"/>
+  <circle cx="1040" cy="120" r="110" fill="#FFFFFF" fill-opacity="0.08"/>
+  <circle cx="170" cy="560" r="150" fill="#FFFFFF" fill-opacity="0.08"/>
+
+  <rect x="50" y="50" width="1100" height="530" rx="28" fill="url(#fbPanel)" stroke="#FFFFFF" stroke-opacity="0.22"/>
+
+  <text x="95" y="120" fill="#BFDBFE" font-size="28" font-family="Segoe UI, Arial, sans-serif" font-weight="700">Facebook • MIX PROMOÇÃO</text>
+  <text x="95" y="210" fill="#FFFFFF" font-size="64" font-family="Segoe UI, Arial, sans-serif" font-weight="900">SUPER DESCONTOS</text>
+  <text x="95" y="280" fill="#FDE68A" font-size="54" font-family="Segoe UI, Arial, sans-serif" font-weight="800">em produtos selecionados</text>
+
+  <rect x="95" y="325" width="300" height="76" rx="18" fill="#FFFFFF"/>
+  <text x="140" y="376" fill="#1D4ED8" font-size="38" font-family="Segoe UI, Arial, sans-serif" font-weight="900">ATÉ 50% OFF</text>
+
+  <text x="95" y="455" fill="#E0F2FE" font-size="30" font-family="Segoe UI, Arial, sans-serif" font-weight="600">✔ Frete grátis acima de R$100</text>
+  <text x="95" y="500" fill="#E0F2FE" font-size="30" font-family="Segoe UI, Arial, sans-serif" font-weight="600">✔ Ofertas novas todos os dias</text>
+
+  <rect x="742" y="155" width="315" height="315" rx="24" fill="#FFFFFF" fill-opacity="0.14" stroke="#FFFFFF" stroke-opacity="0.2"/>
+  <text x="792" y="240" fill="#FFFFFF" font-size="34" font-family="Segoe UI, Arial, sans-serif" font-weight="700">ACESSE</text>
+  <text x="792" y="286" fill="#FDE68A" font-size="42" font-family="Segoe UI, Arial, sans-serif" font-weight="900">mixpromocao</text>
+  <text x="792" y="332" fill="#FDE68A" font-size="42" font-family="Segoe UI, Arial, sans-serif" font-weight="900">.com</text>
+  <text x="792" y="395" fill="#E0F2FE" font-size="28" font-family="Segoe UI, Arial, sans-serif" font-weight="600">Ofertas rápidas</text>
+  <text x="792" y="434" fill="#E0F2FE" font-size="28" font-family="Segoe UI, Arial, sans-serif" font-weight="600">para compartilhar</text>
+
+  <text x="95" y="555" fill="#FFFFFF" font-size="34" font-family="Segoe UI, Arial, sans-serif" font-weight="800">Publique agora no Facebook e aumente suas vendas</text>
+</svg>

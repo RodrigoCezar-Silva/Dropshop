@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Cadastro de Cliente</title>
+  <link rel="stylesheet" href="./src/public/css/cadastro.css" />
+  <link rel="stylesheet" href="./src/public/css/foto.css" />
+  <link rel="stylesheet" href="./src/public/css/btn-topo.css" />
+  <link rel="stylesheet" href="./src/public/css/footer.css" />
+  <!-- Ícones Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="./src/public/css/chatbot-widget.css" />
+</head>
+<body>
+  <h1 class="titulo-loja">Mix Promoção</h1>
+
+  <div class="cadastro-container">
+    <h2>Cadastro de Cliente</h2>
+    <p class="descricao">Preencha seus dados para criar sua conta e aproveitar nossas promoções!</p>
+  <script src="./src/public/js/bloquear-copia.js" defer></script>
+  <script src="./src/public/js/chatbot-widget.js" defer></script>
+
+    <!-- Foto do cliente -->
+    <div class="input-group">
+      <label for="foto">📷 Foto do Cliente (opcional)</label>
+      <input type="file" id="foto" name="foto" accept="image/*">
+    </div>
+
+    <!-- espaço para pré-visualização -->
+    <div id="previewFoto" class="preview-foto"></div>
+
+    <!-- Formulário -->
+    <form id="cadastroForm">
+      <div class="input-group">
+        <label for="nome">Nome do Usuário</label>
+        <input type="text" id="nome" name="nome" required>
+      </div>
+
+      <div class="input-group">
+        <label for="sobrenome">Sobrenome do Usuário</label>
+        <input type="text" id="sobrenome" name="sobrenome" required>
+      </div>
+
+      <div class="input-group">
+        <label for="dataNascimento">Data de Nascimento</label>
+        <input type="date" id="dataNascimento" name="dataNascimento" required>
+      </div>
+
+      <div class="input-group">
+        <label for="email">E-mail</label>
+        <input type="email" id="email" name="email" required>
+      </div>
+
+      <div class="input-group">
+        <label for="telefone">Telefone</label>
+        <input type="tel" id="telefone" name="telefone" placeholder="(XX) XXXXX-XXXX" required>
+      </div>
+
+      <!-- Senha -->
+      <div class="input-group">
+        <label for="senha">Senha</label>
+        <div class="senha-wrapper">
+          <input type="password" id="senha" name="senha" required>
+          <button type="button" id="toggleSenha" class="toggle-btn">👁️</button>
+        </div>
+        <div id="password-strength"></div>
+      </div>
+
+      <!-- Confirmar senha -->
+      <div class="input-group">
+        <label for="confirmarSenha">Confirmar Senha</label>
+        <div class="senha-wrapper">
+          <input type="password" id="confirmarSenha" name="confirmarSenha" required>
+          <button type="button" id="toggleConfirmarSenha" class="toggle-btn">👁️</button>
+        </div>
+        <p id="mensagemSenha"></p>
+      </div>
+
+      <div class="input-group">
+        <label for="rua">Rua</label>
+        <input type="text" id="rua" name="rua" required>
+      </div>
+
+      <div class="input-group">
+        <label for="bairro">Bairro</label>
+        <input type="text" id="bairro" name="bairro" required>
+      </div>
+
+      <div class="input-group">
+        <label for="numero">Número</label>
+        <input type="text" id="numero" name="numero" required>
+      </div>
+
+      <div class="input-group">
+        <label for="complemento">Complemento</label>
+        <input type="text" id="complemento" name="complemento">
+      </div>
+
+      <div class="input-group">
+        <label for="estado">Estado</label>
+        <input type="text" id="estado" name="estado" required>
+      </div>
+
+      <button type="submit" class="btn-cadastrar">Cadastrar</button>
+      <p id="mensagemCadastro" class="mensagem"></p>
+    </form>
+
+    <p class="login-link">Já tem conta? 
+      <a href="./src/public/html/login-cliente.html">Faça login</a>
+    </p>
+  </div>
+
+  <!-- Rodapé -->
+  <footer class="site-footer">
+    <div class="footer-top-bar"></div>
+    <div class="footer-main">
+      <div class="footer-brand">
+        <div class="footer-logo">
+          <span class="footer-logo-icon">🛒</span>
+          <span class="footer-logo-text"><span class="mix">MIX</span><span class="promo">PROMOÇÃO</span></span>
+        </div>
+        <p class="footer-desc">Oferecemos os melhores produtos com qualidade e preço justo. Promoções exclusivas e ofertas imperdíveis todos os dias!</p>
+        <div class="footer-social">
+          <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+          <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+          <a href="#" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+          <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+        </div>
+      </div>
+      <div class="footer-links">
+        <h4>Navegação</h4>
+        <ul>
+          <li><a href="index.html"><i class="fa-solid fa-chevron-right"></i> Início</a></li>
+          <li><a href="loja.html"><i class="fa-solid fa-chevron-right"></i> Nossa Loja</a></li>
+          <li><a href="QuemSomos.html"><i class="fa-solid fa-chevron-right"></i> Sobre Nós</a></li>
+          <li><a href="contato.html"><i class="fa-solid fa-chevron-right"></i> Contato</a></li>
+        </ul>
+      </div>
+      <div class="footer-links">
+        <h4>Suporte</h4>
+        <ul>
+          <li><a href="contato.html"><i class="fa-solid fa-chevron-right"></i> Central de Ajuda</a></li>
+          <li><a href="trocas-devolucoes.html"><i class="fa-solid fa-chevron-right"></i> Trocas e Devoluções</a></li>
+          <li><a href="contato.html"><i class="fa-solid fa-chevron-right"></i> Fale Conosco</a></li>
+          <li><a href="carrinho.html"><i class="fa-solid fa-chevron-right"></i> Meu Carrinho</a></li>
+        </ul>
+      </div>
+      <div class="footer-links">
+        <h4>Contato</h4>
+        <div class="footer-contato-item">
+          <div class="fc-icon"><i class="fa-solid fa-envelope"></i></div>
+          <div>
+            <span class="fc-label">Email</span>
+            <span class="fc-valor">contato@mixpromocao.com</span>
+          </div>
+        </div>
+        <div class="footer-contato-item">
+          <div class="fc-icon"><i class="fa-solid fa-phone"></i></div>
+          <div>
+            <span class="fc-label">Telefone</span>
+            <span class="fc-valor">(21) 99999-9999</span>
+          </div>
+        </div>
+        <div class="footer-contato-item">
+          <div class="fc-icon"><i class="fa-solid fa-location-dot"></i></div>
+          <div>
+            <span class="fc-label">Endereço</span>
+            <span class="fc-valor">Duque de Caxias - RJ</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-bottom-inner">
+        <p>&copy; 2026 MIX-PROMOÇÃO. Todos os direitos reservados.</p>
+        <div class="footer-pagamentos">
+          <span>Pagamentos:</span>
+          <i class="fab fa-cc-visa"></i>
+          <i class="fab fa-cc-mastercard"></i>
+          <i class="fab fa-pix"></i>
+          <i class="fa-solid fa-barcode"></i>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="./src/public/js/cadastro-cliente.js" defer></script>
+  <script src="./src/public/js/upload-foto.js" defer></script>
+  <script src="./src/public/js/btn-topo.js" defer></script>
+</body>
+</html>

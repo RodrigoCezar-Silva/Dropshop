@@ -1,0 +1,167 @@
+body {
+  font-family: 'Poppins', Arial, sans-serif;
+  background: linear-gradient(135deg, #4CAF50, #2E7D32);
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.titulo-loja {
+  font-size: 42px;
+  font-weight: bold;
+  margin-top: 20px;
+  color: #fff;
+  text-shadow: 2px 2px 8px rgba(0,0,0,0.4);
+}
+
+.cadastro-container {
+  background: #fff;
+  margin-top: 30px;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  width: 100%;
+  max-width: 450px;
+  animation: fadeIn 0.8s ease-in-out;
+}
+
+.input-group {
+  margin-bottom: 15px;
+}
+
+.input-group label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+}
+
+.input-group input:focus {
+  border-color: #4CAF50;
+  box-shadow: 0 0 8px rgba(76, 175, 80, 0.4);
+  outline: none;
+}
+
+/* Senha com botão dentro do campo */
+.senha-wrapper {
+  position: relative;
+  margin-bottom: 10px;
+}
+
+.senha-wrapper input {
+  width: 100%;
+  padding: 12px;
+  padding-right: 40px; /* espaço reservado para o botão 👁️ */
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  box-sizing: border-box;
+  line-height: 1.5;
+}
+
+.toggle-btn {
+  position: absolute;
+  right: 10px; /* fixa à direita */
+  top: 50%; /* centraliza verticalmente */
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  color: #555;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toggle-btn:hover {
+  color: #000;
+}
+
+/* Estilo do medidor de força */
+#password-strength {
+  margin-top: 5px;
+  font-weight: bold;
+}
+
+.fraca { color: red; }
+.media { color: orange; }
+.forte { color: green; }
+
+/* Mensagens de senha */
+#mensagemSenha.erro {
+  background: #f8d7da;
+  color: #721c24;
+  padding: 8px;
+  border-radius: 6px;
+  font-weight: bold;
+}
+
+#mensagemSenha.sucesso {
+  background: #d4edda;
+  color: #155724;
+  padding: 8px;
+  border-radius: 6px;
+  font-weight: bold;
+}
+
+.btn-cadastrar {
+  width: 100%;
+  padding: 14px;
+  background: #4CAF50;
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 18px;
+  cursor: pointer;
+  font-weight: bold;
+  margin-top: 20px;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.btn-cadastrar:hover {
+  background: #388E3C;
+  transform: scale(1.03);
+}
+
+.login-link {
+  text-align: center;
+  margin-top: 15px;
+}
+
+.login-link a {
+  color: #2E7D32;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.login-link a:hover {
+  text-decoration: underline;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsividade */
+@media (max-width: 500px) {
+  .cadastro-container {
+    width: 90%;
+    padding: 20px;
+  }
+
+  .titulo-loja {
+    font-size: 32px;
+  }
+}
