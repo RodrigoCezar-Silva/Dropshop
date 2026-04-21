@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cadastro de Administrador</title>
+    <!-- CSS externo -->
+    <link rel="stylesheet" href="/css/cadastro-admin.css" />
+    <link rel="stylesheet" href="/css/btn-topo.css" />
+    <link rel="stylesheet" href="/css/footer.css" />
+    <!-- Ícones Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+    <link rel="stylesheet" href="/css/responsive.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h2>Cadastrar Novo Administrador</h2>
+      
+      <form id="cadastroForm" class="form">
+        <!-- Usuário -->
+        <div class="campo">
+          <label for="usuario">Usuário</label>
+          <input type="text" id="usuario" name="usuario" required />
+        </div>
+
+        <!-- Senha -->
+        <div class="campo">
+          <label for="senha">Senha</label>
+          <div class="senha-wrapper">
+            <input type="password" id="senha" name="senha" required />
+            <button type="button" id="toggleSenha" class="toggle-btn" aria-label="Mostrar/ocultar senha">👁️</button>
+          </div>
+          <div id="password-strength"></div>
+        </div>
+
+        <!-- Confirmar Senha -->
+        <div class="campo">
+          <label for="confirmarSenha">Confirmar Senha</label>
+          <div class="senha-wrapper">
+            <input type="password" id="confirmarSenha" name="confirmarSenha" required />
+            <button type="button" id="toggleConfirmarSenha" class="toggle-btn" aria-label="Mostrar/ocultar confirmação">👁️</button>
+          </div>
+          <div id="password-strength-confirm"></div>
+          <p id="mensagemSenha"></p>
+        </div>
+
+        <!-- Nome -->
+        <div class="campo">
+          <label for="nome">Nome</label>
+          <input type="text" id="nome" name="nome" required />
+        </div>
+
+        <!-- Sobrenome -->
+        <div class="campo">
+          <label for="sobrenome">Sobrenome</label>
+          <input type="text" id="sobrenome" name="sobrenome" required />
+        </div>
+
+        <!-- Botão -->
+        <button type="submit" class="btn-submit">Cadastrar</button>
+      </form>
+
+      <!-- Mensagem de feedback -->
+      <p id="mensagemCadastro" role="alert"></p>
+    </div>
+
+    
+
+    <!-- Script JS -->
+    <script src="/js/cadastro-admin.js"></script>
+    <script src="/js/btn-topo.js"></script>
+    <script src="/js/bloquear-copia.js"></script>
+
+    <script src="/js/responsive-nav.js"></script>
+
+  </body>
+</html>

@@ -1,0 +1,20 @@
+CREATE TABLE IF NOT EXISTS produtos (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  nome VARCHAR(255) NOT NULL,
+  nome_detalhes VARCHAR(255),
+  categoria VARCHAR(100) NOT NULL DEFAULT 'outros',
+  subcategoria VARCHAR(100),
+  preco_antigo DECIMAL(10,2) NULL,
+  preco_atual DECIMAL(10,2) NOT NULL,
+  desconto VARCHAR(60),
+  imagem VARCHAR(500),
+  video VARCHAR(500),
+  descricao TEXT,
+  pagamento_json LONGTEXT,
+  imagens_extras_json LONGTEXT,
+  quantidade INT NOT NULL DEFAULT 1,
+  visualizacoes INT NOT NULL DEFAULT 0,
+  data_cadastro DATETIME DEFAULT CURRENT_TIMESTAMP,
+  criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
