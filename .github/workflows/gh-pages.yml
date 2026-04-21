@@ -57,6 +57,12 @@ jobs:
           echo '--- docs tree ---'
           find docs -maxdepth 3 -type f | sed -n '1,200p' || true
 
+      - name: Ensure .nojekyll
+        run: |
+          # ensure Pages serves the files raw (disable Jekyll processing)
+          mkdir -p docs
+          printf "" > docs/.nojekyll
+
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
