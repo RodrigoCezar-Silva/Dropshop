@@ -1,5 +1,8 @@
 /* Ajuste para alinhar imagem do produto com informações do topo */
 
+/* Remove eventual barra de rolagem horizontal apenas nesta página */
+html, body { overflow-x: hidden; }
+
 /* Link de voltar para admin */
 .estoque-pro-back-admin {
   display: inline-flex;
