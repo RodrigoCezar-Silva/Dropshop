@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Dados exportados — MIX-PROMOÇÃO</title>
+  <link rel="stylesheet" href="./css/style-index.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="logo"><span class="logo-icon">🛒</span><span class="logo-text"><span class="mix">MIX</span><span class="promocao">PROMOÇÃO</span></span></div>
+    <nav class="menu">
+      <ul>
+        <li><a href="./index.html">Início</a></li>
+        <li><a href="./loja.html">Loja</a></li>
+        <li><a href="./data.html" class="active">Dados</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main style="padding:24px;">
+    <h1>Dados exportados</h1>
+    <p>Esta página mostra os JSONs gerados pelo workflow de exportação.</p>
+
+    <section>
+      <h2>Produtos</h2>
+      <div id="produtosSummary">Carregando...</div>
+      <div id="produtosTable"></div>
+    </section>
+
+    <section>
+      <h2>Clientes</h2>
+      <div id="clientesSummary">Carregando...</div>
+      <div id="clientesTable"></div>
+    </section>
+
+    <section>
+      <h2>Pedidos</h2>
+      <div id="pedidosSummary">Carregando...</div>
+      <div id="pedidosTable"></div>
+    </section>
+  </main>
+
+  <script src="./js/load-all-data.js"></script>
+</body>
+</html>
