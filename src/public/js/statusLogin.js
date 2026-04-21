@@ -429,7 +429,8 @@ if (logoutCliente) {
       return h4 && h4.textContent.trim().toLowerCase() === 'contato';
     });
 
-    const isLogged = tipoUsuario === 'Administrador' || tipoUsuario === 'Cliente';
+    // Mostrar 'Ajuda' apenas para clientes (não para administradores)
+    const isLogged = tipoUsuario === 'Cliente';
     contatoBlocks.forEach(el => {
       el.style.display = isLogged ? '' : 'none';
     });

@@ -3,6 +3,27 @@
 /* Remove eventual barra de rolagem horizontal apenas nesta página */
 html, body { overflow-x: hidden; }
 
+/* Torna a tabela responsiva: permite rolagem horizontal apenas no bloco da tabela */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Garante que o container não exceda a viewport */
+.estoque-pro-container {
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+/* A tabela pode ter largura mínima para manter legibilidade, mas não força a página a criar scroll */
+.estoque-pro-table {
+  width: 100%;
+  min-width: 760px;
+  table-layout: auto;
+}
+
 /* Link de voltar para admin */
 .estoque-pro-back-admin {
   display: inline-flex;
