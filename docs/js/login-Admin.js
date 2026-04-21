@@ -56,8 +56,35 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   }
+  
+      // foco e alternância do campo de senha
+      const senhaInputField = document.getElementById('senha');
+      const toggleSenhaBtn = document.getElementById('toggleSenha');
+      const iconeOlhoEl = document.getElementById('iconeOlho');
+      const senhaWrapperEl = document.querySelector('.senha-wrapper');
+      if (senhaInputField && senhaWrapperEl) {
+        senhaInputField.addEventListener('focus', function() {
+          senhaWrapperEl.classList.add('focado');
+        });
+        senhaInputField.addEventListener('blur', function() {
+          senhaWrapperEl.classList.remove('focado');
+        });
+      }
+      if (toggleSenhaBtn && senhaInputField && iconeOlhoEl) {
+        toggleSenhaBtn.addEventListener('click', function() {
+          if (senhaInputField.type === 'password') {
+            senhaInputField.type = 'text';
+            iconeOlhoEl.classList.remove('fa-eye');
+            iconeOlhoEl.classList.add('fa-eye-slash');
+          } else {
+            senhaInputField.type = 'password';
+            iconeOlhoEl.classList.remove('fa-eye-slash');
+            iconeOlhoEl.classList.add('fa-eye');
+          }
+        });
+      }
 
-  // ---------------- STATUS DE LOGIN ---------------- //
+      // ---------------- STATUS DE LOGIN ---------------- //
   const statusAdmin = document.getElementById("statusLogado");
   const nomeUsuario = document.getElementById("nomeUsuario");
   const logoutAdmin = document.getElementById("logout");
