@@ -42,21 +42,10 @@ jobs:
           echo '--- check for LFS pointers ---'
           git grep -n "git-lfs.github.com/spec/v1" || true
 
-      - name: Install dependencies (safe)
-        shell: bash
+      - name: Install dependencies
         run: |
-          # use npm ci when possible, but fall back to npm install on failure
-          set -euo pipefail
-          if [ -f package-lock.json ]; then
-            echo 'Using npm ci (with offline preference)'
-            npm ci --prefer-offline --no-audit --no-fund || {
-              echo 'npm ci failed, trying npm install as fallback'
-              npm install --no-audit --no-fund
-            }
-          else
-            echo 'No package-lock.json, using npm install'
-            npm install --no-audit --no-fund
-          fi
+          # Use npm install directly to avoid npm ci errors when no lockfile
+          npm install --no-audit --no-fund
 
       - name: Build docs folder
         run: npm run build:docs
