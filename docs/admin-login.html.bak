@@ -42,7 +42,7 @@
     </form>
 
     <div class="link-cadastro">
-      <a href="html/cadastro-admin.html" target="_blank" rel="noopener noreferrer">
+      <a href="cadastro-admin.html" target="_blank" rel="noopener noreferrer">
         ➕ Cadastrar outro usuário
       </a>
     </div>
