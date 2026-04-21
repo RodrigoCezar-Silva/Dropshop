@@ -1350,6 +1350,145 @@ app.post("/login-admin", async (req, res) => {
   }
 });
 
+// ===== GitHub OAuth login for admins =====
+app.get('/auth/github', (req, res) => {
+  const clientId = process.env.GITHUB_CLIENT_ID;
+  const redirect = `${SITE_URL}/auth/github/callback`;
+  if (!clientId) return res.status(500).send('GITHUB_CLIENT_ID not configured');
+  const state = Math.random().toString(36).slice(2);
+  const url = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirect)}&scope=user:email&state=${state}`;
+  res.redirect(url);
+});
+
+app.get('/auth/github/callback', async (req, res) => {
+  try {
+    const code = req.query.code;
+    if (!code) return res.status(400).send('Missing code');
+    const tokenResp = await axios.post('https://github.com/login/oauth/access_token', {
+      client_id: process.env.GITHUB_CLIENT_ID,
+      client_secret: process.env.GITHUB_CLIENT_SECRET,
+      code
+    }, { headers: { Accept: 'application/json' } });
+
+    const accessToken = tokenResp.data && tokenResp.data.access_token;
+    if (!accessToken) return res.status(500).send('GitHub token exchange failed');
+
+    const userResp = await axios.get('https://api.github.com/user', { headers: { Authorization: `token ${accessToken}`, Accept: 'application/json', 'User-Agent': 'MixPromocao-App' } });
+    const emailsResp = await axios.get('https://api.github.com/user/emails', { headers: { Authorization: `token ${accessToken}`, Accept: 'application/json', 'User-Agent': 'MixPromocao-App' } });
+
+    const ghUser = userResp.data || {};
+    const emails = Array.isArray(emailsResp.data) ? emailsResp.data : [];
+    const primaryEmailObj = emails.find(e => e.primary) || emails[0] || {};
+    const email = (primaryEmailObj && primaryEmailObj.email) || ghUser.email || null;
+
+    // create or find admin in DB
+    const connection = await createDbConnection();
+    const usuario = ghUser.login || (`gh_${Math.random().toString(36).slice(2,8)}`);
+    const nome = ghUser.name || ghUser.login || 'GitHub User';
+    const sobrenome = '';
+    // check existing by email or usuario
+    let [rows] = await connection.execute('SELECT * FROM admins WHERE usuario = ? OR nome = ? OR ? IS NOT NULL AND (SELECT 1 FROM admins WHERE usuario = ? LIMIT 1)', [usuario, nome, email, usuario]);
+    if (!rows || rows.length === 0) {
+      const randomPass = Math.random().toString(36).slice(2,12);
+      const hash = await bcrypt.hash(randomPass, 10);
+      await connection.execute('INSERT INTO admins (usuario, senhaHash, nome, sobrenome, email) VALUES (?, ?, ?, ?, ?)', [usuario, hash, nome, sobrenome, email]);
+      [rows] = await connection.execute('SELECT * FROM admins WHERE usuario = ?', [usuario]);
+    }
+    await connection.end();
+
+    const admin = rows && rows[0] ? rows[0] : null;
+    if (!admin) return res.status(500).send('Could not create/find admin');
+
+    const token = jwt.sign({ id: admin.id, usuario: admin.usuario, role: 'admin' }, SECRET, { expiresIn: '1h' });
+
+    // Redirect to a small page that stores token in localStorage and redirects to admin area
+    const redirectUrl = `${SITE_URL}/html/auth-success.html?token=${encodeURIComponent(token)}&tipoUsuario=Administrador&nome=${encodeURIComponent(admin.nome || '')}&sobrenome=${encodeURIComponent(admin.sobrenome || '')}`;
+    res.redirect(redirectUrl);
+  } catch (e) {
+    console.error('GitHub OAuth error:', e && e.message);
+    res.status(500).send('GitHub OAuth failed');
+  }
+});
+
+// Dev helper: create admin quickly (only allowed in non-production or with env flag)
+app.post('/dev/create-admin', async (req, res) => {
+  try {
+    if (EM_PRODUCAO) return res.status(403).json({ sucesso: false, mensagem: 'Somente em desenvolvimento.' });
+    if (!process.env.ALLOW_DEV_ADMIN_CREATE) return res.status(403).json({ sucesso: false, mensagem: 'Dev admin creation not enabled.' });
+    const { usuario, nome, sobrenome, email } = req.body || {};
+    if (!usuario || !nome) return res.status(400).json({ sucesso: false, mensagem: 'usuario e nome obrigatorios.' });
+    const randomPass = Math.random().toString(36).slice(2,12);
+    const hash = await bcrypt.hash(randomPass, 10);
+    const connection = await createDbConnection();
+    await connection.execute('INSERT INTO admins (usuario, senhaHash, nome, sobrenome, email) VALUES (?, ?, ?, ?, ?)', [usuario, hash, nome, sobrenome || '', email || null]);
+    await connection.end();
+    res.json({ sucesso: true, mensagem: 'Admin criado (dev).', senha: randomPass });
+  } catch (e) {
+    console.error('Dev create admin error:', e && e.message);
+    res.status(500).json({ sucesso: false, mensagem: e && e.message });
+  }
+});
+
+// ===== GitHub OAuth login for clients =====
+app.get('/auth/github-client', (req, res) => {
+  const clientId = process.env.GITHUB_CLIENT_ID;
+  const redirect = `${SITE_URL}/auth/github-client/callback`;
+  if (!clientId) return res.status(500).send('GITHUB_CLIENT_ID not configured');
+  const state = Math.random().toString(36).slice(2);
+  const url = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirect)}&scope=user:email&state=${state}`;
+  res.redirect(url);
+});
+
+app.get('/auth/github-client/callback', async (req, res) => {
+  try {
+    const code = req.query.code;
+    if (!code) return res.status(400).send('Missing code');
+    const tokenResp = await axios.post('https://github.com/login/oauth/access_token', {
+      client_id: process.env.GITHUB_CLIENT_ID,
+      client_secret: process.env.GITHUB_CLIENT_SECRET,
+      code
+    }, { headers: { Accept: 'application/json' } });
+
+    const accessToken = tokenResp.data && tokenResp.data.access_token;
+    if (!accessToken) return res.status(500).send('GitHub token exchange failed');
+
+    const userResp = await axios.get('https://api.github.com/user', { headers: { Authorization: `token ${accessToken}`, Accept: 'application/json', 'User-Agent': 'MixPromocao-App' } });
+    const emailsResp = await axios.get('https://api.github.com/user/emails', { headers: { Authorization: `token ${accessToken}`, Accept: 'application/json', 'User-Agent': 'MixPromocao-App' } });
+
+    const ghUser = userResp.data || {};
+    const emails = Array.isArray(emailsResp.data) ? emailsResp.data : [];
+    const primaryEmailObj = emails.find(e => e.primary) || emails[0] || {};
+    const email = (primaryEmailObj && primaryEmailObj.email) || ghUser.email || null;
+
+    // create or find client in DB
+    const connection = await createDbConnection();
+    const fullName = ghUser.name || ghUser.login || 'Cliente';
+    const parts = fullName.split(' ');
+    const nome = parts.shift() || fullName;
+    const sobrenome = parts.join(' ') || '';
+
+    let [rows] = await connection.execute('SELECT * FROM clientes WHERE email = ? LIMIT 1', [email]);
+    if (!rows || rows.length === 0) {
+      const randomPass = Math.random().toString(36).slice(2,12);
+      const hash = await bcrypt.hash(randomPass, 10);
+      await connection.execute('INSERT INTO clientes (nome, sobrenome, email, senha_hash) VALUES (?, ?, ?, ?)', [nome, sobrenome, email, hash]);
+      [rows] = await connection.execute('SELECT * FROM clientes WHERE email = ? LIMIT 1', [email]);
+    }
+    await connection.end();
+
+    const cliente = rows && rows[0] ? rows[0] : null;
+    if (!cliente) return res.status(500).send('Could not create/find cliente');
+
+    const token = jwt.sign({ id: cliente.id, email: cliente.email, role: 'cliente' }, SECRET, { expiresIn: '1h' });
+
+    const redirectUrl = `${SITE_URL}/html/auth-success.html?token=${encodeURIComponent(token)}&tipoUsuario=Cliente&nome=${encodeURIComponent(cliente.nome || '')}&sobrenome=${encodeURIComponent(cliente.sobrenome || '')}`;
+    res.redirect(redirectUrl);
+  } catch (e) {
+    console.error('GitHub OAuth client error:', e && e.message);
+    res.status(500).send('GitHub OAuth failed');
+  }
+});
+
 // Login de cliente
 app.post("/login-cliente", async (req, res) => {
   try {
