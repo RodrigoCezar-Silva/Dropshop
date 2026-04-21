@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description"
+        content="MIX-PROMOÇÃO - Produtos exclusivos com qualidade e preço justo. Promoções todos os dias!" />
+  <title>MIX-PROMOÇÃO</title>
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="./css/style-index.css" />
+  <link rel="stylesheet" href="./css/carrinho.css" />
+  <link rel="stylesheet" href="./css/contatos.css" />
+  <link rel="stylesheet" href="./css/menu.css"/>
+  <link rel="stylesheet" href="./css/logo.css" />
+  <link rel="stylesheet" href="./css/statusLogin.css" />
+  <link rel="stylesheet" href="./css/minhaConta.css" />
+  <link rel="stylesheet" href="./css/btn-topo.css" />
+  <link rel="stylesheet" href="./css/footer.css" />
+
+  <!-- Ícones Font Awesome -->
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="./css/chatbot-widget.css" />
+  <link rel="stylesheet" href="./css/popup.css" />
+  <link rel="stylesheet" href="./css/responsive.css" />
+    <script src="./js/chatbot-widget.js"></script>
+    <script src="./js/responsive-nav.js"></script>
+  
+</head>
+<body>
+  <!-- Cabeçalho -->
+  <header class="site-header">
+    <div class="logo">
+      <span class="logo-icon">🛒</span>
+      <span class="logo-text">
+        <span class="mix">MIX</span><span class="promocao">PROMOÇÃO</span>
+      </span>
+    </div>
+
+    <!-- Menu -->
+    <nav class="menu" aria-label="Menu principal">
+      <ul>
+        <li><a href="index.html" class="active"><i class="fa-solid fa-house menu-link-icon" aria-hidden="true"></i><span>Início</span></a></li>
+        <li><a href="loja.html"><i class="fa-solid fa-store menu-link-icon" aria-hidden="true"></i><span>Nossa Loja</span></a></li>
+        <li><a href="QuemSomos.html"><i class="fa-solid fa-circle-info menu-link-icon" aria-hidden="true"></i><span>Sobre</span></a></li>
+        
+        <li><a href="trocas-devolucoes.html"><i class="fa-solid fa-right-left menu-link-icon" aria-hidden="true"></i><span>Trocas e Devoluções</span></a></li>
+        <li><a href="ajuda.html"><i class="fa-solid fa-circle-question menu-link-icon" aria-hidden="true"></i><span>Ajuda</span></a></li>
+      </ul>
+    </nav>
+<!-- Botões de login -->
+    <div id="loginButtons">
+      <a href="login-cliente.html" class="btn-login cliente">👤 Login Cliente</a>
+      <a href="admin-login.html" class="btn-login admin">👤 Login Administrativo</a>
+    </div>
+
+    <!-- Status de login administrador -->
+    <div id="statusLogado" class="status-admin" style="display:none;">
+      <span class="status-text">👑 Administrador: <strong id="nomeUsuario"></strong></span>
+      <button id="logout" class="btn-logout">Sair</button>
+    </div>
+
+    <!-- Status de login cliente -->
+    <div id="clienteStatus" style="display:none;">
+  <img id="fotoCliente" class="foto-perfil" src="" alt="Foto Cliente">
+  <span id="nomeCliente"></span>
+  <span id="sobrenomeCliente"></span>
+  
+  <!-- Botão Minha Conta -->
+  <button id="btnMinhaConta" class="btn-minha-conta">👤 Minha Conta</button>
+
+  <!-- Botão Sair -->
+  <button id="logoutBtn" class="btn-logout">Sair</button>
+</div>
+
+
+   
+
+
+    <!-- Ícone do carrinho -->
+    <a href="carrinho.html" class="cart-icon" aria-label="Carrinho de Compras">
+      <i class="fas fa-shopping-cart"></i>
+      <span id="cart-count">0</span>
+    </a>
+  </header>
+
+  <!-- Formulário de contato -->
+  <section class="contato-section">
+    <div class="contato-container">
+      <!-- Lado esquerdo: info -->
+      <div class="contato-info">
+        <h2><i class="fa-solid fa-headset"></i> Fale Conosco</h2>
+        <p class="contato-desc">Estamos prontos para ajudar! Envie sua mensagem e responderemos em até <strong>24 horas</strong>.</p>
+        
+        <div class="contato-canais">
+          <div class="canal-item">
+            <div class="canal-icon"><i class="fa-solid fa-envelope"></i></div>
+            <div>
+              <span class="canal-label">Email</span>
+              <span class="canal-valor">contato@mixpromocao.com</span>
+            </div>
+          </div>
+          <div class="canal-item">
+            <div class="canal-icon"><i class="fa-solid fa-phone"></i></div>
+            <div>
+              <span class="canal-label">Telefone</span>
+              <span class="canal-valor">(21) 99999-9999</span>
+            </div>
+          </div>
+          <div class="canal-item">
+            <div class="canal-icon"><i class="fa-solid fa-location-dot"></i></div>
+            <div>
+              <span class="canal-label">Endereço</span>
+              <span class="canal-valor">Duque de Caxias - RJ</span>
+            </div>
+          </div>
+          <div class="canal-item">
+            <div class="canal-icon"><i class="fa-solid fa-clock"></i></div>
+            <div>
+              <span class="canal-label">Horário</span>
+              <span class="canal-valor">Seg - Sex, 9h às 18h</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Lado direito: formulário -->
+      <div class="contato-formulario">
+        <h3>Envie sua mensagem</h3>
+        <form id="contatoForm">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="nome"><i class="fa-solid fa-user"></i> Nome</label>
+              <input type="text" id="nome" name="nome" placeholder="Seu nome completo" required>
+            </div>
+            <div class="form-group">
+              <label for="email"><i class="fa-solid fa-at"></i> Email</label>
+              <input type="email" id="email" name="email" placeholder="seu@email.com" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="telefone"><i class="fa-solid fa-phone"></i> Telefone</label>
+            <input type="tel" id="telefone" name="telefone" placeholder="(xx) xxxxx-xxxx">
+          </div>
+
+          <div class="form-group">
+            <label for="assunto"><i class="fa-solid fa-tag"></i> Assunto</label>
+            <input type="text" id="assunto" name="assunto" placeholder="Qual o assunto?" required>
+          </div>
+
+          <div class="form-group">
+            <label for="reclamacao"><i class="fa-solid fa-message"></i> Mensagem</label>
+            <textarea id="reclamacao" name="reclamacao" rows="5" placeholder="Descreva sua mensagem em detalhes..." required></textarea>
+          </div>
+
+          <div class="form-group upload-group">
+            <div class="upload-title"><i class="fa-solid fa-image"></i> Anexos</div>
+            <label class="file-btn" for="fotos"><i class="fa-solid fa-images"></i> Anexar Fotos <span class="file-count">(0)</span></label>
+            <input type="file" id="fotos" name="fotos" accept="image/*" multiple class="visually-hidden">
+
+            <label class="file-btn file-btn-video" for="video"><i class="fa-solid fa-video"></i> Anexar Vídeo <span class="file-count">(0)</span></label>
+            <input type="file" id="video" name="video" accept="video/*" class="visually-hidden">
+
+            <small class="hint">Aceitamos JPG/PNG (máx 5 imagens) e 1 vídeo. Máx 500MB por arquivo.</small>
+            <div id="previewFotos" class="preview-grid" aria-live="polite"></div>
+            <div id="previewVideo" class="preview-grid" aria-live="polite"></div>
+          </div>
+
+          <!-- vídeo integrado ao campo de anexos acima -->
+
+          <button type="submit" class="btn-enviar">
+            <i class="fa-solid fa-paper-plane"></i> Enviar Mensagem
+          </button>
+        </form>
+        <p id="mensagem"></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Rodapé -->
+  <footer class="site-footer">
+    <div class="footer-top-bar"></div>
+    <div class="footer-main">
+      <div class="footer-brand">
+        <div class="footer-logo">
+          <span class="footer-logo-icon">🛒</span>
+          <span class="footer-logo-text"><span class="mix">MIX</span><span class="promo">PROMOÇÃO</span></span>
+        </div>
+        <p class="footer-desc">Oferecemos os melhores produtos com qualidade e preço justo. Promoções exclusivas e ofertas imperdíveis todos os dias!</p>
+        <div class="footer-social">
+          <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+          <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+          <a href="#" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+          <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+        </div>
+      </div>
+      <div class="footer-links">
+        <h4>Navegação</h4>
+        <ul>
+          <li><a href="index.html"><i class="fa-solid fa-chevron-right"></i> Início</a></li>
+          <li><a href="loja.html"><i class="fa-solid fa-chevron-right"></i> Nossa Loja</a></li>
+          <li><a href="QuemSomos.html"><i class="fa-solid fa-chevron-right"></i> Sobre Nós</a></li>
+        </ul>
+      </div>
+      <div class="footer-links suporte">
+        <h4>Suporte</h4>
+        <ul>
+          <li><a href="trocas-devolucoes.html"><i class="fa-solid fa-chevron-right"></i> Trocas e Devoluções</a></li>
+          <li><a href="carrinho.html"><i class="fa-solid fa-chevron-right"></i> Meu Carrinho</a></li>
+        </ul>
+      </div>
+      <!-- Contato removido conforme solicitado -->
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-bottom-inner">
+        <p>&copy; 2026 MIX-PROMOÇÃO. Todos os direitos reservados.</p>
+        <div class="footer-pagamentos">
+          <span>Pagamentos:</span>
+          <i class="fab fa-cc-visa"></i>
+          <i class="fab fa-cc-mastercard"></i>
+          <i class="fab fa-pix"></i>
+          <i class="fa-solid fa-barcode"></i>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="./js/VoltaraoTopo.js"></script>
+  <script src="./js/popup.js"></script>
+  <script src="./js/contatos.js"></script>
+  <script src="./js/statusLogin.js"></script>
+  <script src="./js/carrinho.js"></script>
+  <script src="./js/meu-perfil.js"></script>
+  <script src="./js/logo.js"></script>
+  <script src="./js/btn-topo.js"></script>
+  <script src="./js/bloquear-copia.js"></script>
+  <script src="./js/chatbot-widget.js"></script>
+</body>
+</body>
+
+</html>

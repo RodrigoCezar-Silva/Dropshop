@@ -1,0 +1,288 @@
+/* ===== Hero Sobre ===== */
+.sobre-hero {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  padding: 80px 20px;
+  text-align: center;
+}
+
+.sobre-hero-content {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.sobre-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(99, 102, 241, 0.15);
+  color: #818cf8;
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 8px 20px;
+  border-radius: 30px;
+  border: 1px solid rgba(99, 102, 241, 0.25);
+  margin-bottom: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.sobre-hero h1 {
+  font-size: 2.8rem;
+  font-weight: 900;
+  color: #fff;
+  margin: 0 0 20px;
+  line-height: 1.2;
+}
+
+.sobre-hero h1 .destaque {
+  background: linear-gradient(135deg, #6366f1, #a78bfa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.sobre-hero p {
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.65);
+  line-height: 1.7;
+  margin: 0;
+}
+
+/* ===== Seção Missão ===== */
+.sobre-missao {
+  max-width: 1100px;
+  margin: -40px auto 0;
+  padding: 0 20px;
+  position: relative;
+  z-index: 2;
+}
+
+.missao-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.missao-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 36px 28px;
+  text-align: center;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.missao-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+}
+
+.missao-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #eef2ff, #e0e7ff);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+}
+
+.missao-icon i {
+  font-size: 1.4rem;
+  color: #6366f1;
+}
+
+.missao-card h3 {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #1e293b;
+  margin: 0 0 12px;
+}
+
+.missao-card p {
+  font-size: 0.9rem;
+  color: #64748b;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* ===== Stats ===== */
+.sobre-stats {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  padding: 60px 20px;
+  margin: 60px 0;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  max-width: 900px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.stat-numero {
+  font-size: 2.4rem;
+  font-weight: 900;
+  color: #fff;
+}
+
+.stat-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.75);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ===== Vantagens ===== */
+.sobre-vantagens {
+  max-width: 1100px;
+  margin: 0 auto 60px;
+  padding: 0 20px;
+}
+
+.secao-titulo {
+  text-align: center;
+  font-size: 1.8rem;
+  font-weight: 900;
+  color: #1e293b;
+  margin: 0 0 40px;
+}
+
+.secao-titulo span {
+  color: #6366f1;
+}
+
+.vantagens-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+}
+
+.vantagem-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 32px 24px;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.vantagem-card:hover {
+  background: #fff;
+  border-color: #c7d2fe;
+  box-shadow: 0 8px 24px rgba(99, 102, 241, 0.1);
+  transform: translateY(-4px);
+}
+
+.vantagem-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 18px;
+}
+
+.vantagem-icon i {
+  font-size: 1.2rem;
+  color: #fff;
+}
+
+.vantagem-card h4 {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #1e293b;
+  margin: 0 0 10px;
+}
+
+.vantagem-card p {
+  font-size: 0.85rem;
+  color: #64748b;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* ===== Envios ===== */
+.sobre-envios {
+  max-width: 900px;
+  margin: 0 auto 60px;
+  padding: 48px 40px;
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  text-align: center;
+}
+
+.envios-desc {
+  font-size: 1rem;
+  color: #64748b;
+  margin: -24px 0 30px;
+}
+
+.envios-logos img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 12px;
+}
+
+/* ===== Responsividade ===== */
+@media (max-width: 900px) {
+  .missao-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .vantagens-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 32px;
+  }
+
+  .sobre-hero h1 {
+    font-size: 2rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .sobre-hero {
+    padding: 50px 16px;
+  }
+
+  .sobre-hero h1 {
+    font-size: 1.6rem;
+  }
+
+  .sobre-hero p {
+    font-size: 0.95rem;
+  }
+
+  .vantagens-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .stat-numero {
+    font-size: 1.8rem;
+  }
+
+  .sobre-envios {
+    padding: 32px 20px;
+  }
+}
