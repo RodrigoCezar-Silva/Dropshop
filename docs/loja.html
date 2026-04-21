@@ -1,0 +1,612 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MIX-PROMOÇÃO - Loja</title>
+
+  <!-- CSS reaproveitado -->
+  <link rel="stylesheet" href="./css/style-index.css" />
+  <link rel="stylesheet" href="./css/style-vitrine.css" />
+  <link rel="stylesheet" href="./css/bannerpromo.css" />
+  <link rel="stylesheet" href="./css/carrinho.css" />
+  <link rel="stylesheet" href="./css/loja.css" />
+  <link rel="stylesheet" href="./css/menu.css" />
+  <link rel="stylesheet" href="./css/logo.css" />
+  <link rel="stylesheet" href="./css/statusLogin.css" />
+  <link rel="stylesheet" href="./css/desconto.css" />
+  <link rel="stylesheet" href="./css/minhaConta.css" />
+  <link rel="stylesheet" href="./css/btn-topo.css" />
+  <link rel="stylesheet" href="./css/footer.css" />
+
+  <!-- Ícones Font Awesome -->
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="./css/chatbot-widget.css" />
+  <link rel="stylesheet" href="./css/responsive.css" />
+</head>
+
+<body>
+
+  <!-- Cabeçalho -->
+  <header class="site-header">
+    <div class="logo">
+      <span class="logo-icon">🛒</span>
+      <span class="logo-text">
+        <span class="mix">MIX</span><span class="promocao">PROMOÇÃO</span>
+      </span>
+    </div> 
+
+    <!-- Menu -->
+    <nav class="menu" aria-label="Menu principal">
+      <ul>
+        <li><a href="./index.html" class="active"><i class="fa-solid fa-house menu-link-icon" aria-hidden="true"></i><span>Início</span></a></li>
+        <li><a href="./loja.html"><i class="fa-solid fa-store menu-link-icon" aria-hidden="true"></i><span>Nossa Loja</span></a></li>
+        <li><a href="./QuemSomos.html"><i class="fa-solid fa-circle-info menu-link-icon" aria-hidden="true"></i><span>Sobre</span></a></li>
+        
+        <li><a href="./trocas-devolucoes.html"><i class="fa-solid fa-right-left menu-link-icon" aria-hidden="true"></i><span>Trocas e Devoluções</span></a></li>
+        <li><a href="./ajuda.html"><i class="fa-solid fa-circle-question menu-link-icon" aria-hidden="true"></i><span>Ajuda</span></a></li>
+      </ul>
+    </nav>
+
+    <!-- Botões de login -->
+    <div id="loginButtons">
+      <a href="./login-cliente.html" class="btn-login cliente">👤 Login Cliente</a>
+      <a href="./admin-login.html" class="btn-login admin">👤 Login Administrativo</a>
+    </div>
+
+    <!-- Status admin -->
+    <div id="statusLogado" class="status-admin" style="display:none;">
+      <span class="status-text">
+        👑 Administrador: <strong id="nomeUsuario"></strong>
+      </span>
+      <button id="logout" class="btn-logout">Sair</button>
+    </div>
+
+    <!-- Status cliente -->
+    <div id="clienteStatus" style="display:none;">
+      <img id="fotoCliente" class="foto-perfil" src="" alt="Foto do Cliente" />
+      <span id="nomeCliente"></span>
+      <span id="sobrenomeCliente"></span>
+      
+      <button id="btnMinhaConta" class="btn-minha-conta">Minha Conta</button>
+      <button id="logoutBtn" class="btn-logout">Sair</button>
+    </div>
+
+    <!-- Carrinho -->
+    <a href="./carrinho.html" class="cart-icon" aria-label="Carrinho de Compras">
+      <i class="fas fa-shopping-cart"></i>
+      <span id="cart-count">0</span>
+    </a>
+  </header>
+
+
+
+
+  <!-- Hero da Loja -->
+  <section class="loja-hero">
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <span class="hero-badge"><i class="fa-solid fa-fire"></i> Ofertas Exclusivas</span>
+      <h1 class="hero-titulo">Nossa <span>Loja</span></h1>
+      <p class="hero-subtitulo">Encontre os melhores produtos com preços imbatíveis. Aproveite promoções todos os dias!</p>
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <i class="fa-solid fa-box-open"></i>
+          <span><strong id="heroTotalProdutos">0</strong> Produtos</span>
+        </div>
+        <div class="hero-stat">
+          <i class="fa-solid fa-truck-fast"></i>
+          <span>Frete Grátis +R$100</span>
+        </div>
+        <div class="hero-stat">
+          <i class="fa-solid fa-shield-halved"></i>
+          <span>Compra Segura</span>
+        </div>
+        <div class="hero-stat">
+          <i class="fa-solid fa-credit-card"></i>
+          <span>Até 12x s/ juros</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- Frete -->
+  <div class="banner-frete">
+    <span class="icon">🚚🛒</span>
+    <span class="texto">Frete Grátis em compras acima de R$ 100,00!</span>
+  </div>
+
+
+
+
+  <!-- Vitrine -->
+  <main>
+    <section class="admin-loja-hero" id="adminLojaHero" style="display:none;">
+      <div class="admin-loja-hero-icon"><i class="fa-solid fa-store"></i></div>
+      <div class="admin-loja-hero-content">
+        <span class="admin-loja-badge">Gerenciamento</span>
+        <h1>Gerenciar Produtos</h1>
+        <p>Cadastre, edite, organize a vitrine e acompanhe os produtos da loja no mesmo padrao visual da area administrativa.</p>
+        <div class="admin-loja-hero-actions">
+          <a href="./html/admin-area.html" class="admin-loja-back">
+            <i class="fa-solid fa-arrow-left"></i>
+            Voltar para Area Admin
+          </a>
+          <button type="button" id="adminHeroNovoProduto" class="admin-loja-primary">
+            <i class="fa-solid fa-plus"></i>
+            Novo Produto
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section class="vitrine-home">
+
+      <!-- Breadcrumb -->
+      <div class="loja-breadcrumb">
+        <a href="./index.html"><i class="fa-solid fa-house"></i> Início</a>
+        <i class="fa-solid fa-chevron-right"></i>
+        <span>Nossa Loja</span>
+      </div>
+
+      <!-- Barra de ferramentas da loja -->
+      <div class="loja-toolbar">
+        <div class="toolbar-esquerda">
+          <div class="busca-container">
+            <i class="fa-solid fa-magnifying-glass busca-icon"></i>
+            <input type="text" id="buscaProduto" placeholder="Buscar produtos..." autocomplete="off">
+          </div>
+        </div>
+        <div class="toolbar-direita">
+          <div class="ordenar-container">
+            <label for="ordenarPor"><i class="fa-solid fa-arrow-down-wide-short"></i></label>
+            <select id="ordenarPor">
+              <option value="padrao">Ordenar por</option>
+              <option value="menor-preco">Menor preço</option>
+              <option value="maior-preco">Maior preço</option>
+              <option value="nome-az">Nome A-Z</option>
+              <option value="nome-za">Nome Z-A</option>
+              <option value="desconto">Maior desconto</option>
+            </select>
+          </div>
+          <span id="contadorProdutos" class="contador-produtos"></span>
+        </div>
+      </div>
+
+      <!-- Categorias na lateral -->
+      <div class="loja-sidebar">
+        <div class="categorias-container categorias-lateral">
+          <button class="categoria-btn active" data-categoria="todos">
+            <i class="fa-solid fa-border-all"></i>
+            <span>Todos</span>
+          </button>
+          <button class="categoria-btn" data-categoria="eletronicos">
+            <i class="fa-solid fa-laptop"></i>
+            <span>Eletrônicos</span>
+          </button>
+          <button class="categoria-btn" data-categoria="informatica">
+            <i class="fa-solid fa-computer"></i>
+            <span>Informática</span>
+          </button>
+          <button class="categoria-btn" data-categoria="eletrica">
+            <i class="fa-solid fa-bolt"></i>
+            <span>Elétrica</span>
+          </button>
+          <button class="categoria-btn" data-categoria="moda">
+            <i class="fa-solid fa-shirt"></i>
+            <span>Moda</span>
+          </button>
+          <button class="categoria-btn" data-categoria="moda-infantil">
+            <i class="fa-solid fa-child"></i>
+            <span>Moda Infantil</span>
+          </button>
+          <button class="categoria-btn" data-categoria="casa">
+            <i class="fa-solid fa-house-chimney"></i>
+            <span>Casa & Decoração</span>
+          </button>
+          <button class="categoria-btn" data-categoria="esportes">
+            <i class="fa-solid fa-futbol"></i>
+            <span>Esportes</span>
+          </button>
+          <button class="categoria-btn" data-categoria="beleza">
+            <i class="fa-solid fa-spa"></i>
+            <span>Beleza</span>
+          </button>
+          <button class="categoria-btn" data-categoria="brinquedos">
+            <i class="fa-solid fa-gamepad"></i>
+            <span>Brinquedos</span>
+          </button>
+          <button class="categoria-btn" data-categoria="outros">
+            <i class="fa-solid fa-ellipsis"></i>
+            <span>Outros</span>
+          </button>
+        </div>
+      </div>
+
+
+
+      <!-- Subcategorias dinâmicas acima do botão -->
+      <div id="subcategorias-dinamicas" style="display:none; margin: 18px 0 10px 0; gap: 12px; flex-wrap: wrap; justify-content: flex-start;"></div>
+
+      <div class="acoes-vitrine">
+        <button id="btnNovaVitrine" class="btn-adicionar" style="display:none;">
+          ➕ Adicionar Nova Vitrine
+        </button>
+      </div>
+<style>
+  .loja-sidebar {
+    float: left;
+    width: 210px;
+    margin-right: 32px;
+    min-height: 600px;
+  }
+  .categorias-lateral {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background: #fff;
+    border-radius: 16px;
+    padding: 18px 10px;
+    box-shadow: 0 2px 8px #0001;
+    margin-bottom: 24px;
+  }
+  .categorias-lateral .categoria-btn {
+    width: 100%;
+    justify-content: flex-start;
+    text-align: left;
+  }
+  @media (max-width: 900px) {
+    .loja-sidebar { float: none; width: 100%; margin: 0 0 18px 0; min-height: unset; }
+    .categorias-lateral { flex-direction: row; overflow-x: auto; }
+    .categorias-lateral .categoria-btn { width: auto; min-width: 120px; }
+  }
+</style>
+
+      <!-- Subcategorias dinâmicas -->
+      <div id="subcategorias-dinamicas" style="display:none; margin: 18px 0 10px 0; gap: 12px; flex-wrap: wrap; justify-content: flex-start;"></div>
+
+        <script src="./js/responsive-nav.js"></script>
+        <script>
+        // Deixa o objeto de subcategorias disponível globalmente para o popupEditar.js
+        window.subcategoriasPorCategoria = {
+          informatica: [
+            { value: 'ssd', label: 'SSD' },
+            { value: 'impressoras', label: 'Impressoras' },
+            { value: 'fontes', label: 'Fontes' },
+            { value: 'monitores', label: 'Monitores' },
+            { value: 'teclado', label: 'Teclado' }
+          ],
+          eletrica: [
+            { value: 'fios-cabos', label: 'Fios e Cabos' },
+            { value: 'tomadas', label: 'Tomadas' },
+            { value: 'interruptores', label: 'Interruptores' },
+            { value: 'lampadas', label: 'Lâmpadas' },
+            { value: 'disjuntores', label: 'Disjuntores' },
+            { value: 'acessorios-eletrica', label: 'Acessórios Elétricos' }
+          ],
+          moda: [
+            { value: 'roupas-femininas', label: 'Roupas Femininas' },
+            { value: 'roupas-masculinas', label: 'Roupas Masculinas' },
+            { value: 'sapatos-masculinos', label: 'Sapatos Masculinos' },
+            { value: 'sapatos-femininos', label: 'Sapatos Femininos' },
+            { value: 'bolsas', label: 'Bolsas' }
+          ],
+          'moda-infantil': [
+            { value: 'roupas-menino', label: 'Roupas Menino' },
+            { value: 'roupas-menina', label: 'Roupas Menina' },
+            { value: 'calcados-menino', label: 'Calçados Menino' },
+            { value: 'calcados-menina', label: 'Calçados Menina' },
+            { value: 'bolsa-infantil', label: 'Bolsa Infantil' },
+            { value: 'acessorios-infantil', label: 'Acessórios Infantis' }
+          ],
+          eletronicos: [
+            { value: 'celulares', label: 'Pelicula de celular' },
+            { value: 'informatica', label: 'Informática' },
+            { value: 'audio', label: 'Capa de celular' },
+            { value: 'video', label: 'Acessórios de tablets' }
+          ],
+          casa: [
+            { value: 'decoracao', label: 'Decoração' },
+            { value: 'cozinha', label: 'Cozinha' },
+            { value: 'cama', label: 'Cama' },
+            { value: 'banho', label: 'Banho' }
+          ],
+          esportes: [
+            { value: 'futebol', label: 'Futebol' },
+            { value: 'academia', label: 'Academia' },
+            { value: 'natacao', label: 'Natação' },
+            { value: 'ciclismo', label: 'Ciclismo' }
+          ],
+          beleza: [
+            { value: 'maquiagem', label: 'Maquiagem' },
+            { value: 'cabelos', label: 'Cabelos' },
+            { value: 'perfumaria', label: 'Perfumaria' },
+            { value: 'cuidados', label: 'Cuidados Pessoais' }
+          ],
+          brinquedos: [
+            { value: 'educativos', label: 'Educativos' },
+            { value: 'montar', label: 'De Montar' },
+            { value: 'pelucia', label: 'Pelúcia' },
+            { value: 'eletronicos', label: 'Eletrônicos' }
+          ]
+        };
+        document.addEventListener('DOMContentLoaded', function() {
+          const catBtns = document.querySelectorAll('.categoria-btn[data-categoria]');
+          const subcatDiv = document.getElementById('subcategorias-dinamicas');
+          catBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+              const cat = btn.getAttribute('data-categoria');
+              if (subcategoriasPorCategoria[cat]) {
+                subcatDiv.innerHTML = '';
+                // Botão 'Todos'
+                const btnTodos = document.createElement('button');
+                btnTodos.className = 'categoria-btn subcategoria-btn active';
+                btnTodos.setAttribute('data-value', 'todos');
+                btnTodos.textContent = 'Todos';
+                subcatDiv.appendChild(btnTodos);
+                subcategoriasPorCategoria[cat].forEach(sub => {
+                  const b = document.createElement('button');
+                  b.className = 'categoria-btn subcategoria-btn';
+                  b.setAttribute('data-value', sub.value);
+                  b.textContent = sub.label;
+                  subcatDiv.appendChild(b);
+                });
+                subcatDiv.style.display = 'flex';
+
+                // Evento de filtro por subcategoria
+                subcatDiv.querySelectorAll('.subcategoria-btn').forEach(btn => {
+                  btn.addEventListener('click', function() {
+                    subcatDiv.querySelectorAll('.subcategoria-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    const subcat = btn.getAttribute('data-value');
+                    window.subcategoriaAtiva = subcat; // sempre atualizar global
+                    filtrarProdutos(cat, subcat);
+                  });
+                });
+                // Sempre resetar subcategoria para 'todos' ao trocar de categoria
+                window.subcategoriaAtiva = 'todos';
+                filtrarProdutos(cat, 'todos');
+                      // Função para filtrar produtos por categoria e subcategoria
+                      function filtrarProdutos(categoria, subcategoria) {
+                        // Atualiza variáveis globais para o filtro funcionar corretamente
+                        categoriaAtiva = categoria;
+                        window.subcategoriaAtiva = subcategoria;
+                        paginaAtual = 1;
+                        if (typeof montarVitrine === 'function') {
+                          montarVitrine(paginaAtual);
+                        }
+                      }
+              } else {
+                subcatDiv.style.display = 'none';
+                subcatDiv.innerHTML = '';
+              }
+            });
+          });
+        });
+      </script>
+
+      <!-- Mensagem quando não encontra nada -->
+      <div id="semResultados" class="sem-resultados" style="display:none;">
+        <i class="fa-solid fa-face-sad-tear"></i>
+        <h3>Nenhum produto encontrado</h3>
+        <p>Tente buscar com outras palavras ou selecione outra categoria.</p>
+      </div>
+
+      <div id="vitrine-container" class="vitrine"></div>
+
+      <div id="paginacao" class="paginacao"></div>
+
+    </section>
+  </main>
+
+  <!-- Rodapé -->
+  <footer class="site-footer">
+    <div class="footer-top-bar"></div>
+    <div class="footer-main">
+      <div class="footer-brand">
+        <div class="footer-logo">
+          <span class="footer-logo-icon">🛒</span>
+          <span class="footer-logo-text"><span class="mix">MIX</span><span class="promo">PROMOÇÃO</span></span>
+        </div>
+        <p class="footer-desc">Oferecemos os melhores produtos com qualidade e preço justo. Promoções exclusivas e ofertas imperdíveis todos os dias!</p>
+        <div class="footer-social">
+          <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+          <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+          <a href="#" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+          <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+        </div>
+      </div>
+      <div class="footer-links">
+        <h4>Navegação</h4>
+        <ul>
+          <li><a href="./index.html"><i class="fa-solid fa-chevron-right"></i> Início</a></li>
+          <li><a href="./loja.html"><i class="fa-solid fa-chevron-right"></i> Nossa Loja</a></li>
+          <li><a href="./QuemSomos.html"><i class="fa-solid fa-chevron-right"></i> Sobre Nós</a></li>
+        </ul>
+      </div>
+      <div class="footer-links suporte">
+        <h4>Suporte</h4>
+        <ul>
+          <li><a href="./trocas-devolucoes.html"><i class="fa-solid fa-chevron-right"></i> Trocas e Devoluções</a></li>
+          <li><a href="./carrinho.html"><i class="fa-solid fa-chevron-right"></i> Meu Carrinho</a></li>
+        </ul>
+      </div>
+      <!-- Contato removido -->
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-bottom-inner">
+        <p>&copy; 2026 MIX-PROMOÇÃO. Todos os direitos reservados.</p>
+        <div class="footer-pagamentos">
+          <span>Pagamentos:</span>
+          <i class="fab fa-cc-visa"></i>
+          <i class="fab fa-cc-mastercard"></i>
+          <i class="fab fa-pix"></i>
+          <i class="fa-solid fa-barcode"></i>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Popup Editar Produto -->
+  <div id="popupEditar">
+    <div class="conteudo-popup">
+      <span id="fecharEditar" style="float: right; cursor: pointer; font-size: 28px; color: #aaa;">&times;</span>
+      <h2>Editar Produto</h2>
+
+      <!-- Seletor de Categorias -->
+      <div class="categoria-selector">
+        <div class="categoria-card active" data-categoria="vitrine">
+          <div class="categoria-icon">📦</div>
+          <div class="categoria-title">Dados da Vitrine</div>
+          <div class="categoria-desc">Nome, preços e desconto</div>
+        </div>
+        <div class="categoria-card" data-categoria="detalhes">
+          <div class="categoria-icon">📋</div>
+          <div class="categoria-title">Detalhes do Produto</div>
+          <div class="categoria-desc">Descrição, mídia e galeria</div>
+        </div>
+      </div>
+
+      <!-- Conteúdo das Categorias -->
+      <div class="categoria-content">
+        <!-- Categoria Vitrine -->
+        <div id="categoria-vitrine" class="categoria-section active">
+          <div class="vitrine-stack">
+            <div class="vitrine-subsection">
+              <div class="vitrine-subsection-title">Identificação do produto</div>
+              <div class="form-grid form-grid-vitrine">
+                <div class="form-group full-width">
+                  <label>Nome do Produto:</label>
+                  <input type="text" id="editNome" required>
+                </div>
+                <div class="form-group full-width">
+                  <label>Categoria:</label>
+                  <select id="editCategoria">
+                    <option value="eletronicos">Eletrônicos</option>
+                    <option value="informatica">Informática</option>
+                    <option value="eletrica">Elétrica</option>
+                    <option value="moda">Moda</option>
+                    <option value="moda-infantil">Moda Infantil</option>
+                    <option value="casa">Casa & Decoração</option>
+                    <option value="esportes">Esportes</option>
+                    <option value="beleza">Beleza</option>
+                    <option value="brinquedos">Brinquedos</option>
+                    <option value="outros">Outros</option>
+                  </select>
+                </div>
+                <div class="form-group full-width" id="grupoSubcategoria" style="display:none;">
+                  <label>Subcategoria:</label>
+                  <select id="editSubcategoria"></select>
+                </div>
+                <div class="form-group full-width" id="grupoQuantidade" style="display:none;">
+                  <label>Quantidade em Estoque:</label>
+                  <input type="number" id="editQuantidade" min="1" required style="width: 120px; display: inline-block;">
+                </div>
+              </div>
+            </div>
+
+            <div class="vitrine-subsection">
+              <div class="vitrine-subsection-title">Precificação</div>
+              <div class="form-grid form-grid-vitrine">
+                <div class="form-group">
+                  <label>Preço Antigo:</label>
+                  <input type="text" id="editPrecoAntigo">
+                </div>
+
+                <div class="form-group">
+                  <label>Preço Atual:</label>
+                  <input type="text" id="editPrecoAtual">
+                </div>
+
+                <div class="form-group full-width">
+                  <label>Desconto:</label>
+                  <input type="text" id="editDesconto" readonly>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Categoria Detalhes -->
+        <div id="categoria-detalhes" class="categoria-section">
+          <div class="detalhes-stack">
+            <div class="detalhes-subsection">
+              <div class="detalhes-subsection-title">Mídia principal</div>
+              <div class="form-grid form-grid-detalhes">
+                <div class="form-group full-width">
+                  <label>Imagem Principal:</label>
+                  <input type="text" id="editImagem">
+                </div>
+
+                <div class="form-group">
+                  <label>Nome Detalhes:</label>
+                  <input type="text" id="editNomeDetalhes">
+                </div>
+
+                <div class="form-group">
+                  <label>Vídeo:</label>
+                  <input type="text" id="editVideo">
+                </div>
+              </div>
+            </div>
+
+            <div class="detalhes-subsection">
+              <div class="detalhes-subsection-title">Conteúdo do produto</div>
+              <div class="form-grid form-grid-detalhes">
+                <div class="form-group full-width">
+                  <label>Descrição:</label>
+                  <textarea id="editDescricao"></textarea>
+                </div>
+
+                <div class="form-group full-width">
+                  <label>Formas de Pagamento (uma por linha):</label>
+                  <textarea id="editPagamento" placeholder="💳 Cartão de crédito (até 12x)&#10;🏦 Boleto bancário&#10;📱 PIX com 10% OFF"></textarea>
+                </div>
+              </div>
+            </div>
+
+            <div class="detalhes-subsection">
+              <div class="detalhes-subsection-title">Galeria complementar</div>
+              <div class="form-group full-width">
+                <label>Imagens Extras (até 5 - aparecem no carrossel):</label>
+                <div class="imagens-extras-grid">
+                  <input type="text" id="editImagemExtra1" placeholder="Imagem 1">
+                  <input type="text" id="editImagemExtra2" placeholder="Imagem 2">
+                  <input type="text" id="editImagemExtra3" placeholder="Imagem 3">
+                  <input type="text" id="editImagemExtra4" placeholder="Imagem 4">
+                  <input type="text" id="editImagemExtra5" placeholder="Imagem 5">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" id="btnSalvar" class="btn-salvar-principal">💾 Salvar Produto</button>
+      </div>
+
+      <button type="button" id="btnTopoPopupEditar" class="btn-topo-popup" aria-label="Voltar ao topo da edição" title="Voltar ao topo">
+        <i class="fas fa-arrow-up"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="./js/VoltaraoTopo.js"></script>
+  <script src="./js/script-vitrine.js"></script>
+  <script src="./js/statusLogin.js"></script>
+  <script src="./js/popupEditar.js"></script>
+  <script src="./js/meu-perfil.js"></script>
+  <script src="./js/logo.js"></script>
+  <script src="./js/btn-topo.js"></script>
+  <script src="./js/bloquear-copia.js"></script>
+  <script src="./js/chatbot-widget.js"></script>
+  <script src="./js/promo-carousel.js"></script>
+  <script src="./js/loja.js"></script>
+</body>
+</body>
+
+</html>

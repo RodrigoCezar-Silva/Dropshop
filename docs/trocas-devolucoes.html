@@ -1,0 +1,416 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description"
+        content="MIX-PROMOÇÃO - Política de Trocas e Devoluções. Saiba como trocar ou devolver seu produto." />
+  <title>MIX-PROMOÇÃO - Trocas e Devoluções</title>
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="./css/style-index.css" />
+  <link rel="stylesheet" href="./css/carrinho.css" />
+  <link rel="stylesheet" href="./css/trocas-devolucoes.css" />
+  <link rel="stylesheet" href="./css/menu.css" />
+  <link rel="stylesheet" href="./css/logo.css" />
+  <link rel="stylesheet" href="./css/statusLogin.css" />
+  <link rel="stylesheet" href="./css/minhaConta.css" />
+  <link rel="stylesheet" href="./css/btn-topo.css" />
+  <link rel="stylesheet" href="./css/footer.css" />
+
+  <!-- Ícones Font Awesome -->
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="./css/chatbot-widget.css" />
+  <link rel="stylesheet" href="./css/responsive.css" />
+</head>
+<body>
+  <!-- Cabeçalho -->
+  <header class="site-header">
+    <div class="logo">
+      <span class="logo-icon">🛒</span>
+      <span class="logo-text">
+        <span class="mix">MIX</span><span class="promocao">PROMOÇÃO</span>
+      </span>
+    </div>
+
+    <!-- Menu -->
+    <nav class="menu" aria-label="Menu principal">
+      <ul>
+        <li><a href="./index.html"><i class="fa-solid fa-house menu-link-icon" aria-hidden="true"></i><span>Início</span></a></li>
+        <li><a href="./loja.html"><i class="fa-solid fa-store menu-link-icon" aria-hidden="true"></i><span>Nossa Loja</span></a></li>
+        <li><a href="./QuemSomos.html"><i class="fa-solid fa-circle-info menu-link-icon" aria-hidden="true"></i><span>Sobre</span></a></li>
+        
+        <li><a href="./trocas-devolucoes.html" class="active"><i class="fa-solid fa-right-left menu-link-icon" aria-hidden="true"></i><span>Trocas e Devoluções</span></a></li>
+        <li><a href="./ajuda.html"><i class="fa-solid fa-circle-question menu-link-icon" aria-hidden="true"></i><span>Ajuda</span></a></li>
+      </ul>
+    </nav>
+
+    <!-- Botões de login -->
+    <div id="loginButtons">
+      <a href="./login-cliente.html" class="btn-login cliente">👤 Login Cliente</a>
+      <a href="./admin-login.html" class="btn-login admin">👤 Login Administrativo</a>
+    </div>
+
+    <!-- Status de login administrador -->
+    <div id="statusLogado" class="status-admin" style="display:none;">
+      <span class="status-text">👑 Administrador: <strong id="nomeUsuario"></strong></span>
+      <button id="logout" class="btn-logout">Sair</button>
+    </div>
+
+    <!-- Status de login cliente -->
+    <div id="clienteStatus" style="display:none;">
+      <img id="fotoCliente" class="foto-perfil" src="" alt="Foto Cliente">
+      <span id="nomeCliente"></span>
+      <span id="sobrenomeCliente"></span>
+
+      <!-- Botão Minha Conta -->
+      <button id="btnMinhaConta" class="btn-minha-conta">👤 Minha Conta</button>
+
+      <!-- Botão Sair -->
+      <button id="logoutBtn" class="btn-logout">Sair</button>
+    </div>
+
+    <!-- Ícone do carrinho -->
+    <a href="./carrinho.html" class="cart-icon" aria-label="Carrinho de Compras">
+      <i class="fas fa-shopping-cart"></i>
+      <span id="cart-count">0</span>
+    </a>
+  </header>
+
+  <!-- Hero -->
+  <section class="trocas-hero">
+    <div class="trocas-hero-content">
+      <span class="trocas-badge"><i class="fa-solid fa-rotate"></i> Política de Trocas</span>
+      <h1>Trocas e <span class="destaque">Devoluções</span></h1>
+      <div class="hero-text-box redesign">
+        <div class="hero-title">
+          <i class="fa-solid fa-face-smile"></i> Satisfação Garantida
+        </div>
+        <div class="hero-main-text">
+          <span>Queremos que você fique <strong>100% satisfeito</strong> com sua compra. Caso precise trocar ou devolver algum produto, confira abaixo como funciona o nosso processo — <span class="hero-highlight">simples, rápido e sem complicação.</span></span>
+        </div>
+      </div>
+      <div class="hero-btn-group-outside">
+        <button class="hero-nav-btn" data-target=".trocas-etapas"><i class="fa-solid fa-list-check"></i> Troca</button>
+        <button class="hero-nav-btn" data-target=".trocas-regras"><i class="fa-solid fa-scale-balanced"></i> Regras</button>
+        <button class="hero-nav-btn" data-target=".trocas-faq"><i class="fa-solid fa-circle-question"></i> FAQ</button>
+        <button class="hero-nav-btn btn-ajuda" data-target=".trocas-cta"><i class="fa-solid fa-hands-helping"></i> Ajuda</button>
+      </div>
+      <style>
+        .hero-text-box.redesign {
+          background: linear-gradient(120deg, #232046 60%, #2d2a5a 100%);
+          border-radius: 22px;
+          box-shadow: 0 6px 32px 0 rgba(30,27,75,0.18);
+          padding: 36px 40px 32px 40px;
+          margin: 28px auto 0 auto;
+          max-width: 900px;
+          color: #e0e7ef;
+          font-size: 1.18rem;
+          text-align: center;
+          font-weight: 500;
+          letter-spacing: 0.01em;
+          position: relative;
+          overflow: hidden;
+        }
+        .hero-title {
+          color: #a5b4fc;
+          font-size: 1.1rem;
+          font-weight: 700;
+          margin-bottom: 14px;
+          letter-spacing: 0.04em;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+        }
+        .hero-main-text span {
+          display: inline-block;
+          max-width: 100%;
+          white-space: normal;
+          line-height: 1.5;
+        }
+        .hero-main-text strong {
+          color: #fff;
+        }
+        .hero-highlight {
+          color: #7dd3fc;
+          font-weight: 600;
+          white-space: nowrap;
+        }
+        .hero-btn-group-outside {
+          margin: 48px auto 0 auto;
+          display: flex;
+          justify-content: center;
+          gap: 18px;
+          flex-wrap: nowrap;
+          flex-direction: row;
+          overflow-x: auto;
+          scrollbar-width: none;
+          max-width: 900px;
+        }
+        .hero-btn-group-outside::-webkit-scrollbar {
+          display: none;
+        }
+        .hero-nav-btn {
+          background: linear-gradient(90deg,#6366f1,#a78bfa);
+          color: #fff;
+          padding: 12px 32px;
+          border-radius: 10px;
+          font-weight: 700;
+          font-size: 1.05rem;
+          border: none;
+          cursor: pointer;
+          box-shadow: 0 2px 12px #6366f133;
+          transition: background 0.2s, transform 0.15s;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          white-space: nowrap;
+        }
+        .hero-nav-btn:nth-child(2) {
+          background: linear-gradient(90deg,#f59e0b,#ef4444);
+        }
+        .hero-nav-btn:nth-child(3) {
+          background: linear-gradient(90deg,#0ea5e9,#818cf8);
+        }
+        .btn-ajuda {
+          background: linear-gradient(90deg,#22d3ee,#6366f1) !important;
+        }
+        .hero-nav-btn:hover {
+          filter: brightness(1.08);
+          transform: translateY(-2px) scale(1.04);
+        }
+        @media (max-width: 600px) {
+          .hero-text-box.redesign {
+            padding: 22px 8vw 18px 8vw;
+            font-size: 1rem;
+          }
+          .hero-btn-group-outside {
+            gap: 10px;
+            padding: 0 4vw;
+          }
+        }
+      </style>
+      <script>
+        document.addEventListener('DOMContentLoaded', function() {
+          document.querySelectorAll('.hero-nav-btn').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+              var target = btn.getAttribute('data-target');
+              var el = document.querySelector(target);
+              if (el) {
+                var y = el.getBoundingClientRect().top + window.pageYOffset - 120;
+                window.scrollTo({ top: y, behavior: 'smooth' });
+              }
+            });
+          });
+        });
+      </script>
+    </div>
+  </section>
+
+  <main>
+    <!-- Introdução -->
+    <section class="trocas-intro">
+      <p>A Mix Promoção segue as normas do <strong>Código de Defesa do Consumidor</strong> e garante o <strong>direito de arrependimento</strong> em até 7 dias corridos após o recebimento do produto. Além disso, aceitamos trocas por defeito ou divergência em até 30 dias.</p>
+      <div class="info-box">
+        <i class="fa-solid fa-shield-halved"></i>
+        Compra protegida — Garantia de troca ou reembolso
+      </div>
+    </section>
+
+    <!-- Etapas -->
+    <section class="trocas-etapas">
+      <h2 class="secao-titulo">Como solicitar sua <span>Troca ou Devolução</span></h2>
+
+      <div class="timeline">
+        <div class="timeline-step" data-step="1">
+          <h3><i class="fa-solid fa-headset"></i> Entre em contato</h3>
+          <p>Envie um e-mail para <strong>contato@mixpromocao.com</strong> ou entre em contato pelo WhatsApp <strong>(21) 99999-9999</strong> informando o número do pedido e o motivo da troca/devolução.</p>
+        </div>
+
+        <div class="timeline-step" data-step="2">
+          <h3><i class="fa-solid fa-clipboard-check"></i> Aprovação da Solicitação</h3>
+          <p>Nossa equipe analisará sua solicitação em até <strong>2 dias úteis</strong> e enviará as instruções de envio com o código de postagem.</p>
+        </div>
+
+        <div class="timeline-step" data-step="3">
+          <h3><i class="fa-solid fa-box-open"></i> Envio do Produto</h3>
+          <p>Embale o produto na embalagem original (sempre que possível), com todos os acessórios e nota fiscal, e poste nos Correios com o código fornecido. <strong>O frete de devolução é por nossa conta!</strong></p>
+        </div>
+
+        <div class="timeline-step" data-step="4">
+          <h3><i class="fa-solid fa-rotate"></i> Troca ou Reembolso</h3>
+          <p>Após recebermos e conferirmos o produto, realizamos a troca pelo novo item ou o reembolso integral em até <strong>5 dias úteis</strong> no mesmo método de pagamento.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Regras -->
+    <section class="trocas-regras">
+      <h2 class="secao-titulo">Condições para <span>Troca e Devolução</span></h2>
+
+      <div class="regras-grid">
+        <!-- Pode trocar -->
+        <div class="regra-card pode">
+          <div class="regra-icon"><i class="fa-solid fa-circle-check"></i></div>
+          <h3>Aceitamos a troca quando:</h3>
+          <ul>
+            <li><i class="fa-solid fa-check"></i> Produto com defeito de fabricação</li>
+            <li><i class="fa-solid fa-check"></i> Produto diferente do que foi pedido</li>
+            <li><i class="fa-solid fa-check"></i> Produto danificado no transporte</li>
+            <li><i class="fa-solid fa-check"></i> Arrependimento em até 7 dias (com embalagem intacta)</li>
+            <li><i class="fa-solid fa-check"></i> Tamanho ou cor diferente do anunciado</li>
+          </ul>
+        </div>
+
+        <!-- Não pode trocar -->
+        <div class="regra-card nao-pode">
+          <div class="regra-icon"><i class="fa-solid fa-circle-xmark"></i></div>
+          <h3>Não aceitamos troca quando:</h3>
+          <ul>
+            <li><i class="fa-solid fa-xmark"></i> Produto usado ou com sinais de uso</li>
+            <li><i class="fa-solid fa-xmark"></i> Sem embalagem original ou acessórios</li>
+            <li><i class="fa-solid fa-xmark"></i> Prazo de 30 dias excedido</li>
+            <li><i class="fa-solid fa-xmark"></i> Produto com dano causado pelo cliente</li>
+            <li><i class="fa-solid fa-xmark"></i> Itens de higiene pessoal abertos</li>
+          </ul>
+        </div>
+
+        <!-- Atenção -->
+        <div class="regra-card atencao">
+          <div class="regra-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+          <h3>Fique atento:</h3>
+          <ul>
+            <li><i class="fa-solid fa-exclamation"></i> Envie fotos do produto e da embalagem para agilizar</li>
+            <li><i class="fa-solid fa-exclamation"></i> O reembolso é feito no mesmo método de pagamento</li>
+            <li><i class="fa-solid fa-exclamation"></i> Para PIX, o reembolso cai em até 1 dia útil</li>
+            <li><i class="fa-solid fa-exclamation"></i> Para cartão, pode levar até 2 faturas</li>
+            <li><i class="fa-solid fa-exclamation"></i> Guarde a nota fiscal até o final do processo</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="trocas-faq">
+      <h2 class="secao-titulo">Perguntas <span>Frequentes</span></h2>
+
+      <div class="faq-item">
+        <button class="faq-pergunta">
+          Quanto tempo tenho para solicitar uma troca?
+          <i class="fa-solid fa-chevron-down"></i>
+        </button>
+        <div class="faq-resposta">
+          <p>Você tem até <strong>7 dias corridos</strong> para exercer o direito de arrependimento (sem necessidade de justificativa) e até <strong>30 dias</strong> para troca por defeito, contados a partir do recebimento do produto.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-pergunta">
+          O frete da devolução é pago por mim?
+          <i class="fa-solid fa-chevron-down"></i>
+        </button>
+        <div class="faq-resposta">
+          <p><strong>Não!</strong> Em caso de defeito ou erro nosso, o frete de devolução é 100% por nossa conta. Para arrependimento, fornecemos o código de postagem gratuito também.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-pergunta">
+          Posso trocar por outro produto diferente?
+          <i class="fa-solid fa-chevron-down"></i>
+        </button>
+        <div class="faq-resposta">
+          <p>Sim! Você pode optar por trocar pelo mesmo produto (outra cor/tamanho) ou por um produto diferente de mesmo valor. Se o novo item tiver valor superior, você paga apenas a diferença.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-pergunta">
+          Em quanto tempo recebo o reembolso?
+          <i class="fa-solid fa-chevron-down"></i>
+        </button>
+        <div class="faq-resposta">
+          <p>Após recebermos o produto devolvido e confirmarmos as condições, o reembolso é processado em até <strong>5 dias úteis</strong>. Para PIX, o valor cai em até 1 dia útil. Para cartão de crédito, pode levar até 2 faturas para aparecer o estorno.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-pergunta">
+          Preciso da nota fiscal para devolver?
+          <i class="fa-solid fa-chevron-down"></i>
+        </button>
+        <div class="faq-resposta">
+          <p>Sim, é recomendável enviar a nota fiscal junto com o produto. Se você perdeu a nota, entre em contato conosco que emitimos uma segunda via.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA removido conforme solicitado -->
+  </main>
+
+  <!-- Rodapé -->
+  <footer class="site-footer">
+    <div class="footer-top-bar"></div>
+    <div class="footer-main">
+      <div class="footer-brand">
+        <div class="footer-logo">
+          <span class="footer-logo-icon">🛒</span>
+          <span class="footer-logo-text"><span class="mix">MIX</span><span class="promo">PROMOÇÃO</span></span>
+        </div>
+        <p class="footer-desc">Oferecemos os melhores produtos com qualidade e preço justo. Promoções exclusivas e ofertas imperdíveis todos os dias!</p>
+        <div class="footer-social">
+          <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+          <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+          <a href="#" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+          <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+        </div>
+      </div>
+      <div class="footer-links">
+        <h4>Navegação</h4>
+        <ul>
+          <li><a href="./index.html"><i class="fa-solid fa-chevron-right"></i> Início</a></li>
+          <li><a href="./loja.html"><i class="fa-solid fa-chevron-right"></i> Nossa Loja</a></li>
+          <li><a href="./QuemSomos.html"><i class="fa-solid fa-chevron-right"></i> Sobre Nós</a></li>
+        </ul>
+      </div>
+      <div class="footer-links suporte">
+        <h4>Suporte</h4>
+        <ul>
+          <li><a href="./trocas-devolucoes.html"><i class="fa-solid fa-chevron-right"></i> Trocas e Devoluções</a></li>
+          <li><a href="./carrinho.html"><i class="fa-solid fa-chevron-right"></i> Meu Carrinho</a></li>
+        </ul>
+      </div>
+      <!-- Contato removido -->
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-bottom-inner">
+        <p>&copy; 2026 MIX-PROMOÇÃO. Todos os direitos reservados.</p>
+        <div class="footer-pagamentos">
+          <span>Pagamentos:</span>
+          <i class="fab fa-cc-visa"></i>
+          <i class="fab fa-cc-mastercard"></i>
+          <i class="fab fa-pix"></i>
+          <i class="fa-solid fa-barcode"></i>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="./js/carrinho.js"></script>
+  <script src="./js/VoltaraoTopo.js"></script>
+  <script src="./js/statusLogin.js"></script>
+  <script src="./js/meu-perfil.js"></script>
+  <script src="./js/logo.js"></script>
+  <script src="./js/btn-topo.js"></script>
+  <script src="./js/bloquear-copia.js"></script>
+  <script src="./js/chatbot-widget.js"></script>
+  <script src="./js/responsive-nav.js"></script>
+  <script src="./js/trocas-devolucoes.js"></script>
+
+  <!-- FAQ Acordeão -->
+  <script src="./js/faq-acordeao.js"></script>
+</body>
+</html>
