@@ -22,7 +22,8 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       try {
-        const response = await fetch("http://localhost:3000/login-admin", {
+        const base = window.AUTH_SERVER || window.location.origin;
+        const response = await fetch(`${base.replace(/\/$/, '')}/login-admin`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ usuario, senha })
@@ -38,7 +39,8 @@ document.addEventListener("DOMContentLoaded", () => {
           localStorage.setItem("tipoUsuario", "Administrador");
           localStorage.setItem("isAdmin", "true"); // 🔹 garante compatibilidade com comentarios.js
 
-          window.location.href = "index.html";
+          // redirect to admin area after successful admin login
+          window.location.href = "admin-area.html";
         } else {
           if (mensagemErro) {
             mensagemErro.innerText = result.mensagem || "Usuário ou senha inválidos.";
