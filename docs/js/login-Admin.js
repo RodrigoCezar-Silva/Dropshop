@@ -38,7 +38,8 @@ document.addEventListener("DOMContentLoaded", () => {
           localStorage.setItem("tipoUsuario", "Administrador");
           localStorage.setItem("isAdmin", "true"); // 🔹 garante compatibilidade com comentarios.js
 
-          window.location.href = "index.html";
+          // redireciona para área administrativa após login bem-sucedido
+          window.location.href = "admin-area.html";
         } else {
           if (mensagemErro) {
             mensagemErro.innerText = result.mensagem || "Usuário ou senha inválidos.";
