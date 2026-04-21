@@ -214,7 +214,7 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       const bases = [];
       if (typeof apiBase !== 'undefined' && apiBase) bases.push(apiBase);
-      bases.push('http://localhost:3000', '');
+      bases.push('http://localhost:3000', 'http://127.0.0.1:3000', '');
       let resp = null;
       for (const b of bases) {
         try {
@@ -384,7 +384,7 @@ document.addEventListener("DOMContentLoaded", () => {
         try {
           const bases = [];
           if (typeof apiBase !== 'undefined' && apiBase) bases.push(apiBase);
-          bases.push('http://localhost:3000', '');
+          bases.push('http://localhost:3000', 'http://127.0.0.1:3000', '');
           for (const b of bases) {
             try {
               const url = (b ? b : '') + `/api/reclamacoes/${id}`;
@@ -864,7 +864,7 @@ document.addEventListener("DOMContentLoaded", () => {
       // candidate bases: apiBase (configurado), depois dois hosts comuns e por fim caminho relativo
       const bases = [];
       if (apiBase) bases.push(apiBase);
-      bases.push('http://localhost:3000', '');
+      bases.push('http://localhost:3000', 'http://127.0.0.1:3000', '');
 
       const urls = bases.map(b => (b ? b : '') + `/api/cliente/${clienteId}`);
 
