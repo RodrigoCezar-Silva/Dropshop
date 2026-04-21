@@ -37,7 +37,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const currentPort = window.location.port;
     if (currentPort && currentPort !== '3000') bases.push('http://localhost:3000');
     if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') bases.push(window.location.origin);
-    bases.push('http://127.0.0.1:3000', '');
+    bases.push('http://localhost:3000', '');
 
     for (const b of bases) {
       try {
@@ -500,7 +500,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const currentPort = window.location.port;
     if (currentPort && currentPort !== '3000') bases.push('http://localhost:3000');
     if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') bases.push(window.location.origin);
-    bases.push('http://127.0.0.1:3000', '');
+    bases.push('http://localhost:3000', '');
 
     for (const b of bases) {
       try {
@@ -527,7 +527,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const currentPort = window.location.port;
       if (currentPort && currentPort !== '3000') bases.push('http://localhost:3000');
       if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') bases.push(window.location.origin);
-      bases.push('http://127.0.0.1:3000', '');
+      bases.push('http://localhost:3000', '');
       let deleted = false;
       for (const b of bases) {
         try {
