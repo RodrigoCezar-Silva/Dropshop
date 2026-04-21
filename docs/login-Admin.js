@@ -32,7 +32,8 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       try {
-        const response = await fetch("http://localhost:3000/login-admin", {
+        const endpoint = (BACKEND_URL || 'http://localhost:3000').replace(/\/$/, '') + '/login-admin';
+        const response = await fetch(endpoint, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ usuario, senha })
