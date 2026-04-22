@@ -6,42 +6,26 @@ on:
       - main
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pages: write
-      id-token: write
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Prepare `docs` for Pages
+      - name: Prepare docs directory (copy docs/html -> docs if needed)
         run: |
-          echo "Debug: listando docs before copy"
+          echo "Listing docs before copy"
           ls -la docs || true
-          if [ -f docs/html/index.html ]; then
-            echo "docs/html/index.html detected — copying docs/html/* -> docs/"
+          if [ -d docs/html ]; then
+            echo "Found docs/html, copying contents to docs/"
             cp -r docs/html/* docs/ || true
           else
-            echo "docs/html/index.html not found — leaving docs/ as-is"
+            echo "docs/html not found, skipping copy"
           fi
-          echo "After copy:"
+          echo "Listing docs after copy"
           ls -la docs || true
 
-      - name: Upload `docs` folder to pages artifact
-        uses: actions/upload-pages-artifact@v1
-        with:
-          path: docs
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Deploy `docs/` to gh-pages (peaceiris)
+      - name: Deploy `docs/` to gh-pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
