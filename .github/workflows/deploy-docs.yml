@@ -17,9 +17,13 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Upload `docs` folder to pages artifact
+        run: |
+          echo "Listando conteúdo de docs for debug"
+          ls -la docs || true
+        - name: Upload `docs/html` folder to pages artifact
         uses: actions/upload-pages-artifact@v1
         with:
-          path: docs
+          path: docs/html
 
   deploy:
     needs: build
