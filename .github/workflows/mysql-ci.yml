@@ -1,0 +1,49 @@
+name: MySQL CI Import
+
+on:
+  workflow_dispatch:
+
+jobs:
+  import-mysql:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: rootpw
+          MYSQL_DATABASE: dropshop
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost -prootpw"
+          --health-interval=10s --health-timeout=5s --health-retries=10
+        ports:
+          - 3306:3306
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install mysql client
+        run: sudo apt-get update && sudo apt-get install -y default-mysql-client
+
+      - name: Wait for MySQL to be ready
+        run: |
+          for i in {1..60}; do
+            mysql -h 127.0.0.1 -uroot -prootpw -e 'select 1' >/dev/null 2>&1 && break || sleep 1
+          done
+
+      - name: Check for dump and import
+        run: |
+          echo "Looking for db/dump.sql or db/dump.sql.gz"
+          if [ -f db/dump.sql.gz ]; then
+            echo "Found compressed dump, importing..."
+            gunzip -c db/dump.sql.gz | mysql -h 127.0.0.1 -uroot -prootpw dropshop
+          elif [ -f db/dump.sql ]; then
+            echo "Found SQL dump, importing..."
+            mysql -h 127.0.0.1 -uroot -prootpw dropshop < db/dump.sql
+          else
+            echo "No dump found at db/dump.sql or db/dump.sql.gz — nothing to import"
+          fi
+
+      - name: Verify tables
+        run: |
+          mysql -h 127.0.0.1 -uroot -prootpw -e "SHOW TABLES IN dropshop;"
