@@ -6,6 +6,24 @@ document.addEventListener("DOMContentLoaded", () => {
   const formLogin = document.getElementById("formLogin");
   const mensagemErro = document.getElementById("mensagemErro");
 
+  // helper to navigate to admin area trying common candidates
+  async function navigateToAdmin() {
+    const candidates = [
+      'admin-area.html',
+      'html/admin-area.html',
+      '/admin-area.html',
+      '/html/admin-area.html',
+      `${window.location.pathname.replace(/\/.+$/, '')}/admin-area.html`
+    ];
+    for (const p of candidates) {
+      try {
+        const res = await fetch(p, { method: 'HEAD' });
+        if (res && res.ok) { window.location.href = p; return; }
+      } catch (e) { /* ignore */ }
+    }
+    window.location.href = 'admin-area.html';
+  }
+
   if (formLogin) {
     formLogin.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -38,9 +56,31 @@ document.addEventListener("DOMContentLoaded", () => {
           localStorage.setItem("sobrenome", result.sobrenome);
           localStorage.setItem("tipoUsuario", "Administrador");
           localStorage.setItem("isAdmin", "true"); // 🔹 garante compatibilidade com comentarios.js
-
           // redirect to admin area after successful admin login
-          window.location.href = "admin-area.html";
+          // tenta detectar o caminho correto (pode estar em ./ ou ./html/)
+          async function resolveAndRedirect() {
+            const candidates = [
+              'admin-area.html',
+              'html/admin-area.html',
+              '/admin-area.html',
+              '/html/admin-area.html',
+              `${window.location.pathname.replace(/\/.+$/, '')}/admin-area.html`
+            ];
+            for (const p of candidates) {
+              try {
+                const res = await fetch(p, { method: 'HEAD' });
+                if (res && res.ok) {
+                  window.location.href = p;
+                  return;
+                }
+              } catch (e) {
+                // ignora e tenta próximo
+              }
+            }
+            // fallback simples
+            window.location.href = 'admin-area.html';
+          }
+          resolveAndRedirect();
         } else {
           if (mensagemErro) {
             mensagemErro.innerText = result.mensagem || "Usuário ou senha inválidos.";
@@ -49,6 +89,29 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       } catch (error) {
         console.error("Erro de conexão:", error);
+        // se o backend não estiver acessível, tentar login mock se configurado em auth-config
+        const cfg = window.AUTH_CONFIG || {};
+        if (cfg.mockAdmin && cfg.mockAdmin.enabled) {
+          const mockUser = cfg.mockAdmin.user || 'admin';
+          const mockPass = cfg.mockAdmin.pass || 'admin';
+          if (usuario === mockUser && senha === mockPass) {
+            // mock successful login
+            localStorage.setItem("token", "MOCK_TOKEN");
+            localStorage.setItem("nome", mockUser);
+            localStorage.setItem("sobrenome", "");
+            localStorage.setItem("tipoUsuario", "Administrador");
+            localStorage.setItem("isAdmin", "true");
+            await navigateToAdmin();
+            return;
+          } else {
+            if (mensagemErro) {
+              mensagemErro.innerText = "Usuário ou senha inválidos (mock).";
+              mensagemErro.style.color = "red";
+            }
+            return;
+          }
+        }
+
         if (mensagemErro) {
           mensagemErro.innerText = "❌ Erro de conexão com servidor!";
           mensagemErro.style.color = "red";
