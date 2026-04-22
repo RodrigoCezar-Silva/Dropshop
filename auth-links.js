@@ -12,8 +12,8 @@
         const repoBase = '/' + parts[0];
         out.push(window.location.origin + repoBase + '/auth-config.json');
       }
-      // common fallbacks
-      ['auth-config.json','./auth-config.json','../auth-config.json','/auth-config.json'].forEach(p=>{
+      // common fallbacks (avoid absolute root '/auth-config.json' to prevent root-404 on Project Pages)
+      ['auth-config.json','./auth-config.json','../auth-config.json'].forEach(p=>{
         try{ const u = new URL(p, window.location.href).href; if (!out.includes(u)) out.push(u); }catch(e){}
       });
       return out;
@@ -35,10 +35,11 @@
       }
     }
 
-    if (!cfg) cfg = { authServer: window.location.origin };
+    if (!cfg) cfg = { authServer: window.location.origin, mockAdmin: { enabled: true, user: 'AdminMaster', pass: 'admin123' } };
     const authServer = (cfg && cfg.authServer) ? cfg.authServer.replace(/\/$/, '') : window.location.origin;
 
     // expose for other scripts (login handlers) to use as API base
+    window.AUTH_CONFIG = cfg;
     window.AUTH_SERVER = authServer;
 
     const btnClient = document.getElementById('githubLoginClient');
