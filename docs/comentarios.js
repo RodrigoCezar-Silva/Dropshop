@@ -109,35 +109,34 @@ document.addEventListener("DOMContentLoaded", () => {
   async function carregarComentariosDoServidor() {
     const params = new URLSearchParams(window.location.search);
     const produtoId = params.get('id') || params.get('produtoId') || params.get('produto');
-    const relativePath = '/api/comentarios' + (produtoId ? ('?produtoId=' + encodeURIComponent(produtoId)) : '');
+    // construir base da API: prioriza a configuração carregada por auth-links (`window.AUTH_SERVER`)
+    const host = window.location.hostname;
+    const proto = window.location.protocol;
+    const defaultBase = `${proto}//${host}:3000`;
+    const apiBase = (window.AUTH_SERVER && window.AUTH_SERVER.replace(/\/$/, '')) || defaultBase;
+    const apiUrl = `${apiBase}/api/comentarios` + (produtoId ? ('?produtoId=' + encodeURIComponent(produtoId)) : '');
 
-    // tenta primeiro no mesmo host (relativo). Se falhar (404 ou network), tenta no backend padrão na porta 3000
+    // tenta primeiro API configurada (AUTH_SERVER ou host:3000), se falhar tenta relativo (útil em produção se API for proxy)
     try {
-      let resp = await fetch(relativePath);
-      if (!resp.ok) {
-        throw new Error('Resposta não OK: ' + resp.status);
-      }
+      let resp = await fetch(apiUrl, { cache: 'no-store' });
+      if (!resp.ok) throw new Error('Resposta não OK: ' + resp.status);
       const lista = await resp.json();
       comentarios = Array.isArray(lista) ? lista : [];
       atualizarComentarios(comentarios);
       atualizarEstatisticas(comentarios);
       return;
     } catch (err) {
-      // tenta fallback para localhost:3000 (útil quando frontend serve via LiveServer em :5501)
       try {
-        const host = window.location.hostname;
-        const proto = window.location.protocol;
-        const fallbackBase = `${proto}//${host}:3000`;
-        const fallbackUrl = fallbackBase + relativePath;
-        const resp2 = await fetch(fallbackUrl);
-        if (!resp2.ok) throw new Error('Fallback resposta não OK: ' + resp2.status);
+        const relativePath = '/api/comentarios' + (produtoId ? ('?produtoId=' + encodeURIComponent(produtoId)) : '');
+        const resp2 = await fetch(relativePath);
+        if (!resp2.ok) throw new Error('Resposta relativa não OK: ' + resp2.status);
         const lista2 = await resp2.json();
         comentarios = Array.isArray(lista2) ? lista2 : [];
         atualizarComentarios(comentarios);
         atualizarEstatisticas(comentarios);
         return;
       } catch (err2) {
-        console.warn('Erro ao carregar comentarios do servidor (relativo e fallback):', err && err.message, err2 && err2.message);
+        console.warn('Erro ao carregar comentarios do servidor (apiBase e relativo):', err && err.message, err2 && err2.message);
         comentarios = [];
         atualizarComentarios(comentarios);
         atualizarEstatisticas(comentarios);
@@ -236,7 +235,19 @@ document.addEventListener("DOMContentLoaded", () => {
       // anexar video (apenas 1)
       if (videoInput.files.length > 0) fd.append('video', videoInput.files[0]);
 
-      const resp = await fetch('/api/comentarios', { method: 'POST', body: fd });
+      // enviar para API configurada (AUTH_SERVER ou host:3000) e, se falhar, tentar caminho relativo
+      const host = window.location.hostname;
+      const proto = window.location.protocol;
+      const defaultBase = `${proto}//${host}:3000`;
+      const apiBase = (window.AUTH_SERVER && window.AUTH_SERVER.replace(/\/$/, '')) || defaultBase;
+      let resp = null;
+      try {
+        resp = await fetch(apiBase + '/api/comentarios', { method: 'POST', body: fd });
+        if (!resp.ok) throw new Error('API base respondeu ' + resp.status);
+      } catch (err) {
+        // tentativa fallback relativo
+        resp = await fetch('/api/comentarios', { method: 'POST', body: fd });
+      }
       const j = await resp.json();
       if (!resp.ok || !j.sucesso) {
         alert(j.mensagem || 'Erro ao enviar comentário');
@@ -283,7 +294,18 @@ document.addEventListener("DOMContentLoaded", () => {
           try {
             const id = c.id || c._id;
             if (!id) return alert('Comentário sem id.');
-            const resp = await fetch('/api/comentarios/' + encodeURIComponent(id), { method: 'DELETE', headers: { 'Content-Type': 'application/json' } });
+            // delete via API base (AUTH_SERVER) with fallback to relative
+            const host = window.location.hostname;
+            const proto = window.location.protocol;
+            const defaultBase = `${proto}//${host}:3000`;
+            const apiBase = (window.AUTH_SERVER && window.AUTH_SERVER.replace(/\/$/, '')) || defaultBase;
+            let resp = null;
+            try {
+              resp = await fetch(apiBase + '/api/comentarios/' + encodeURIComponent(id), { method: 'DELETE', headers: { 'Content-Type': 'application/json' } });
+              if (!resp.ok) throw new Error('API base respondeu ' + resp.status);
+            } catch (err) {
+              resp = await fetch('/api/comentarios/' + encodeURIComponent(id), { method: 'DELETE', headers: { 'Content-Type': 'application/json' } });
+            }
             const j = await resp.json();
             if (!resp.ok) return alert(j.mensagem || 'Falha ao remover comentário');
             await carregarComentariosDoServidor();

@@ -303,6 +303,11 @@ document.addEventListener("DOMContentLoaded", () => {
     if (btnRemoverProduto) btnRemoverProduto.style.display = "inline-block";
     if (btnEditarProduto) btnEditarProduto.style.display = "inline-block";
 
+    // Esconde elementos de Ajuda para administradores
+    try {
+      document.querySelectorAll('.btn-ajuda, a[href$="ajuda.html"], nav.menu a[href*="ajuda.html"]').forEach(el => el.style.display = 'none');
+    } catch (e) { /* ignore */ }
+
   } else if (tipoUsuario === "Cliente") {
     // Mostra status cliente
     if (clienteStatus) {
@@ -429,7 +434,8 @@ if (logoutCliente) {
       return h4 && h4.textContent.trim().toLowerCase() === 'contato';
     });
 
-    const isLogged = tipoUsuario === 'Administrador' || tipoUsuario === 'Cliente';
+    // Mostrar 'Ajuda' apenas para clientes (não para administradores)
+    const isLogged = tipoUsuario === 'Cliente';
     contatoBlocks.forEach(el => {
       el.style.display = isLogged ? '' : 'none';
     });
@@ -492,6 +498,14 @@ if (logoutCliente) {
       // ignore
     }
   }
+
+  // Mostrar/ocultar global do botão Ajuda: apenas clientes devem ver
+  try {
+    const isCliente = tipoUsuario === 'Cliente';
+    document.querySelectorAll('.btn-ajuda, a[href$="ajuda.html"], nav.menu a[href*="ajuda.html"]').forEach(el => {
+      el.style.display = isCliente ? '' : 'none';
+    });
+  } catch (e) { /* ignore */ }
 
   // chamar inicialmente com o estado atual
   try { ensureHelpPosition(!!tipoUsuario); } catch (e) { /* ignore */ }
