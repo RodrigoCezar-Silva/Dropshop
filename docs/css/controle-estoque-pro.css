@@ -30,6 +30,7 @@ html, body { overflow-x: hidden; }
   min-width: 760px;
   table-layout: auto;
 }
+
 /* Link de voltar para admin */
 .estoque-pro-back-admin {
   display: inline-flex;
