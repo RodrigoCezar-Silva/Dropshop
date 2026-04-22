@@ -16,14 +16,23 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Upload `docs` folder to pages artifact
+      - name: Prepare `docs` for Pages
         run: |
-          echo "Listando conteúdo de docs for debug"
+          echo "Debug: listando docs before copy"
           ls -la docs || true
-        - name: Upload `docs/html` folder to pages artifact
+          if [ -f docs/html/index.html ]; then
+            echo "docs/html/index.html detected — copying docs/html/* -> docs/"
+            cp -r docs/html/* docs/ || true
+          else
+            echo "docs/html/index.html not found — leaving docs/ as-is"
+          fi
+          echo "After copy:"
+          ls -la docs || true
+
+      - name: Upload `docs` folder to pages artifact
         uses: actions/upload-pages-artifact@v1
         with:
-          path: docs/html
+          path: docs
 
   deploy:
     needs: build
