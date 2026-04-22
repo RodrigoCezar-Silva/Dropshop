@@ -1333,7 +1333,12 @@ app.get("/api/cliente/:id/foto", async (req, res) => {
 });
 app.post("/login-admin", async (req, res) => {
   try {
+    console.debug('[login-admin] request body:', req.body);
     const { usuario, senha } = req.body;
+    if (!usuario || !senha) {
+      console.warn('[login-admin] missing usuario or senha in request body');
+      return res.status(400).json({ sucesso: false, mensagem: 'usuario e senha obrigatorios' });
+    }
     const connection = await createDbConnection();
     const [rows] = await connection.execute("SELECT * FROM admins WHERE usuario = ?", [usuario]);
     await connection.end();
