@@ -17,6 +17,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Prepare docs directory (copy docs/html -> docs if needed)
         run: |
@@ -35,5 +37,8 @@ jobs:
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          # Optional: provide a Personal Access Token in secrets.GH_PAGES_PAT
+          # to work around repository protections that block the default GITHUB_TOKEN.
+          personal_token: ${{ secrets.GH_PAGES_PAT }}
           publish_dir: ./docs
           publish_branch: gh-pages
