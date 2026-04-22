@@ -1,0 +1,246 @@
+.image-maker-main {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 28px 20px 52px;
+}
+
+.image-maker-hero {
+  background: linear-gradient(135deg, #111827, #1d4ed8 55%, #0ea5e9);
+  color: #fff;
+  border-radius: 20px;
+  padding: 30px;
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.18);
+  margin-bottom: 24px;
+}
+
+.image-maker-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  font-size: 0.82rem;
+  font-weight: 800;
+  margin-bottom: 12px;
+}
+
+.image-maker-hero h1 {
+  margin: 0 0 10px;
+  font-size: clamp(1.8rem, 3vw, 2.7rem);
+  color: #fff;
+}
+
+.image-maker-hero p {
+  margin: 0;
+  max-width: 780px;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.image-maker-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 22px;
+  align-items: start;
+}
+
+.image-form,
+.image-preview {
+  background: #fff;
+  border: 1px solid #dbe6ef;
+  border-radius: 18px;
+  padding: 20px;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.maker-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.maker-field-full {
+  grid-column: 1 / -1;
+}
+
+.maker-field span {
+  font-weight: 700;
+  color: #0f2740;
+}
+
+.maker-field input,
+.maker-field select,
+.maker-field textarea {
+  width: 100%;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  padding: 12px 14px;
+  font: inherit;
+  color: #243b53;
+  background: #fff;
+}
+
+.maker-field textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+.maker-buttons {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 16px 0;
+}
+
+.maker-btn-primary,
+.maker-btn-secondary {
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-weight: 800;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.maker-btn-primary {
+  border: none;
+  background: linear-gradient(135deg, #db2777, #2563eb);
+  color: #fff;
+  box-shadow: 0 12px 22px rgba(37, 99, 235, 0.18);
+}
+
+.maker-btn-secondary {
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  color: #0f2740;
+}
+
+.maker-btn-primary:hover,
+.maker-btn-secondary:hover {
+  transform: translateY(-1px);
+}
+
+.maker-status {
+  margin: 0;
+  color: #0d6e6e;
+  font-weight: 700;
+}
+
+.preview-header {
+  background: linear-gradient(135deg, #172554, #1d4ed8);
+  color: #fff;
+  border-radius: 16px;
+  padding: 18px;
+  margin-bottom: 14px;
+}
+
+.preview-tag {
+  display: inline-flex;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  font-size: 0.78rem;
+  font-weight: 800;
+  margin-bottom: 12px;
+}
+
+.preview-header h2 {
+  margin: 0 0 8px;
+  color: #fff;
+  font-size: 1.45rem;
+}
+
+.preview-header p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.88);
+  line-height: 1.6;
+}
+
+.preview-toolbar {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-size: 0.92rem;
+  color: #334e68;
+  margin-bottom: 12px;
+}
+
+.preview-toolbar span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.canvas-shell {
+  background: radial-gradient(circle at top left, #eff6ff 0%, #dbeafe 42%, #eef6ff 100%);
+  border: 1px solid #dbe6ef;
+  border-radius: 18px;
+  padding: 14px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+#imageMakerCanvas {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 16px;
+  background: #dfe9f5;
+  box-shadow: 0 18px 36px rgba(15, 23, 42, 0.18);
+}
+
+.preview-tips {
+  margin-top: 14px;
+  background: #f8fbff;
+  border: 1px solid #dbe6ef;
+  border-radius: 16px;
+  padding: 16px;
+}
+
+.preview-tips h3 {
+  margin: 0 0 10px;
+  color: #0f2740;
+}
+
+.preview-tips ul {
+  margin: 0;
+  padding-left: 18px;
+  color: #4f6475;
+  line-height: 1.8;
+}
+
+@media (max-width: 980px) {
+  .image-maker-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 680px) {
+  .image-maker-main {
+    padding: 20px 14px 34px;
+  }
+
+  .image-maker-hero,
+  .image-form,
+  .image-preview {
+    padding: 16px;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .maker-buttons button {
+    width: 100%;
+    justify-content: center;
+  }
+}

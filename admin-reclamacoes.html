@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MIX-PROMOÇÃO - Reclamações dos Clientes</title>
+
+  <link rel="stylesheet" href="./css/style-index.css" />
+  <link rel="stylesheet" href="./css/menu.css" />
+  <link rel="stylesheet" href="./css/logo.css" />
+  <link rel="stylesheet" href="./css/statusLogin.css" />
+  <link rel="stylesheet" href="./css/minhaConta.css" />
+  <link rel="stylesheet" href="./css/btn-topo.css" />
+  <link rel="stylesheet" href="./css/footer.css" />
+  <link rel="stylesheet" href="./css/admin-reclamacoes.css" />
+  <link rel="stylesheet" href="./css/lightbox.css" />
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="./css/responsive.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="logo">
+      <span class="logo-icon">🛒</span>
+      <span class="logo-text">
+        <span class="mix">MIX</span><span class="promocao">PROMOÇÃO</span>
+      </span>
+    </div>
+
+    <nav class="menu" aria-label="Menu principal">
+      <ul>
+        <li><a href="index.html"><i class="fa-solid fa-house menu-link-icon" aria-hidden="true"></i><span>Início</span></a></li>
+        <li><a href="loja.html"><i class="fa-solid fa-store menu-link-icon" aria-hidden="true"></i><span>Nossa Loja</span></a></li>
+        <li><a href="QuemSomos.html"><i class="fa-solid fa-circle-info menu-link-icon" aria-hidden="true"></i><span>Sobre</span></a></li>
+        <li><a href="trocas-devolucoes.html"><i class="fa-solid fa-right-left menu-link-icon" aria-hidden="true"></i><span>Trocas e Devoluções</span></a></li>
+        <li><a href="ajuda.html"><i class="fa-solid fa-circle-question menu-link-icon" aria-hidden="true"></i><span>Ajuda</span></a></li>
+      </ul>
+    </nav>
+
+    <div id="loginButtons">
+      <a href="login-cliente.html" class="btn-login cliente">👤 Login Cliente</a>
+      <a href="admin-login.html" class="btn-login admin">👤 Login Administrativo</a>
+    </div>
+
+    <div id="statusLogado" class="status-admin" style="display:none;">
+      <span class="status-text">👑 Administrador: <strong id="nomeUsuario"></strong></span>
+      <button id="logout" class="btn-logout">Sair</button>
+    </div>
+  </header>
+
+  <main class="reclamacoes-main">
+
+    <section class="reclamacoes-hero">
+      <div class="reclamacoes-eyebrow">
+        <i class="fa-solid fa-comments" aria-hidden="true"></i>
+        <span>Central de Atendimento</span>
+      </div>
+      <h1>Reclamações dos Clientes</h1>
+      <p>Gerencie e responda às reclamações enviadas pelos clientes. Mantenha um bom relacionamento com respostas rápidas.</p>
+    </section>
+
+    <!-- Filtros -->
+    <section class="reclamacoes-filtros">
+      <button class="filtro-btn ativo" data-filtro="todas">
+        <i class="fa-solid fa-inbox"></i> Todas
+        <span class="filtro-badge" id="badge-todas">0</span>
+      </button>
+      <button class="filtro-btn" data-filtro="pendente">
+        <i class="fa-solid fa-clock"></i> Pendentes
+        <span class="filtro-badge pendente" id="badge-pendente">0</span>
+      </button>
+      <button class="filtro-btn" data-filtro="respondida">
+        <i class="fa-solid fa-check-circle"></i> Respondidas
+        <span class="filtro-badge respondida" id="badge-respondida">0</span>
+      </button>
+    </section>
+
+    <!-- Lista de reclamações -->
+    <section class="reclamacoes-lista" id="listaReclamacoes">
+      <p class="reclamacoes-vazio" id="msgVazio">
+        <i class="fa-solid fa-face-smile"></i> Nenhuma reclamação encontrada.
+      </p>
+    </section>
+
+  </main>
+
+  <!-- Modal de resposta -->
+  <div class="modal-overlay" id="modalResposta" style="display:none;">
+    <div class="modal-conteudo">
+      <button class="modal-fechar" id="fecharModal">&times;</button>
+
+      <div class="modal-header">
+        <i class="fa-solid fa-reply"></i>
+        <h2>Responder Reclamação</h2>
+      </div>
+
+      <div class="modal-info" id="modalInfo"></div>
+
+      <div class="modal-historico" id="modalHistorico">
+        <h3><i class="fa-solid fa-clock-rotate-left"></i> Histórico de Respostas</h3>
+        <div id="historicoRespostas"></div>
+      </div>
+
+      <div class="modal-form">
+        <label for="respostaTexto">Sua Resposta:</label>
+        <textarea id="respostaTexto" rows="5" placeholder="Digite sua resposta ao cliente..."></textarea>
+        <div class="modal-form-actions">
+          <button id="btnGerarIA" class="btn-gerar-ia" type="button">
+            <i class="fa-solid fa-robot"></i> Gerar resposta (IA)
+          </button>
+          <button id="btnEnviarResposta">
+            <i class="fa-solid fa-paper-plane"></i> Enviar Resposta
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="site-footer">
+    <div class="footer-top-bar"></div>
+    <div class="footer-main">
+      <div class="footer-brand">
+        <div class="footer-logo">
+          <span class="footer-logo-icon">🛒</span>
+          <span class="footer-logo-text"><span class="mix">MIX</span><span class="promo">PROMOÇÃO</span></span>
+        </div>
+        <p class="footer-desc">Oferecemos os melhores produtos com qualidade e preço justo. Promoções exclusivas e ofertas imperdíveis todos os dias!</p>
+        <div class="footer-social">
+          <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+          <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+          <a href="#" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+          <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+        </div>
+      </div>
+      <div class="footer-links">
+        <h4>Navegação</h4>
+        <ul>
+          <li><a href="index.html"><i class="fa-solid fa-chevron-right"></i> Início</a></li>
+          <li><a href="loja.html"><i class="fa-solid fa-chevron-right"></i> Nossa Loja</a></li>
+          <li><a href="QuemSomos.html"><i class="fa-solid fa-chevron-right"></i> Sobre Nós</a></li>
+        </ul>
+      </div>
+      <!-- Contato removido conforme solicitado -->
+          <div class="fc-icon"><i class="fa-solid fa-location-dot"></i></div>
+          <div>
+            <span class="fc-label">Endereço</span>
+            <span class="fc-valor">Duque de Caxias - RJ</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-bottom-inner">
+        <p>&copy; 2026 MIX-PROMOÇÃO. Todos os direitos reservados.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- SCRIPTS -->
+  <script src="./js/statusLogin.js"></script>
+  <script src="./js/admin-reclamacoes.js"></script>
+  <script src="./js/lightbox.js"></script>
+    <script src="./js/responsive-nav.js"></script>
+  </body>
+</html>
+

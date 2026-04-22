@@ -1,0 +1,48 @@
+#btnTopo {
+  position: fixed;
+  bottom: 48px;
+  right: 48px;
+  z-index: 9999;
+  background: linear-gradient(135deg, #00bcd4, #2196f3, #43e97b);
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 72px;
+  height: 72px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.22), 0 0 0 8px #00bcd455;
+  font-size: 2.5em;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.3s, box-shadow 0.3s, transform 0.2s, opacity 0.3s;
+  opacity: 0;
+  animation: none;
+}
+#btnTopo.show {
+  display: flex;
+  opacity: 1;
+  animation: btnTopoFadeIn 0.5s;
+}
+#btnTopo:hover {
+  background: linear-gradient(135deg, #43e97b, #00bcd4, #2196f3);
+  box-shadow: 0 12px 40px #00bcd4cc, 0 0 0 12px #43e97b44;
+  transform: scale(1.12);
+}
+#btnTopo i {
+  pointer-events: none;
+  filter: drop-shadow(0 2px 8px #fff8);
+}
+@keyframes btnTopoFadeIn {
+  from { opacity: 0; transform: scale(0.7); }
+  to { opacity: 1; transform: scale(1); }
+}
+@media (max-width: 600px) {
+  #btnTopo {
+    width: 54px;
+    height: 54px;
+    right: 16px;
+    bottom: 16px;
+    font-size: 1.5em;
+  }
+}

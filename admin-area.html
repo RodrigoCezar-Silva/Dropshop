@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MIX-PROMOCAO - Area Admin</title>
+
+  <link rel="stylesheet" href="./css/style-index.css" />
+  <link rel="stylesheet" href="./css/menu.css" />
+  <link rel="stylesheet" href="./css/logo.css" />
+  <link rel="stylesheet" href="./css/statusLogin.css" />
+  <link rel="stylesheet" href="./css/minhaConta.css" />
+  <link rel="stylesheet" href="./css/btn-topo.css" />
+  <link rel="stylesheet" href="./css/footer.css" />
+  <link rel="stylesheet" href="./css/admin-area.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="./css/responsive.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="logo">
+      <span class="logo-icon">??</span>
+      <span class="logo-text">
+        <span class="mix">MIX</span><span class="promocao">PROMOCAO</span>
+      </span>
+    </div>
+
+    <nav class="menu" aria-label="Menu principal">
+      <ul>
+        <li><a href="index.html"><i class="fa-solid fa-house menu-link-icon" aria-hidden="true"></i><span>Inicio</span></a></li>
+        <li><a href="loja.html"><i class="fa-solid fa-store menu-link-icon" aria-hidden="true"></i><span>Nossa Loja</span></a></li>
+        <li><a href="QuemSomos.html"><i class="fa-solid fa-circle-info menu-link-icon" aria-hidden="true"></i><span>Sobre</span></a></li>
+        <li><a href="trocas-devolucoes.html"><i class="fa-solid fa-right-left menu-link-icon" aria-hidden="true"></i><span>Trocas e Devolucoes</span></a></li>
+        <li><a href="ajuda.html"><i class="fa-solid fa-circle-question menu-link-icon" aria-hidden="true"></i><span>Ajuda</span></a></li>
+      </ul>
+    </nav>
+
+    <div id="loginButtons">
+      <a href="login-cliente.html" class="btn-login cliente">?? Login Cliente</a>
+      <a href="admin-login.html" class="btn-login admin">?? Login Administrativo</a>
+    </div>
+
+    <div id="statusLogado" class="status-admin" style="display:none;">
+      <span class="status-text">?? Administrador: <strong id="nomeUsuario"></strong></span>
+      <button id="logout" class="btn-logout">Sair</button>
+    </div>
+
+    <div id="clienteStatus" style="display:none;">
+      <img id="fotoCliente" class="foto-perfil" src="" alt="Foto Cliente" />
+      <span id="nomeCliente"></span>
+      <span id="sobrenomeCliente"></span>
+      <button id="btnMinhaConta" class="btn-minha-conta">Minha Conta</button>
+      <button id="logoutBtn" class="btn-logout">Sair</button>
+    </div>
+  </header>
+
+  <main class="admin-area-main">
+    <section class="admin-area-hero">
+      <div class="admin-area-eyebrow">
+        <i class="fa-solid fa-user-shield" aria-hidden="true"></i>
+        <span>Painel Administrativo</span>
+      </div>
+      <h1>Area Admin MIX-PROMOCAO</h1>
+      <p>Centralize as acoes principais do sistema em um unico lugar e acesse rapidamente gerenciamento de produtos, cadastro administrativo e navegacao do site.</p>
+    </section>
+
+    <section class="admin-area-grid">
+      <article class="admin-card">
+        <div class="admin-card-icon"><i class="fa-solid fa-warehouse" aria-hidden="true"></i></div>
+        <h2>Controle de Estoque</h2>
+        <p>Acesse o painel para visualizar, consultar e acompanhar o estoque dos produtos cadastrados na loja.</p>
+        <a class="admin-card-link" href="controle-estoque.html"><span>Abrir controle de estoque</span><i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+      </article>
+
+      <article class="admin-card">
+        <div class="admin-card-icon"><i class="fa-solid fa-box-open" aria-hidden="true"></i></div>
+        <h2>Gerenciar Produtos</h2>
+        <p>Acesse a vitrine administrativa para editar, remover e revisar os produtos cadastrados.</p>
+        <a class="admin-card-link" href="loja.html"><span>Abrir gerenciamento</span><i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+      </article>
+
+      <article class="admin-card">
+        <div class="admin-card-icon"><i class="fa-solid fa-chart-column" aria-hidden="true"></i></div>
+        <h2>Estatisticas de Produtos</h2>
+        <p>Veja quantas visualizacoes cada produto recebeu e acompanhe quais itens estao chamando mais atencao na loja.</p>
+        <a class="admin-card-link" href="admin-estatisticas.html"><span>Ver estatisticas</span><i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+      </article>
+
+      <article class="admin-card">
+        <div class="admin-card-icon"><i class="fa-solid fa-user-plus" aria-hidden="true"></i></div>
+        <h2>Cadastrar Administrador</h2>
+        <p>Cadastre novos usuarios com acesso administrativo para manter a operacao do sistema organizada.</p>
+        <a class="admin-card-link" href="cadastro-admin.html"><span>Abrir cadastro</span><i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+      </article>
+
+      <article class="admin-card">
+        <div class="admin-card-icon"><i class="fa-solid fa-house" aria-hidden="true"></i></div>
+        <h2>Voltar para o Site</h2>
+        <p>Retorne para a pagina inicial e acompanhe como as alteracoes ficam visiveis para o publico.</p>
+        <a class="admin-card-link" href="index.html"><span>Ir para a home</span><i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+      </article>
+
+      <article class="admin-card">
+        <div class="admin-card-icon"><i class="fa-solid fa-clipboard-list" aria-hidden="true"></i></div>
+        <h2>Pedidos dos Clientes</h2>
+        <p>Visualize todos os pedidos realizados pelos clientes para processar as compras e fazer o dropshipping.</p>
+        <a class="admin-card-link" href="admin-pedidos.html"><span>Ver pedidos</span><i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+      </article>
+
+      <article class="admin-card">
+        <div class="admin-card-icon"><i class="fa-solid fa-comments" aria-hidden="true"></i></div>
+        <h2>Reclamacoes dos Clientes</h2>
+        <p>Visualize e responda as reclamacoes enviadas pelos clientes pelo formulario de contato.</p>
+        <a class="admin-card-link" href="admin-reclamacoes.html"><span>Ver reclamacoes</span><i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+      </article>
+
+      <article class="admin-card">
+        <div class="admin-card-icon"><i class="fa-solid fa-envelope-open-text" aria-hidden="true"></i></div>
+        <h2>Emails Promocionais</h2>
+        <p>Envie emails de promocoes com imagens para os clientes cadastrados e aumente suas vendas.</p>
+        <a class="admin-card-link" href="admin-emails.html"><span>Enviar emails</span><i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+      </article>
+
+      <article class="admin-card">
+        <div class="admin-card-icon"><i class="fab fa-whatsapp" aria-hidden="true"></i></div>
+        <h2>WhatsApp Promocional</h2>
+        <p>Envie mensagens de promocoes via WhatsApp diretamente para os clientes e aumente suas vendas.</p>
+        <a class="admin-card-link" href="admin-whatsapp.html"><span>Enviar mensagens</span><i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+      </article>
+
+      <article class="admin-card">
+        <div class="admin-card-icon"><i class="fa-solid fa-robot" aria-hidden="true"></i></div>
+        <h2>Chatbot IA</h2>
+        <p>Configure o assistente virtual com inteligencia artificial que atende clientes automaticamente no site e WhatsApp.</p>
+        <a class="admin-card-link" href="admin-chatbot.html"><span>Configurar chatbot</span><i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+      </article>
+    </section>
+
+    <section class="admin-area-notes">
+      <h2>Atalhos Uteis</h2>
+      <ul>
+        <li>Use o gerenciamento de produtos para editar vitrine, detalhes e midia.</li>
+        <li>Se voce sair da conta, a pagina administrativa volta a exigir login de administrador.</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-top-bar"></div>
+    <div class="footer-main">
+      <div class="footer-brand">
+        <div class="footer-logo">
+          <span class="footer-logo-icon">??</span>
+          <span class="footer-logo-text"><span class="mix">MIX</span><span class="promo">PROMOCAO</span></span>
+        </div>
+        <p class="footer-desc">Oferecemos os melhores produtos com qualidade e preco justo. Promocoes exclusivas e ofertas imperdiveis todos os dias.</p>
+        <div class="footer-social">
+          <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+          <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+          <a href="#" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+          <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+        </div>
+      </div>
+      <div class="footer-links">
+        <h4>Navegacao</h4>
+        <ul>
+          <li><a href="index.html"><i class="fa-solid fa-chevron-right"></i> Inicio</a></li>
+          <li><a href="loja.html"><i class="fa-solid fa-chevron-right"></i> Nossa Loja</a></li>
+          <li><a href="QuemSomos.html"><i class="fa-solid fa-chevron-right"></i> Sobre Nos</a></li>
+          
+        </ul>
+      </div>
+      <div class="footer-links suporte">
+        <h4>Suporte</h4>
+        <ul>
+          <li><a href="trocas-devolucoes.html"><i class="fa-solid fa-chevron-right"></i> Trocas e Devoluções</a></li>
+          <li><a href="carrinho.html"><i class="fa-solid fa-chevron-right"></i> Meu Carrinho</a></li>
+        </ul>
+      </div>
+      <!-- Contato removido conforme solicitado -->
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-bottom-inner">
+        <p>&copy; 2026 MIX-PROMOCAO. Todos os direitos reservados.</p>
+        <div class="footer-pagamentos">
+          <span>Pagamentos:</span>
+          <i class="fab fa-cc-visa"></i>
+          <i class="fab fa-cc-mastercard"></i>
+          <i class="fab fa-pix"></i>
+          <i class="fa-solid fa-barcode"></i>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="./js/statusLogin.js"></script>
+  <script src="./js/logo.js"></script>
+  <script src="./js/btn-topo.js"></script>
+  <script src="./js/bloquear-copia.js"></script>
+  <script src="./js/admin-area.js"></script>
+  <script src="./js/responsive-nav.js"></script>
+</body>
+</html>

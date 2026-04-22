@@ -1,0 +1,318 @@
+/* Ajuste para alinhar imagem do produto com informações do topo */
+
+/* Remove eventual barra de rolagem horizontal apenas nesta página */
+html, body { overflow-x: hidden; }
+
+/* Torna a tabela responsiva: permite rolagem horizontal apenas no bloco da tabela */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  
+  /* esconder barra de rolagem visualmente, mantendo a rolagem funcional */
+  -ms-overflow-style: none; /* IE/Edge */
+  scrollbar-width: none; /* Firefox */
+}
+.table-responsive::-webkit-scrollbar {
+  height: 0; /* esconder scrollbar horizontal no WebKit */
+}
+
+/* Garante que o container não exceda a viewport */
+.estoque-pro-container {
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+/* A tabela pode ter largura mínima para manter legibilidade, mas não força a página a criar scroll */
+.estoque-pro-table {
+  width: 100%;
+  min-width: 760px;
+  table-layout: auto;
+}
+
+/* Link de voltar para admin */
+.estoque-pro-back-admin {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 8px;
+  font-size: 1.01em;
+  color: #2563eb;
+  background: #e0e7ef;
+  border-radius: 8px;
+  padding: 7px 16px;
+  text-decoration: none;
+  font-weight: 600;
+  box-shadow: 0 1px 6px #2563eb11;
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+}
+.estoque-pro-back-admin:hover {
+  background: #2563eb;
+  color: #fff;
+  box-shadow: 0 2px 12px #2563eb33;
+}
+
+/* Topo mais estiloso */
+/* Topo mais estiloso */
+.estoque-pro-header-area {
+  background: linear-gradient(90deg, #2563eb 0%, #6366f1 100%);
+  border-radius: 18px 18px 0 0;
+  box-shadow: 0 4px 24px #2563eb22;
+  padding: 32px 28px 22px 28px;
+  margin-bottom: 18px;
+  display: flex;
+  align-items: flex-start;
+  gap: 22px;
+  border-bottom: 2px solid #e0e7ef;
+  min-height: 120px;
+}
+.estoque-pro-header-icon {
+  font-size: 2.7rem;
+  color: #fff;
+  background: #2563eb;
+  border-radius: 16px;
+  padding: 18px 22px;
+  box-shadow: 0 2px 12px #fff2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.estoque-pro-title {
+  margin-bottom: 8px;
+  color: #fff;
+  font-size: 2.5rem;
+  font-weight: 900;
+  letter-spacing: -1.2px;
+  line-height: 1.1;
+  text-shadow: 0 4px 24px #232a4d80, 0 1.5px 8px #6366f180, 0 2px 12px #2563eb99;
+  background: none;
+  display: block;
+  max-width: 700px;
+/* linha removida para corrigir erro de sintaxe */
+}
+.estoque-pro-desc {
+  color: #e0e7ef;
+  font-size: 1.13em;
+  margin: 0 0 2px 0;
+  font-weight: 600;
+  text-shadow: 0 2px 12px #232a4d80, 0 1px 8px #6366f180;
+  letter-spacing: 0.01em;
+  background: rgba(99,102,241,0.13);
+  border-radius: 10px;
+  padding: 8px 18px 8px 10px;
+  display: inline-block;
+  max-width: 700px;
+  word-break: break-word;
+}
+/* Header e Toolbar modernos */
+/* Removido bloco duplicado e conflitante de .estoque-pro-header-area, .estoque-pro-header-icon, .estoque-pro-title, .estoque-pro-desc */
+.estoque-pro-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f1f5f9;
+  border-radius: 12px;
+  padding: 14px 22px;
+  margin-bottom: 22px;
+  box-shadow: 0 1px 8px #2563eb11;
+  gap: 12px;
+}
+.estoque-pro-toolbar-info {
+  color: #2563eb;
+  font-weight: 700;
+  font-size: 1.05em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.estoque-pro-toolbar-btn {
+    padding-right: 12px;
+  color: #fff;
+  .estoque-pro-table .estoque-pro-btn {
+    margin-left: 10px;
+    margin-right: 0;
+  }
+  .estoque-pro-table .estoque-pro-remover {
+    margin-left: 6px;
+  }
+  .estoque-pro-table td.estoque-pro-data-acoes span {
+    font-size: 1.04em;
+    color: #334155;
+    font-weight: 500;
+    margin-right: 2px;
+    min-width: 110px;
+    letter-spacing: 0.01em;
+  }
+  border: none;
+  border-radius: 8px;
+  padding: 10px 22px;
+  font-size: 1em;
+  font-weight: 600;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 2px 8px #2563eb22;
+  transition: background 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+}
+.estoque-pro-toolbar-btn:hover {
+  background: linear-gradient(90deg, #1e40af 60%, #6366f1 100%);
+  box-shadow: 0 4px 16px #2563eb33;
+}
+/* Controle de Estoque Profissional */
+body {
+  background: #f4f6fb;
+}
+.estoque-pro-container {
+  max-width: 1100px;
+  margin: 40px auto 0 auto;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 4px 32px #0002;
+  padding: 36px 32px 32px 32px;
+}
+.estoque-pro-title {
+  font-size: 2.2rem;
+  color: #1e293b;
+  font-weight: 700;
+  margin-bottom: 18px;
+  letter-spacing: -1px;
+}
+.estoque-pro-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 12px;
+}
+.estoque-pro-table th {
+  text-align: left;
+  color: #64748b;
+  font-size: 1.05em;
+  font-weight: 600;
+  padding-bottom: 8px;
+}
+.estoque-pro-table td {
+  background: #f8fafc;
+  border-radius: 10px;
+  padding: 18px 14px;
+  vertical-align: middle;
+  font-size: 1.08em;
+  color: #1e293b;
+  position: relative;
+  height: 90px;
+  /* Garante alinhamento centralizado em todas as células */
+}
+
+
+.estoque-pro-table td.estoque-pro-data-acoes {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: nowrap;
+  min-width: 220px;
+  padding-right: 8px;
+  justify-content: flex-end;
+}
+.estoque-pro-table td.estoque-pro-data-acoes span {
+  font-size: 1.04em;
+  color: #334155;
+  font-weight: 500;
+  margin-right: 6px;
+  min-width: 70px;
+  letter-spacing: 0.01em;
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.estoque-pro-qtd {
+  width: 56px;
+  padding: 4px 8px;
+  border-radius: 8px;
+  border: 1.5px solid #d1d5db;
+  font-size: 1.05rem;
+  background: #f1f5f9;
+  text-align: center;
+  margin-right: 6px;
+}
+.estoque-pro-btn, .estoque-pro-remover {
+  margin-left: 0;
+  margin-right: 0;
+}
+.estoque-pro-btn {
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 18px;
+  font-size: 1em;
+  cursor: pointer;
+  transition: background 0.2s;
+  text-decoration: none;
+  display: inline-block;
+  margin-right: 6px;
+}
+.estoque-pro-btn:last-child {
+  margin-right: 0;
+}
+.estoque-pro-btn:hover {
+  background: #1e40af;
+}
+.estoque-pro-remover {
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 18px;
+  font-size: 1em;
+  cursor: pointer;
+  transition: background 0.2s;
+  text-decoration: none;
+  display: inline-block;
+}
+.estoque-pro-remover:hover {
+  background: #ef4444;
+}
+ 
+.estoque-pro-img {
+  width: 70px;
+  height: 70px;
+  max-width: 90px;
+  max-height: 90px;
+  object-fit: contain;
+  border-radius: 10px;
+  box-shadow: 0 1px 6px #0001;
+  background: #f1f5f9;
+  display: block;
+  margin: 0 auto;
+}
+
+.estoque-pro-qtd {
+  width: 60px;
+  padding: 4px 8px;
+  border-radius: 8px;
+  border: 1.5px solid #d1d5db;
+  font-size: 1.05rem;
+  background: #f1f5f9;
+  text-align: center;
+}
+.estoque-pro-btn {
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 18px;
+  font-size: 1em;
+  cursor: pointer;
+  transition: background 0.2s;
+  text-decoration: none;
+  display: inline-block;
+}
+.estoque-pro-btn:hover {
+  background: #1e40af;
+}
+@media (max-width: 700px) {
+  .estoque-pro-container { padding: 12px 2vw; }
+  .estoque-pro-table td, .estoque-pro-table th { font-size: 0.98em; padding: 10px 4px; }
+  .estoque-pro-img { width: 44px; height: 44px; }
+}

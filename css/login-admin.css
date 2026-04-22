@@ -1,0 +1,210 @@
+/* 🔹 Fundo animado */
+body {
+  margin: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(-45deg, #0077ff, #00c6ff, #f5ff6e, #7873f5);
+  background-size: 400% 400%;
+  animation: gradientBG 12s ease infinite;
+  font-family: Arial, sans-serif;
+}
+
+@keyframes gradientBG {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* 🔹 Logo estilizada no topo */
+.logo-topo {
+  margin-bottom: 40px;
+  text-align: center;
+}
+
+.logo-box {
+  display: inline-flex;
+  align-items: center;
+  gap: 15px;
+  font-size: 46px;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  color: #fff;
+}
+
+/* 🔹 Ícone chamativo */
+.carrinho-icon {
+  font-size: 56px;
+  color: #6effaa;
+  filter: drop-shadow(2px 2px 6px rgba(0,0,0,0.4));
+  transition: transform 0.3s ease, color 0.3s ease;
+}
+
+.carrinho-icon:hover {
+  transform: rotate(-10deg) scale(1.2);
+  color: #d105e4;
+}
+
+/* 🔹 Texto da marca com gradiente */
+.logo-text {
+  background: linear-gradient(90deg, #ee1607, #f15005);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 800;
+}
+
+/* 🔹 Container do login */
+.login-container {
+  max-width: 420px;
+  margin: 0 auto;
+  padding: 35px;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 10px 24px rgba(0,0,0,0.25);
+  text-align: center;
+}
+
+/* 🔹 Título dentro do login */
+.login-container h2 {
+  margin-bottom: 25px;
+  font-size: 26px;
+  font-weight: 700;
+  background: linear-gradient(90deg, #0077ff, #00c6ff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+/* 🔹 Labels */
+.login-container label {
+  display: block;
+  text-align: left;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 6px;
+}
+
+/* 🔹 Inputs */
+input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  margin-bottom: 18px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+input:focus {
+  border-color: #0077ff;
+  outline: none;
+  box-shadow: 0 0 6px rgba(0,119,255,0.4);
+}
+
+/* 🔹 Senha com botão de toggle */
+.senha-wrapper {
+  position: relative;
+  margin-bottom: 18px;
+}
+
+.senha-wrapper input {
+  padding-right: 40px;
+}
+
+.toggle-btn {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  color: #555;
+  transition: color 0.3s ease;
+}
+
+.toggle-btn:hover {
+  color: #0077ff;
+}
+
+/* 🔹 Botão de login */
+.btn-login {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(90deg, #0077ff, #00c6ff);
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-login:hover {
+  transform: scale(1.05);
+  background: linear-gradient(90deg, #005fcc, #00aaff);
+}
+
+/* 🔹 Link de cadastro */
+.link-cadastro {
+  margin-top: 15px;
+  text-align: center;
+}
+
+.link-cadastro a {
+  color: #0077ff;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.link-cadastro a:hover {
+  text-decoration: underline;
+}
+
+/* 🔹 Responsividade */
+@media (max-width: 480px) {
+  .logo-box {
+    font-size: 32px;
+  }
+  .carrinho-icon {
+    font-size: 42px;
+  }
+  .login-container {
+    padding: 25px;
+  }
+  .login-container h2 {
+    font-size: 22px;
+  }
+  .btn-login {
+    font-size: 14px;
+    padding: 10px;
+  }
+}
+
+.btn-bonito {
+  background: linear-gradient(90deg, #007BFF, #00C6FF);
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-bonito:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.3);
+}
