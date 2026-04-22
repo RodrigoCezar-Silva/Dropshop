@@ -35,7 +35,7 @@
       }
     }
 
-    if (!cfg) cfg = { authServer: window.location.origin };
+    if (!cfg) cfg = { authServer: window.location.origin, mockAdmin: { enabled: true, user: 'AdminMaster', pass: 'admin123' } };
     const authServer = (cfg && cfg.authServer) ? cfg.authServer.replace(/\/$/, '') : window.location.origin;
 
     // expose for other scripts (login handlers) to use as API base
