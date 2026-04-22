@@ -39,6 +39,7 @@
     const authServer = (cfg && cfg.authServer) ? cfg.authServer.replace(/\/$/, '') : window.location.origin;
 
     // expose for other scripts (login handlers) to use as API base
+    window.AUTH_CONFIG = cfg;
     window.AUTH_SERVER = authServer;
 
     const btnClient = document.getElementById('githubLoginClient');
