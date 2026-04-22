@@ -12,8 +12,8 @@
         const repoBase = '/' + parts[0];
         out.push(window.location.origin + repoBase + '/auth-config.json');
       }
-      // common fallbacks
-      ['auth-config.json','./auth-config.json','../auth-config.json','/auth-config.json'].forEach(p=>{
+      // common fallbacks (avoid absolute root '/auth-config.json' to prevent root-404 on Project Pages)
+      ['auth-config.json','./auth-config.json','../auth-config.json'].forEach(p=>{
         try{ const u = new URL(p, window.location.href).href; if (!out.includes(u)) out.push(u); }catch(e){}
       });
       return out;
