@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
       'admin-area.html',
       'html/admin-area.html',
       '/admin-area.html',
-      './html/admin-area.html',
+      '/html/admin-area.html',
       `${window.location.pathname.replace(/\/.+$/, '')}/admin-area.html`
     ];
     for (const p of candidates) {
@@ -56,9 +56,31 @@ document.addEventListener("DOMContentLoaded", () => {
           localStorage.setItem("sobrenome", result.sobrenome);
           localStorage.setItem("tipoUsuario", "Administrador");
           localStorage.setItem("isAdmin", "true"); // 🔹 garante compatibilidade com comentarios.js
-
           // redirect to admin area after successful admin login
-          window.location.href = "admin-area.html";
+          // tenta detectar o caminho correto (pode estar em ./ ou ./html/)
+          async function resolveAndRedirect() {
+            const candidates = [
+              'admin-area.html',
+              'html/admin-area.html',
+              '/admin-area.html',
+              '/html/admin-area.html',
+              `${window.location.pathname.replace(/\/.+$/, '')}/admin-area.html`
+            ];
+            for (const p of candidates) {
+              try {
+                const res = await fetch(p, { method: 'HEAD' });
+                if (res && res.ok) {
+                  window.location.href = p;
+                  return;
+                }
+              } catch (e) {
+                // ignora e tenta próximo
+              }
+            }
+            // fallback simples
+            window.location.href = 'admin-area.html';
+          }
+          resolveAndRedirect();
         } else {
           if (mensagemErro) {
             mensagemErro.innerText = result.mensagem || "Usuário ou senha inválidos.";
