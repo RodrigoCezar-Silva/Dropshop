@@ -305,15 +305,18 @@ const PAGBANK_FAKE = (! (process.env.PAGBANK_TOKEN_PRODUCTION || process.env.PAG
 const PAGBANK_NOTIFICATION_URL = process.env.PAGBANK_NOTIFICATION_URL || `http://localhost:${PORT}/api/pagbank/notificacao`;
 const SITE_URL = process.env.SITE_URL || `http://localhost:${PORT}`;
 
-const allowedOrigins = [
+// Permite adicionar origens extras via VAR de ambiente `ALLOWED_ORIGINS` (csv)
+const extraOriginsEnv = String(process.env.ALLOWED_ORIGINS || '').split(',').map(s => s.trim()).filter(Boolean);
+const allowedOrigins = Array.from(new Set([
   "http://127.0.0.1:5500",
   "http://localhost:5500",
   "http://127.0.0.1:5501",
   "http://localhost:5501",
   "http://localhost:3000",
   "http://127.0.0.1:3000",
-  SITE_URL
-].filter(Boolean);
+  SITE_URL,
+  ...extraOriginsEnv
+].filter(Boolean)));
 
 // ---------------- MIDDLEWARES ---------------- //
 // CORS: permitir apenas origens configuradas. Em requests sem `Origin` (server-to-server)
@@ -2441,6 +2444,16 @@ app.post("/api/redefinir-senha", async (req, res) => {
 });
 
 // ---------------- INICIAR SERVIDOR ---------------- //
+// Log simples para requisições não resolvidas (ajuda a diagnosticar 404s do front-end)
+app.use((req, res, next) => {
+  res.on('finish', () => {
+    if (res.statusCode === 404) {
+      console.warn(`[404] ${req.method} ${req.originalUrl} - Origin: ${req.get('origin') || req.get('referer') || '-'} - Host: ${req.get('host')}`);
+    }
+  });
+  next();
+});
+
 (async () => {
   try {
     await garantirTabelas();
