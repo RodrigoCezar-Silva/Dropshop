@@ -316,14 +316,21 @@ const allowedOrigins = [
 ].filter(Boolean);
 
 // ---------------- MIDDLEWARES ---------------- //
+// CORS: permitir apenas origens configuradas. Em requests sem `Origin` (server-to-server)
+// permitimos para não quebrar chamadas internas.
 app.use(cors({
   origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
-    return callback(null, true);
+    if (!origin) return callback(null, true); // tools, curl, server-to-server
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    return callback(new Error('Origem não permitida'));
   },
-  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"]
 }));
+
+// responder preflight globalmente
+app.options('*', cors());
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
