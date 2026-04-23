@@ -332,8 +332,13 @@ app.use(cors({
   allowedHeaders: ["Content-Type", "Authorization"]
 }));
 
-// responder preflight globalmente
-app.options('*', cors());
+// responder preflight globalmente: aplicar CORS manualmente em requests OPTIONS
+app.use((req, res, next) => {
+  if (req.method === 'OPTIONS') {
+    return cors()(req, res, next);
+  }
+  next();
+});
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -2461,7 +2466,17 @@ app.use((req, res, next) => {
 
 (async () => {
   try {
-    await garantirTabelas();
+    try {
+      await garantirTabelas();
+    } catch (err) {
+      console.error('Falha ao garantir tabelas:', err && err.message);
+      if (EM_PRODUCAO) {
+        throw err; // em produção, manter comportamento atual
+      } else {
+        console.warn('Modo desenvolvimento: ignorando erro de DB e continuando; algumas rotas podem falhar.');
+      }
+    }
+
     app.listen(PORT, () => {
       console.log(`Servidor rodando em http://localhost:${PORT}`);
       console.log(`Ambiente: ${NODE_ENV}`);
@@ -2469,7 +2484,7 @@ app.use((req, res, next) => {
       console.log(`Webhook: ${PAGBANK_NOTIFICATION_URL}`);
     });
   } catch (error) {
-    console.error("Erro ao iniciar servidor:", error.message);
+    console.error("Erro ao iniciar servidor:", error && error.message);
     process.exit(1);
   }
 })();

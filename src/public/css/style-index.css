@@ -616,8 +616,6 @@ body {
   border-color: #6366f1;
 }
 
-
-
 /* ===== TEMA ESCURO ===== */
 @media (prefers-color-scheme: dark) {
   .menu a,
@@ -816,5 +814,4 @@ body {
     grid-template-columns: 1fr;
   }
 }
-
 

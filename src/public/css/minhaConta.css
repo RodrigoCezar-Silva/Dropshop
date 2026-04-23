@@ -22,7 +22,6 @@
   letter-spacing: 0.5px;
 }
 
-
 /* Hover */
 .btn-minha-conta:hover {
   background: linear-gradient(135deg, #0056b3, #003d80);
@@ -177,5 +176,4 @@ h1 {
 .reclamacao-thumb { width:88px; height:66px; object-fit:cover; border-radius:8px; box-shadow:0 6px 18px rgba(15,23,42,0.06); cursor:pointer; transition:transform 0.18s ease; }
 .reclamacao-thumb:hover { transform:scale(1.04); }
 .modal-thumb { width:200px; height:140px; object-fit:cover; border-radius:10px; }
-
 

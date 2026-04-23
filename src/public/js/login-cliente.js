@@ -103,8 +103,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 // ignore e fallback
               }
             }
-            // fallback padrão
-            window.location.href = "/html/index.html";
+            // fallback padrão: redireciona para a área do cliente
+            window.location.href = "/html/meu-perfil.html";
           }, 800);
         } else {
           msgLogin.textContent = data.mensagem || "Erro ao fazer login!";

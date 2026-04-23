@@ -511,7 +511,6 @@
 /* Ajustes menores para o card quando usado na área do cliente */
 .reclamacao-card .reclamacao-header { align-items: center; }
 
-
 .foto-perfil:hover {
   box-shadow: 0 0 0 6px #19a8c6, 0 10px 26px rgba(25, 168, 198, 0.25);
   border-color: #0f7d56;

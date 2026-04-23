@@ -97,7 +97,6 @@
   box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
 
-
 /* Avaliações */
 #avaliacoes-produto {
   margin-top: 30px;
@@ -339,8 +338,8 @@
   border: 2px solid #ddd;
   transition: transform 0.3s;
 }
-#previewFotos img:hover { 
-  transform: scale(1.1); 
+#previewFotos img:hover {
+  transform: scale(1.1);
 }
 
 /* Pré-visualização de vídeo */
@@ -385,8 +384,8 @@
   color: #fff;
   cursor: pointer;
 }
-#closeMedia:hover { 
-  color: #ff4444; 
+#closeMedia:hover {
+  color: #ff4444;
 }
 
 /* Container de mídia abaixo */

@@ -384,7 +384,7 @@
   transform: translateY(6px) scale(.995);
   animation: mix-pop .24s cubic-bezier(.2,.9,.3,1) forwards;
 }
-.mix-popup-message { 
+.mix-popup-message {
   margin: 0 0 8px 0;
   font-weight: 800;
   color: #0f172a;
@@ -430,6 +430,4 @@
   justify-content: center;
   box-shadow: 0 8px 20px rgba(2,6,23,0.25);
 }
-
-
 

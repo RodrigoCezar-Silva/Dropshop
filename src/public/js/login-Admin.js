@@ -40,12 +40,31 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       try {
-        const base = window.AUTH_SERVER || window.location.origin;
-        const response = await fetch(`${base.replace(/\/$/, '')}/login-admin`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ usuario, senha })
-        });
+        const candidates = [];
+        if (window.AUTH_SERVER) candidates.push(String(window.AUTH_SERVER).replace(/\/$/, ''));
+        if (window.location && window.location.origin) candidates.push(String(window.location.origin).replace(/\/$/, ''));
+        candidates.push('http://localhost:3000');
+        candidates.push('http://127.0.0.1:3000');
+
+        let response = null;
+        let lastError = null;
+        for (const base of candidates) {
+          try {
+            console.debug('[login-admin] tentando', base + '/login-admin');
+            response = await fetch(`${base}/login-admin`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ usuario, senha })
+            });
+            // If we received a network response (even 4xx/5xx), stop trying others
+            if (response) break;
+          } catch (err) {
+            console.warn('[login-admin] falha ao conectar em', base, err && err.message);
+            lastError = err;
+          }
+        }
+
+        if (!response) throw lastError || new Error('Nenhuma resposta do servidor');
 
         const result = await response.json();
 
