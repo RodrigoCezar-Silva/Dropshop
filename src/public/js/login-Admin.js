@@ -40,33 +40,40 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       try {
-        const candidates = [];
-        if (window.AUTH_SERVER) candidates.push(String(window.AUTH_SERVER).replace(/\/$/, ''));
-        if (window.location && window.location.origin) candidates.push(String(window.location.origin).replace(/\/$/, ''));
-        candidates.push('http://localhost:3000');
-        candidates.push('http://127.0.0.1:3000');
+        // Se `AUTH_SERVER` estiver definido usa ele, caso contrário
+        // detecta se estamos rodando pelo Live Server (porta 5500/5501)
+        // e aponta para o backend em http://localhost:3000 por padrão.
+        const defaultBackend = `${window.location.protocol}//localhost:3000`;
+        const isLiveServer = !!(window.location.port && (window.location.port === '5500' || window.location.port === '5501'));
+        const base = window.AUTH_SERVER || (isLiveServer ? defaultBackend : window.location.origin);
+        let response = await fetch(`${base.replace(/\/$/, '')}/login-admin`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ usuario, senha })
+        });
 
-        let response = null;
-        let lastError = null;
-        for (const base of candidates) {
+        // Se o servidor de arquivos respondeu 405 (Method Not Allowed),
+        // provavelmente estamos apontando para o Live Server. Tenta o backend padrão.
+        if (response.status === 405 && base !== defaultBackend) {
           try {
-            console.debug('[login-admin] tentando', base + '/login-admin');
-            response = await fetch(`${base}/login-admin`, {
+            response = await fetch(`${defaultBackend}/login-admin`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ usuario, senha })
             });
-            // If we received a network response (even 4xx/5xx), stop trying others
-            if (response) break;
-          } catch (err) {
-            console.warn('[login-admin] falha ao conectar em', base, err && err.message);
-            lastError = err;
+          } catch (e) {
+            // fallback continua para tratar erro abaixo
           }
         }
 
-        if (!response) throw lastError || new Error('Nenhuma resposta do servidor');
-
-        const result = await response.json();
+        // Tratar respostas sem corpo JSON para evitar 'Unexpected end of JSON input'
+        let result = {};
+        try {
+          const text = await response.text();
+          result = text ? JSON.parse(text) : {};
+        } catch (e) {
+          result = {};
+        }
 
         if (response.ok && result.sucesso) {
           // guarda dados no navegador

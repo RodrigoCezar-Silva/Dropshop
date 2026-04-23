@@ -120,6 +120,31 @@
   color: #083f71;
 }
 
+/* ========== Card hover animation (aplica em varios tipos de cards da area admin) ========== */
+.admin-card,
+.admin-stat-card,
+.stat-card,
+.reclamacao-card,
+.pagamento-card {
+  transition: transform 220ms cubic-bezier(.2,.8,.2,1), box-shadow 220ms, border-color 220ms;
+  will-change: transform, box-shadow;
+}
+
+.admin-card:hover,
+.admin-card.is-hover,
+.admin-stat-card:hover,
+.stat-card:hover,
+.reclamacao-card:hover,
+.pagamento-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.14);
+}
+
+.admin-card:active,
+.admin-card.is-hover:active {
+  transform: translateY(-4px) scale(1.01);
+}
+
 .admin-area-notes {
   margin-top: 24px;
   background: #fff;

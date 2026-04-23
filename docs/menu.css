@@ -84,6 +84,7 @@
   text-decoration: none;     /* remove sublinhado se for <a> */
 }
 
+
 /* Botão Cliente (azul) */
 .btn-login.cliente {
   background: linear-gradient(135deg, #3498db, #2980b9);
@@ -126,6 +127,7 @@
   0% { left: -75%; }
   100% { left: 125%; }
 }
+
 
 /* 🔹 Responsividade */
 @media (max-width: 768px) {

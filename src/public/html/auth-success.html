@@ -19,21 +19,11 @@
       const p = qs();
       if (p.token) {
         localStorage.setItem('token', p.token);
-        const tipo = (p.tipoUsuario || 'Administrador');
-        localStorage.setItem('tipoUsuario', tipo);
+        localStorage.setItem('tipoUsuario', p.tipoUsuario || 'Administrador');
         if (p.nome) localStorage.setItem('nome', p.nome);
         if (p.sobrenome) localStorage.setItem('sobrenome', p.sobrenome);
-
-        // Redirect based on user type
-        setTimeout(()=>{
-          if (tipo.toLowerCase().startsWith('cliente')) {
-            location.href = '/html/meu-perfil.html';
-          } else if (tipo.toLowerCase().startsWith('admin')) {
-            location.href = '/html/admin-area.html';
-          } else {
-            location.href = '/html/index.html';
-          }
-        }, 500);
+        // redirect to admin area
+        setTimeout(()=> location.href = '/html/admin-area.html', 500);
       } else {
         document.body.innerHTML = '<p>Erro na autenticação via GitHub.</p>';
       }

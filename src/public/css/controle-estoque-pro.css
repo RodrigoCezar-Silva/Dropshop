@@ -8,7 +8,7 @@ html, body { overflow-x: hidden; }
   width: 100%;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
-
+  
   /* esconder barra de rolagem visualmente, mantendo a rolagem funcional */
   -ms-overflow-style: none; /* IE/Edge */
   scrollbar-width: none; /* Firefox */
@@ -204,6 +204,7 @@ body {
   /* Garante alinhamento centralizado em todas as células */
 }
 
+
 .estoque-pro-table td.estoque-pro-data-acoes {
   display: flex;
   align-items: center;
@@ -272,7 +273,7 @@ body {
 .estoque-pro-remover:hover {
   background: #ef4444;
 }
-
+ 
 .estoque-pro-img {
   width: 70px;
   height: 70px;

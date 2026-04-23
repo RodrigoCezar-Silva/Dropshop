@@ -226,6 +226,7 @@
   transform: scale(1.06) rotate(-2deg);
   box-shadow: 0 4px 24px #4f8cff66, 0 2px 12px #23273344;
 }
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
 
 body {
   background: linear-gradient(120deg, #232733 0%, #4f8cff 100%);

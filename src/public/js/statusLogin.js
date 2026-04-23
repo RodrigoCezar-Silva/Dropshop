@@ -102,6 +102,12 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     ensureHeaderUserWidget();
+    // Aplicar tema salvo globalmente (mixTema) em todas as páginas
+    try {
+      const savedTheme = localStorage.getItem('mixTema');
+      if (savedTheme === 'dark') document.body.classList.add('theme-dark');
+      else document.body.classList.remove('theme-dark');
+    } catch (e) { /* ignore */ }
     // Esconde/remover por padrão o widget de cliente quando não há login
     function removeClientStatusElement() {
       try {
@@ -268,21 +274,65 @@ document.addEventListener("DOMContentLoaded", () => {
         statusAdmin.appendChild(statusActions);
       }
 
+      // botão de alternar tema (aparece apenas para administradores)
+      try {
+        let btnToggleAdminTheme = document.getElementById('btnToggleAdminTheme');
+        if (!btnToggleAdminTheme) {
+          btnToggleAdminTheme = document.createElement('button');
+          btnToggleAdminTheme.id = 'btnToggleAdminTheme';
+          btnToggleAdminTheme.className = 'btn-theme-toggle';
+          btnToggleAdminTheme.setAttribute('aria-pressed', 'false');
+          btnToggleAdminTheme.title = 'Alternar tema (claro / escuro)';
+          btnToggleAdminTheme.style.marginRight = '8px';
+          btnToggleAdminTheme.style.padding = '6px 10px';
+          btnToggleAdminTheme.style.borderRadius = '6px';
+          btnToggleAdminTheme.style.border = 'none';
+          btnToggleAdminTheme.style.cursor = 'pointer';
+          btnToggleAdminTheme.style.background = 'linear-gradient(90deg,#0f7cc6,#0bbdc3)';
+          btnToggleAdminTheme.style.color = '#fff';
+          btnToggleAdminTheme.innerHTML = '<i class="fa fa-moon" aria-hidden="true"></i>&nbsp;<span style="font-weight:600">Tema</span>';
+          statusActions.appendChild(btnToggleAdminTheme);
+
+          // inicializar estado do botão
+          try {
+            const st = localStorage.getItem('mixTema');
+            if (st === 'dark') {
+              btnToggleAdminTheme.setAttribute('aria-pressed','true');
+              btnToggleAdminTheme.innerHTML = '<i class="fa fa-sun" aria-hidden="true"></i>&nbsp;<span style="font-weight:600">Tema</span>';
+            } else {
+              btnToggleAdminTheme.setAttribute('aria-pressed','false');
+              btnToggleAdminTheme.innerHTML = '<i class="fa fa-moon" aria-hidden="true"></i>&nbsp;<span style="font-weight:600">Tema</span>';
+            }
+          } catch(e){}
+
+          btnToggleAdminTheme.addEventListener('click', function() {
+            try {
+              const isDark = document.body.classList.contains('theme-dark');
+              if (!isDark) {
+                document.body.classList.add('theme-dark');
+                this.setAttribute('aria-pressed','true');
+                this.innerHTML = '<i class="fa fa-sun" aria-hidden="true"></i>&nbsp;<span style="font-weight:600">Tema</span>';
+                try { localStorage.setItem('mixTema', 'dark'); } catch(e){}
+              } else {
+                document.body.classList.remove('theme-dark');
+                this.setAttribute('aria-pressed','false');
+                this.innerHTML = '<i class="fa fa-moon" aria-hidden="true"></i>&nbsp;<span style="font-weight:600">Tema</span>';
+                try { localStorage.setItem('mixTema', 'light'); } catch(e){}
+              }
+            } catch (e) { console.warn('Erro alternar tema', e); }
+          });
+        }
+      } catch (e) { /* ignore */ }
+
       if (logoutAdmin && logoutAdmin.parentElement !== statusActions) {
         statusActions.appendChild(logoutAdmin);
       }
 
-      const estaNaAreaAdmin = paginaAtual.endsWith("/admin-area.html") || paginaAtual.endsWith("admin-area.html");
-      let btnAreaAdmin = document.getElementById("btnAreaAdmin");
-
-      if (!estaNaAreaAdmin && !btnAreaAdmin) {
-        btnAreaAdmin = document.createElement("a");
-        btnAreaAdmin.id = "btnAreaAdmin";
-        btnAreaAdmin.className = "btn-admin-area";
-        btnAreaAdmin.href = "admin-area.html";
-        btnAreaAdmin.innerHTML = "<i class=\"fa-solid fa-screwdriver-wrench\" aria-hidden=\"true\"></i><span>Área Admin</span>";
-        statusActions.insertBefore(btnAreaAdmin, logoutAdmin || null);
-      }
+      // Não exibir botão "Área Admin" — apenas mostrar status e o botão Sair
+      try {
+        const existingAdminBtn = document.getElementById('btnAreaAdmin');
+        if (existingAdminBtn && existingAdminBtn.parentNode) existingAdminBtn.parentNode.removeChild(existingAdminBtn);
+      } catch (e) { /* ignore */ }
     }
     if (loginButtons) loginButtons.style.display = "none"; // 🔹 Esconde botões de login
     // Esconde botão de logout do cliente se existir (evita duplicidade)
@@ -308,6 +358,26 @@ document.addEventListener("DOMContentLoaded", () => {
       document.querySelectorAll('.btn-ajuda, a[href$="ajuda.html"], nav.menu a[href*="ajuda.html"]').forEach(el => el.style.display = 'none');
     } catch (e) { /* ignore */ }
 
+    // Oculta o menu principal e botões do topo quando logado como Administrador
+    try {
+      const nav = document.querySelector('nav.menu');
+      if (nav) nav.style.display = 'none';
+      document.querySelectorAll('.top-buttons, .header-links, header .menu, header .nav, .site-nav').forEach(el => {
+        try { el.style.display = 'none'; } catch(e) {}
+      });
+    } catch (e) { /* ignore */ }
+
+    // Esconder o ícone do carrinho especificamente na página de 'Gerenciar Produtos'
+    try {
+      const heading = document.querySelector('h1, h2');
+      const headingText = heading ? (heading.textContent || '').trim().toLowerCase() : '';
+      const path = window.location.pathname.toLowerCase();
+      const isGerenciarPage = headingText.includes('gerenciar produtos') || path.includes('admin-area') || path.includes('loja.html');
+      if (isGerenciarPage) {
+        document.querySelectorAll('.cart-icon').forEach(el => { try { el.style.display = 'none'; } catch(e){} });
+      }
+    } catch (e) { /* ignore */ }
+
   } else if (tipoUsuario === "Cliente") {
     // Mostra status cliente
     if (clienteStatus) {
@@ -322,11 +392,38 @@ document.addEventListener("DOMContentLoaded", () => {
       if (nomeCliente) nomeCliente.textContent = nomeCompleto || '';
       if (sobrenomeCliente) sobrenomeCliente.textContent = '';
 
-      const fotoBase64 = localStorage.getItem("foto");
-      if (fotoBase64 && fotoCliente && fotoBase64 !== "null") {
-        fotoCliente.src = "data:image/png;base64," + fotoBase64;
-      } else if (fotoCliente) {
-        fotoCliente.src = getDefaultAvatarDataUri(); // imagem padrão embutida
+      // Preferir foto do servidor quando possível, cair para base64 em localStorage ou para o avatar padrão
+      try {
+        const clienteId = localStorage.getItem('clienteId');
+        const serverUrl = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+          ? `${window.location.protocol}//${window.location.hostname}:3000`
+          : window.location.origin;
+        if (clienteId && fotoCliente) {
+          const url = `${serverUrl}/api/cliente/${clienteId}/foto?cb=${Date.now()}`;
+          fotoCliente.onerror = function () {
+            // se falhar, tentar usar foto em base64 armazenada localmente
+            try {
+              const fb = localStorage.getItem('foto');
+              if (fb && fb !== 'null') { this.onerror = null; this.src = 'data:image/png;base64,' + fb; return; }
+            } catch (e) { /* ignore */ }
+            try { this.onerror = null; this.src = getDefaultAvatarDataUri(); } catch (e) {}
+          };
+          fotoCliente.src = url;
+        } else {
+          const fotoBase64 = localStorage.getItem("foto");
+          if (fotoBase64 && fotoCliente && fotoBase64 !== "null") {
+            fotoCliente.src = "data:image/png;base64," + fotoBase64;
+          } else if (fotoCliente) {
+            fotoCliente.src = getDefaultAvatarDataUri();
+          }
+        }
+      } catch (e) {
+        const fotoBase64 = localStorage.getItem("foto");
+        if (fotoBase64 && fotoCliente && fotoBase64 !== "null") {
+          fotoCliente.src = "data:image/png;base64," + fotoBase64;
+        } else if (fotoCliente) {
+          fotoCliente.src = getDefaultAvatarDataUri();
+        }
       }
     }
     if (loginButtons) loginButtons.style.display = "none"; // 🔹 Esconde botões de login
@@ -342,6 +439,8 @@ document.addEventListener("DOMContentLoaded", () => {
     if (btnAddProduto) btnAddProduto.style.display = "none";
     if (btnRemoverProduto) btnRemoverProduto.style.display = "none";
     if (btnEditarProduto) btnEditarProduto.style.display = "none";
+    // garante que o menu principal esteja visível para cliente
+    try { const nav = document.querySelector('nav.menu'); if (nav) nav.style.display = ''; } catch(e){}
     // garante que o botão Minha Conta e o logout do cliente fiquem visíveis
     if (btnMinhaConta) {
       btnMinhaConta.style.display = 'inline-flex';
@@ -368,6 +467,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (lb) {
         lb.style.display = 'flex';
         lb.style.marginLeft = 'auto';
+        try { const nav = document.querySelector('nav.menu'); if (nav) nav.style.display = ''; } catch(e){}
       }
     } catch (e) { /* ignore */ }
   }
@@ -509,6 +609,21 @@ if (logoutCliente) {
 
   // chamar inicialmente com o estado atual
   try { ensureHelpPosition(!!tipoUsuario); } catch (e) { /* ignore */ }
+
+  // Destacar link do menu correspondente à página atual
+  (function markCurrentMenuLink() {
+    try {
+      const path = window.location.pathname.split('/').pop().toLowerCase();
+      if (!path) return;
+      document.querySelectorAll('nav.menu a').forEach(a => {
+        const href = (a.getAttribute('href') || '').split('/').pop().toLowerCase();
+        if (!href) return;
+        if (href === path || (path === 'index.html' && (href === 'index.html' || href === '/'))) {
+          a.classList.add('menu-active');
+        }
+      });
+    } catch (e) { /* ignore */ }
+  })();
 
   // Retry/enforce login buttons in case other scripts modify header after load
   (function enforceLoginButtonsRetry() {

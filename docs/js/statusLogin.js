@@ -102,6 +102,12 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     ensureHeaderUserWidget();
+    // Aplicar tema salvo globalmente (mixTema) em todas as páginas
+    try {
+      const savedTheme = localStorage.getItem('mixTema');
+      if (savedTheme === 'dark') document.body.classList.add('theme-dark');
+      else document.body.classList.remove('theme-dark');
+    } catch (e) { /* ignore */ }
     // Esconde/remover por padrão o widget de cliente quando não há login
     function removeClientStatusElement() {
       try {
@@ -268,21 +274,64 @@ document.addEventListener("DOMContentLoaded", () => {
         statusAdmin.appendChild(statusActions);
       }
 
+      // botão de alternar tema (aparece apenas para administradores)
+      try {
+        let btnToggleAdminTheme = document.getElementById('btnToggleAdminTheme');
+        if (!btnToggleAdminTheme) {
+          btnToggleAdminTheme = document.createElement('button');
+          btnToggleAdminTheme.id = 'btnToggleAdminTheme';
+          btnToggleAdminTheme.className = 'btn-theme-toggle';
+          btnToggleAdminTheme.setAttribute('aria-pressed', 'false');
+          btnToggleAdminTheme.title = 'Alternar tema (claro / escuro)';
+          btnToggleAdminTheme.style.marginRight = '8px';
+          btnToggleAdminTheme.style.padding = '6px 10px';
+          btnToggleAdminTheme.style.borderRadius = '6px';
+          btnToggleAdminTheme.style.border = 'none';
+          btnToggleAdminTheme.style.cursor = 'pointer';
+          btnToggleAdminTheme.style.background = 'linear-gradient(90deg,#0f7cc6,#0bbdc3)';
+          btnToggleAdminTheme.style.color = '#fff';
+          btnToggleAdminTheme.innerHTML = '<i class="fa fa-moon" aria-hidden="true"></i>&nbsp;<span style="font-weight:600">Tema</span>';
+          statusActions.appendChild(btnToggleAdminTheme);
+
+          try {
+            const st = localStorage.getItem('mixTema');
+            if (st === 'dark') {
+              btnToggleAdminTheme.setAttribute('aria-pressed','true');
+              btnToggleAdminTheme.innerHTML = '<i class="fa fa-sun" aria-hidden="true"></i>&nbsp;<span style="font-weight:600">Tema</span>';
+            } else {
+              btnToggleAdminTheme.setAttribute('aria-pressed','false');
+              btnToggleAdminTheme.innerHTML = '<i class="fa fa-moon" aria-hidden="true"></i>&nbsp;<span style="font-weight:600">Tema</span>';
+            }
+          } catch(e){}
+
+          btnToggleAdminTheme.addEventListener('click', function() {
+            try {
+              const isDark = document.body.classList.contains('theme-dark');
+              if (!isDark) {
+                document.body.classList.add('theme-dark');
+                this.setAttribute('aria-pressed','true');
+                this.innerHTML = '<i class="fa fa-sun" aria-hidden="true"></i>&nbsp;<span style="font-weight:600">Tema</span>';
+                try { localStorage.setItem('mixTema', 'dark'); } catch(e){}
+              } else {
+                document.body.classList.remove('theme-dark');
+                this.setAttribute('aria-pressed','false');
+                this.innerHTML = '<i class="fa fa-moon" aria-hidden="true"></i>&nbsp;<span style="font-weight:600">Tema</span>';
+                try { localStorage.setItem('mixTema', 'light'); } catch(e){}
+              }
+            } catch (e) { console.warn('Erro alternar tema', e); }
+          });
+        }
+      } catch (e) { /* ignore */ }
+
       if (logoutAdmin && logoutAdmin.parentElement !== statusActions) {
         statusActions.appendChild(logoutAdmin);
       }
 
-      const estaNaAreaAdmin = paginaAtual.endsWith("/admin-area.html") || paginaAtual.endsWith("admin-area.html");
-      let btnAreaAdmin = document.getElementById("btnAreaAdmin");
-
-      if (!estaNaAreaAdmin && !btnAreaAdmin) {
-        btnAreaAdmin = document.createElement("a");
-        btnAreaAdmin.id = "btnAreaAdmin";
-        btnAreaAdmin.className = "btn-admin-area";
-        btnAreaAdmin.href = "admin-area.html";
-        btnAreaAdmin.innerHTML = "<i class=\"fa-solid fa-screwdriver-wrench\" aria-hidden=\"true\"></i><span>Área Admin</span>";
-        statusActions.insertBefore(btnAreaAdmin, logoutAdmin || null);
-      }
+      // Não exibir botão "Área Admin" — apenas mostrar status e o botão Sair
+      try {
+        const existingAdminBtn = document.getElementById('btnAreaAdmin');
+        if (existingAdminBtn && existingAdminBtn.parentNode) existingAdminBtn.parentNode.removeChild(existingAdminBtn);
+      } catch (e) { /* ignore */ }
     }
     if (loginButtons) loginButtons.style.display = "none"; // 🔹 Esconde botões de login
     // Esconde botão de logout do cliente se existir (evita duplicidade)

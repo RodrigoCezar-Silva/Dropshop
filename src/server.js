@@ -25,12 +25,34 @@ require("dotenv").config();
 const multer = require("multer");
 const fs = require("fs");
 const path = require("path");
+const sharp = require('sharp');
 
-// Usar memória para evitar salvar arquivos físicos no servidor (anexos serão embutidos como data-URI)
-const storage = multer.memoryStorage();
+// Multer memory storage (usado por endpoints que precisam do buffer em memória)
+const storageMemory = multer.memoryStorage();
 const upload = multer({
-  storage,
+  storage: storageMemory,
   limits: { fileSize: 500 * 1024 * 1024 }, // 500MB cap por arquivo
+  fileFilter: (req, file, cb) => {
+    if (!file || !file.mimetype) return cb(null, false);
+    if (file.mimetype.startsWith('image/') || file.mimetype.startsWith('video/')) return cb(null, true);
+    return cb(new Error('Apenas imagens e vídeos são permitidos.'));
+  }
+});
+
+// Multer disk storage for large client photo uploads (avoids keeping large files in RAM)
+const tmpUploadsDir = path.join(__dirname, 'tmp', 'uploads');
+if (!fs.existsSync(tmpUploadsDir)) fs.mkdirSync(tmpUploadsDir, { recursive: true });
+const storageDisk = multer.diskStorage({
+  destination: tmpUploadsDir,
+  filename: (req, file, cb) => {
+    const ext = (file.mimetype && file.mimetype.split('/')[1]) ? file.mimetype.split('/')[1].split('+')[0] : 'bin';
+    const name = `upload-${Date.now()}-${Math.floor(Math.random()*9000+1000)}.${ext}`;
+    cb(null, name);
+  }
+});
+const uploadDisk = multer({
+  storage: storageDisk,
+  limits: { fileSize: 2 * 1024 * 1024 * 1024 }, // 2GB
   fileFilter: (req, file, cb) => {
     if (!file || !file.mimetype) return cb(null, false);
     if (file.mimetype.startsWith('image/') || file.mimetype.startsWith('video/')) return cb(null, true);
@@ -276,6 +298,33 @@ async function garantirTabelas() {
       INDEX (pedido_id)
     )
   `);
+    // Garantir coluna de foto em clientes (BLOB) para evitar falha ao salvar imagens
+    try {
+      await connection.execute(`
+        ALTER TABLE clientes
+        ADD COLUMN IF NOT EXISTS foto LONGBLOB
+      `);
+    } catch (e) {
+      // poderia falhar se tabela 'clientes' não existir — silencioso para não interromper startup
+      console.debug('garantirTabelas: não foi possível garantir coluna foto (talvez tabela clientes não exista ainda)');
+    }
+    // garantir coluna para armazenar caminho de arquivo no servidor (robusto: checa information_schema)
+    try {
+      const [cols] = await connection.execute(
+        `SELECT COUNT(*) as cnt FROM information_schema.COLUMNS WHERE table_schema = ? AND table_name = 'clientes' AND column_name = 'foto_path'`,
+        [dbConfig.database]
+      );
+      const exists = cols && cols[0] && Number(cols[0].cnt) > 0;
+      if (!exists) {
+        try {
+          await connection.execute(`ALTER TABLE clientes ADD COLUMN foto_path VARCHAR(1000)`);
+        } catch (e) {
+          console.debug('garantirTabelas: falha ao adicionar coluna foto_path (talvez tabela clientes não exista ainda)');
+        }
+      }
+    } catch (e) {
+      console.debug('garantirTabelas: erro ao checar information_schema para foto_path', e && e.message);
+    }
   await connection.end();
 }
 
@@ -332,22 +381,36 @@ app.use(cors({
   allowedHeaders: ["Content-Type", "Authorization"]
 }));
 
-// responder preflight globalmente: aplicar CORS manualmente em requests OPTIONS
-app.use((req, res, next) => {
-  if (req.method === 'OPTIONS') {
-    return cors()(req, res, next);
-  }
-  next();
-});
+// responder preflight globalmente
+// (o middleware `app.use(cors(...))` já trata preflight para as rotas permitidas)
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// Allow larger JSON payloads (used by dev base64 upload route)
+app.use(express.json({ limit: '2gb' }));
+app.use(express.urlencoded({ extended: true, limit: '2gb' }));
+
+// Error handler for payload too large
+app.use((err, req, res, next) => {
+  // multer file size limit error
+  if (err && (err.code === 'LIMIT_FILE_SIZE' || err.code === 'LIMIT_PART_COUNT' || err.code === 'LIMIT_FIELD_KEY' || err.code === 'LIMIT_FIELD_VALUE' || err.code === 'LIMIT_FIELD_COUNT' || err.code === 'LIMIT_UNEXPECTED_FILE')) {
+    console.warn('Multer limit error:', err.code, err.message, { url: req.originalUrl });
+    return res.status(413).json({ sucesso: false, mensagem: 'Arquivo muito grande. Reduza o tamanho do arquivo.' });
+  }
+  // body parser too large
+  if (err && (err.type === 'entity.too.large' || err.status === 413)) {
+    console.warn('Payload too large:', { url: req.originalUrl, length: req.headers['content-length'] });
+    return res.status(413).json({ sucesso: false, mensagem: 'Payload muito grande. Reduza o tamanho ou use upload via multipart/form-data.' });
+  }
+  return next(err);
+});
 
 // ---------------- AUTENTICAÇÃO ---------------- //
 function autenticarToken(req, res, next) {
   const authHeader = req.headers["authorization"];
   const token = authHeader && authHeader.split(" ")[1];
-  if (!token) return res.status(401).json({ sucesso: false, mensagem: "Token não fornecido!" });
+  if (!token) {
+    console.debug('[auth] token não fornecido para', req.method, req.originalUrl, 'origin=', req.get('origin'));
+    return res.status(401).json({ sucesso: false, mensagem: "Token não fornecido!" });
+  }
 
   jwt.verify(token, SECRET, (err, usuario) => {
     if (err) return res.status(403).json({ sucesso: false, mensagem: "Token inválido ou expirado!" });
@@ -375,6 +438,14 @@ app.get('/dev/auto-login', (req, res) => {
     console.error('Erro /dev/auto-login', e && e.message);
     return res.status(500).json({ sucesso: false, mensagem: 'Erro ao gerar token dev' });
   }
+});
+
+// Log simples para todas as requisições à rota de foto (ajuda a diagnosticar 405)
+app.all('/api/cliente/:id/foto', (req, res, next) => {
+  try {
+    console.debug('[server] /api/cliente/:id/foto request:', { method: req.method, url: req.originalUrl, origin: req.get('origin'), ip: req.ip, contentType: req.headers['content-type'] });
+  } catch (e) { /* ignore */ }
+  next();
 });
 
 // ---------------- ROTAS PROTEGIDAS ---------------- //
@@ -1317,23 +1388,189 @@ app.get("/api/cliente/:id/foto", async (req, res) => {
     }
 
     const connection = await createDbConnection();
-    const [rows] = await connection.execute("SELECT foto FROM clientes WHERE id = ?", [id]);
+    const [rows] = await connection.execute("SELECT foto, foto_mime, foto_path FROM clientes WHERE id = ?", [id]);
     await connection.end();
-    if (!rows.length || !rows[0].foto) {
-      return res.status(404).json({ sucesso: false, mensagem: 'Foto não encontrada.' });
+    if (!rows.length) return res.status(404).json({ sucesso: false, mensagem: 'Foto não encontrada.' });
+
+    const row = rows[0];
+    // Priorizar foto em disco se existir caminho
+    if (row.foto_path) {
+      const uploadsDir = path.join(__dirname, 'public', 'uploads');
+      const filePath = path.join(uploadsDir, row.foto_path);
+      if (fs.existsSync(filePath)) {
+        return res.sendFile(filePath);
+      }
+      // se arquivo não existir, continuar e tentar servir BLOB
     }
 
-    const fotoBuffer = rows[0].foto;
-    let contentType = 'image/jpeg';
-    if (fotoBuffer && fotoBuffer[0] === 0x89 && fotoBuffer[1] === 0x50) contentType = 'image/png';
-    else if (fotoBuffer && fotoBuffer[0] === 0xFF && fotoBuffer[1] === 0xD8) contentType = 'image/jpeg';
-    else if (fotoBuffer && fotoBuffer.slice(0,4).toString() === 'RIFF' && fotoBuffer.slice(8,12).toString() === 'WEBP') contentType = 'image/webp';
+    const fotoBuffer = row.foto;
+    if (!fotoBuffer) return res.status(404).json({ sucesso: false, mensagem: 'Foto não encontrada.' });
+    let contentType = row.foto_mime || 'image/jpeg';
+    // tentativa de detecção rápida se mime não existir
+    if (!row.foto_mime) {
+      if (fotoBuffer && fotoBuffer[0] === 0x89 && fotoBuffer[1] === 0x50) contentType = 'image/png';
+      else if (fotoBuffer && fotoBuffer[0] === 0xFF && fotoBuffer[1] === 0xD8) contentType = 'image/jpeg';
+      else if (fotoBuffer && fotoBuffer.slice(0,4).toString() === 'RIFF' && fotoBuffer.slice(8,12).toString() === 'WEBP') contentType = 'image/webp';
+    }
 
     res.setHeader('Content-Type', contentType);
     res.send(fotoBuffer);
   } catch (error) {
     console.error('Erro ao buscar foto do cliente:', error && error.message);
     res.status(500).json({ sucesso: false, mensagem: 'Erro no servidor!' });
+  }
+});
+// Atualizar foto do cliente (multipart/form-data, campo 'foto')
+app.put("/api/cliente/:id/foto", autenticarToken, uploadDisk.single('foto'), async (req, res) => {
+  try {
+    const { id } = req.params;
+    // somente o próprio cliente ou admin podem alterar
+    if (!req.usuario) return res.status(401).json({ sucesso: false, mensagem: 'Token não fornecido' });
+    if (req.usuario.role !== 'admin' && String(req.usuario.id) !== String(id)) {
+      return res.status(403).json({ sucesso: false, mensagem: 'Acesso negado' });
+    }
+
+    if (!req.file || (!req.file.buffer && !req.file.path)) {
+      return res.status(400).json({ sucesso: false, mensagem: 'Nenhum arquivo enviado' });
+    }
+    const mimetype = req.file.mimetype || null;
+    // multer.diskStorage saved the file in tmpUploadsDir; mover para uploads final
+    const tmpPath = req.file.path || path.join(tmpUploadsDir, req.file.filename || '');
+    console.debug(`[server] atualizando foto cliente ${id}, tmpPath=${tmpPath}, mimetype=${mimetype}`);
+
+    // caminho para salvar uploads finais
+    const uploadsDir = path.join(__dirname, 'public', 'uploads', 'clientes');
+    if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+    const ext = (mimetype && mimetype.split('/')[1]) ? mimetype.split('/')[1].split('+')[0] : 'jpg';
+    const filename = `cliente-${id}-${Date.now()}-${Math.floor(Math.random()*9000+1000)}.${ext}`;
+    const relPath = path.join('clientes', filename);
+    const filePath = path.join(uploadsDir, filename);
+
+    try {
+      await fs.promises.rename(tmpPath, filePath);
+    } catch (e) {
+      console.error('Falha ao mover arquivo tmp para uploads:', e && e.message);
+      // tentar copiar como fallback
+      try {
+        const data = await fs.promises.readFile(tmpPath);
+        await fs.promises.writeFile(filePath, data);
+        await fs.promises.unlink(tmpPath).catch(()=>{});
+      } catch (e2) {
+        console.error('Falha ao copiar tmp para uploads:', e2 && e2.message);
+        return res.status(500).json({ sucesso: false, mensagem: 'Erro ao salvar arquivo no servidor.' });
+      }
+    }
+
+    // atualizar DB: salvar caminho relativo em foto_path e foto_mime (mantendo compatibilidade com foto BLOB)
+    const connection = await createDbConnection();
+    try {
+      const [prev] = await connection.execute('SELECT foto_path FROM clientes WHERE id = ? LIMIT 1', [id]);
+      if (!prev || !prev.length) {
+        await connection.end();
+        // remover arquivo salvo pois cliente não existe
+        try { await fs.promises.unlink(filePath); } catch (e) { /* ignore */ }
+        return res.status(404).json({ sucesso: false, mensagem: 'Cliente não encontrado' });
+      }
+      const prevPath = prev[0] && prev[0].foto_path ? prev[0].foto_path : null;
+
+      await connection.execute('UPDATE clientes SET foto_path = ?, foto_mime = ? WHERE id = ?', [relPath.replace(/\\/g, '/'), mimetype, id]);
+      await connection.end();
+
+      // remover arquivo anterior em disco se existir e diferente do novo
+      if (prevPath && prevPath !== relPath) {
+        const oldFull = path.join(__dirname, 'public', 'uploads', prevPath);
+        fs.promises.unlink(oldFull).catch(() => {});
+      }
+
+      return res.json({ sucesso: true, mensagem: 'Foto atualizada', path: relPath });
+    } catch (err) {
+      await connection.end();
+      console.error('Erro ao atualizar foto do cliente (DB):', err && err.message);
+      // tentar remover arquivo salvo em caso de erro
+      try { await fs.promises.unlink(filePath); } catch (e) { /* ignore */ }
+      return res.status(500).json({ sucesso: false, mensagem: (err && err.message) || 'Erro ao atualizar foto no banco.' });
+    }
+  } catch (error) {
+    console.error('Erro ao atualizar foto do cliente:', error);
+    // tentar retornar mensagem detalhada em dev
+    const msg = (error && error.message) ? error.message : 'Erro no servidor';
+    return res.status(500).json({ sucesso: false, mensagem: msg });
+  }
+});
+
+// Rota dev: grava foto enviada como base64 JSON (campo 'fotoBase64')
+// Útil para diagnosticar problemas com multipart/form-data/multer.
+app.post('/dev/cliente/:id/foto-base64', autenticarToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!req.usuario) return res.status(401).json({ sucesso: false, mensagem: 'Token não fornecido' });
+    if (req.usuario.role !== 'admin' && String(req.usuario.id) !== String(id)) {
+      return res.status(403).json({ sucesso: false, mensagem: 'Acesso negado' });
+    }
+
+    const { fotoBase64 } = req.body || {};
+    if (!fotoBase64) return res.status(400).json({ sucesso: false, mensagem: 'Campo fotoBase64 ausente' });
+
+    // aceitar data-uri ou apenas base64 cru
+    let mime = 'image/jpeg';
+    let b64 = fotoBase64;
+    const m = String(fotoBase64).match(/^data:(image\/[a-zA-Z0-9+.-]+);base64,(.+)$/);
+    if (m) { mime = m[1]; b64 = m[2]; }
+
+    let buffer = Buffer.from(b64, 'base64');
+    console.debug(`[dev] escrevendo foto cliente ${id}, bytes=${buffer.length}, mime=${mime}, content-length=${req.headers['content-length']}`);
+    // attempt to resize/compress if too large
+    const MAX_DB_BYTES = 2 * 1024 * 1024; // 2MB target for DB blob
+    try {
+      if (buffer.length > MAX_DB_BYTES) {
+        const out = await sharp(buffer).rotate().resize({ width: 1024, height: 1024, fit: 'inside' }).jpeg({ quality: 80 }).toBuffer();
+        buffer = out;
+        mime = 'image/jpeg';
+        console.debug('[dev] buffer resized to', buffer.length);
+      }
+    } catch (e) { console.warn('sharp resize dev failed', e && e.message); }
+
+    // If still too large for DB, save to disk and update foto_path instead of BLOB
+    const DB_LIMIT_BYTES = 8 * 1024 * 1024; // 8MB safe threshold for storing in DB
+    if (buffer.length > DB_LIMIT_BYTES) {
+      try {
+        const uploadsDir = path.join(__dirname, 'public', 'uploads', 'clientes');
+        if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+        const ext = mime && mime.split('/')[1] ? mime.split('/')[1].split('+')[0] : 'jpg';
+        const filename = `cliente-${id}-${Date.now()}-${Math.floor(Math.random()*9000+1000)}.${ext}`;
+        const relPath = path.join('clientes', filename).replace(/\\/g, '/');
+        const filePath = path.join(uploadsDir, filename);
+        await fs.promises.writeFile(filePath, buffer);
+        const connection = await createDbConnection();
+        const [prev] = await connection.execute('SELECT foto_path FROM clientes WHERE id = ? LIMIT 1', [id]);
+        if (!prev || !prev.length) { await connection.end(); try { await fs.promises.unlink(filePath); } catch(e){}; return res.status(404).json({ sucesso:false, mensagem:'Cliente não encontrado' }); }
+        const prevPath = prev[0] && prev[0].foto_path ? prev[0].foto_path : null;
+        await connection.execute('UPDATE clientes SET foto_path = ?, foto_mime = ? WHERE id = ?', [relPath, mime, id]);
+        await connection.end();
+        if (prevPath && prevPath !== relPath) { const oldFull = path.join(__dirname, 'public', 'uploads', prevPath); fs.promises.unlink(oldFull).catch(()=>{}); }
+        return res.json({ sucesso: true, bytes: buffer.length, path: relPath, stored: 'disk' });
+      } catch (e) {
+        console.error('Dev route failed to store large file on disk:', e && e.message);
+        return res.status(500).json({ sucesso:false, mensagem: 'Erro ao gravar arquivo grande no servidor.' });
+      }
+    }
+
+    // write into DB as BLOB (small files)
+    try {
+      const connection = await createDbConnection();
+      const [result] = await connection.execute('UPDATE clientes SET foto = ?, foto_mime = ? WHERE id = ?', [buffer, mime, id]);
+      await connection.end();
+      if (result && (result.affectedRows === 0 || result.affectedRows === '0')) {
+        return res.status(404).json({ sucesso: false, mensagem: 'Cliente não encontrado' });
+      }
+      return res.json({ sucesso: true, bytes: buffer.length, affectedRows: result.affectedRows, stored: 'db' });
+    } catch (e) {
+      console.error('Dev route DB write error:', e && e.message);
+      return res.status(500).json({ sucesso:false, mensagem: 'Erro ao atualizar foto no banco.' });
+    }
+  } catch (error) {
+    console.error('Erro dev foto base64:', error);
+    return res.status(500).json({ sucesso: false, mensagem: (error && error.message) || 'Erro no servidor' });
   }
 });
 app.post("/login-admin", async (req, res) => {
@@ -1541,6 +1778,38 @@ app.post("/login-cliente", async (req, res) => {
   }
 });
 
+// Rota de desenvolvimento: gerar token e dados de um cliente por id ou email
+// Apenas ativa quando não estiver em produção (sandbox/dev).
+app.post('/dev/impersonate-client', async (req, res) => {
+  if (EM_PRODUCAO) return res.status(404).json({ sucesso: false, mensagem: 'Unavailable in production' });
+  try {
+    const { id, email } = req.body || {};
+    if (!id && !email) return res.status(400).json({ sucesso: false, mensagem: 'Informe id ou email do cliente' });
+    const connection = await createDbConnection();
+    const query = id ? 'SELECT * FROM clientes WHERE id = ? LIMIT 1' : 'SELECT * FROM clientes WHERE email = ? LIMIT 1';
+    const param = id || email;
+    const [rows] = await connection.execute(query, [param]);
+    await connection.end();
+    if (!rows || rows.length === 0) return res.status(404).json({ sucesso: false, mensagem: 'Cliente não encontrado' });
+    const cliente = rows[0];
+    const token = jwt.sign({ id: cliente.id, email: cliente.email, role: 'cliente' }, SECRET, { expiresIn: '1h' });
+    return res.json({
+      sucesso: true,
+      mensagem: 'Token gerado para impersonation (dev)',
+      token,
+      id: cliente.id,
+      nome: cliente.nome,
+      sobrenome: cliente.sobrenome,
+      email: cliente.email,
+      dataNascimento: cliente.data_nascimento,
+      foto: cliente.foto ? Buffer.from(cliente.foto).toString('base64') : null
+    });
+  } catch (e) {
+    console.error('Erro dev impersonate-client:', e && e.message);
+    return res.status(500).json({ sucesso: false, mensagem: 'Erro no servidor' });
+  }
+});
+
 // ✅ Login Social (Google, Facebook, Instagram)
 app.post("/login/social", async (req, res) => {
   try {
@@ -1706,27 +1975,59 @@ app.get("/api/cliente/me", autenticarToken, async (req, res) => {
   }
 });
 
-// Atualizar/Salvar foto do cliente (aceita image/*)
-app.put('/api/cliente/:id/foto', upload.single('foto'), async (req, res) => {
+// Atualizar/Salvar foto do cliente (aceita image/*) - fallback compatível (sem autenticação)
+app.put('/api/cliente/:id/foto', uploadDisk.single('foto'), async (req, res) => {
   try {
     const { id } = req.params;
     if (!req.file) return res.status(400).json({ sucesso: false, mensagem: 'Arquivo de foto não enviado.' });
-    const fotoBuffer = req.file.buffer;
     const fotoMime = req.file.mimetype || null;
+    const tmpPath = req.file.path || path.join(tmpUploadsDir, req.file.filename || '');
+    // salvar em disco para suportar qualquer tamanho (mover do tmp)
+    const uploadsDir = path.join(__dirname, 'public', 'uploads', 'clientes');
+    if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+    const ext = (fotoMime && fotoMime.split('/')[1]) ? fotoMime.split('/')[1].split('+')[0] : 'jpg';
+    const filename = `cliente-${id}-${Date.now()}-${Math.floor(Math.random()*9000+1000)}.${ext}`;
+    const relPath = path.join('clientes', filename);
+    const filePath = path.join(uploadsDir, filename);
+    try {
+      await fs.promises.rename(tmpPath, filePath);
+    } catch (e) {
+      console.error('Falha ao mover arquivo tmp para uploads (fallback):', e && e.message);
+      try {
+        const data = await fs.promises.readFile(tmpPath);
+        await fs.promises.writeFile(filePath, data);
+        await fs.promises.unlink(tmpPath).catch(()=>{});
+      } catch (e2) {
+        console.error('Falha ao copiar tmp para uploads (fallback):', e2 && e2.message);
+        return res.status(500).json({ sucesso: false, mensagem: 'Erro ao salvar arquivo no servidor.' });
+      }
+    }
 
     const connection = await createDbConnection();
-    // tenta atualizar coluna foto_mime, mas não falha se a coluna não existir
     try {
-      await connection.execute('UPDATE clientes SET foto = ?, foto_mime = ? WHERE id = ?', [fotoBuffer, fotoMime, id]);
+      const [prev] = await connection.execute('SELECT foto_path FROM clientes WHERE id = ? LIMIT 1', [id]);
+      if (!prev || !prev.length) {
+        await connection.end();
+        try { await fs.promises.unlink(filePath); } catch (e) {}
+        return res.status(404).json({ sucesso: false, mensagem: 'Cliente não encontrado' });
+      }
+      const prevPath = prev[0] && prev[0].foto_path ? prev[0].foto_path : null;
+      await connection.execute('UPDATE clientes SET foto_path = ?, foto_mime = ? WHERE id = ?', [relPath.replace(/\\/g, '/'), fotoMime, id]);
+      await connection.end();
+      if (prevPath && prevPath !== relPath) {
+        const oldFull = path.join(__dirname, 'public', 'uploads', prevPath);
+        fs.promises.unlink(oldFull).catch(() => {});
+      }
+      return res.json({ sucesso: true, mensagem: 'Foto atualizada com sucesso.', path: relPath });
     } catch (e) {
-      // coluna foto_mime possivelmente ausente — atualizar apenas foto
-      await connection.execute('UPDATE clientes SET foto = ? WHERE id = ?', [fotoBuffer, id]);
+      await connection.end();
+      console.error('Erro DB ao atualizar foto (fallback):', e && e.message);
+      try { await fs.promises.unlink(filePath); } catch (err) {}
+      return res.status(500).json({ sucesso: false, mensagem: 'Erro ao atualizar foto no banco.' });
     }
-    await connection.end();
-    res.json({ sucesso: true, mensagem: 'Foto atualizada com sucesso.' });
   } catch (error) {
-    console.error('Erro ao atualizar foto do cliente:', error.message);
-    res.status(500).json({ sucesso: false, mensagem: 'Erro ao atualizar foto.' });
+    console.error('Erro ao atualizar foto do cliente (fallback):', error && error.message);
+    return res.status(500).json({ sucesso: false, mensagem: (error && error.message) || 'Erro no servidor' });
   }
 });
 
@@ -1828,6 +2129,12 @@ app.post('/api/cliente/:id/excluir-com-senha', async (req, res) => {
       try {
         try {
           await connection.execute('DELETE FROM pedidos WHERE cliente_id = ?', [id]);
+        } catch (e) {
+          if (e && e.code !== 'ER_NO_SUCH_TABLE') throw e;
+        }
+        // também remover entrada em tabela de usuários (quando houver vínculo)
+        try {
+          await connection.execute('DELETE FROM usuarios WHERE cliente_id = ?', [id]);
         } catch (e) {
           if (e && e.code !== 'ER_NO_SUCH_TABLE') throw e;
         }
@@ -2466,17 +2773,7 @@ app.use((req, res, next) => {
 
 (async () => {
   try {
-    try {
-      await garantirTabelas();
-    } catch (err) {
-      console.error('Falha ao garantir tabelas:', err && err.message);
-      if (EM_PRODUCAO) {
-        throw err; // em produção, manter comportamento atual
-      } else {
-        console.warn('Modo desenvolvimento: ignorando erro de DB e continuando; algumas rotas podem falhar.');
-      }
-    }
-
+    await garantirTabelas();
     app.listen(PORT, () => {
       console.log(`Servidor rodando em http://localhost:${PORT}`);
       console.log(`Ambiente: ${NODE_ENV}`);
@@ -2484,7 +2781,7 @@ app.use((req, res, next) => {
       console.log(`Webhook: ${PAGBANK_NOTIFICATION_URL}`);
     });
   } catch (error) {
-    console.error("Erro ao iniciar servidor:", error && error.message);
+    console.error("Erro ao iniciar servidor:", error.message);
     process.exit(1);
   }
 })();

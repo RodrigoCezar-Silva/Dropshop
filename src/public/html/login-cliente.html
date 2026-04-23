@@ -68,15 +68,15 @@
         <button class="btn-social instagram" id="btnInstagram" type="button">
           <i class="fa-brands fa-instagram"></i> Instagram
         </button>
-        <!-- GitHub OAuth -->
-        <a id="githubLoginClient" class="btn-social github" href="#" role="button" style="text-decoration:none; display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:8px; background:#24292e; color:#fff; margin-left:6px;">
-          <i class="fa-brands fa-github"></i> GitHub
-        </a>
       </div>
       <p id="mensagemSocial" class="msg-social"></p>
     </div>
   </div>
 
+  <script>
+    // Forçar backend durante desenvolvimento para evitar 405 vindo do Live Server
+    window.AUTH_SERVER = window.AUTH_SERVER || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? (window.location.protocol + '//localhost:3000') : window.location.origin);
+  </script>
   <script src="/js/login-cliente.js"></script>
     <script src="/js/auth-links.js"></script>
   <script src="/js/login-social.js"></script>

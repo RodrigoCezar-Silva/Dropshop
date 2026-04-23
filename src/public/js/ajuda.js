@@ -46,4 +46,52 @@ document.addEventListener('DOMContentLoaded', function () {
   document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape') closeModal();
   });
+
+  // Interações da seção de ajuda: destacar etapas e copiar template
+  var etapas = document.querySelectorAll('.etapas-lista ol li');
+  etapas.forEach(function (li, idx) {
+    li.setAttribute('data-step', String(idx + 1));
+    li.addEventListener('click', function () {
+      etapas.forEach(function (x) { x.classList.remove('active-step'); });
+      li.classList.add('active-step');
+      // role: scroll para o item
+      li.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+  });
+
+  // Botão copiar para o template
+  var copyBtn = document.createElement('button');
+  copyBtn.className = 'copy-btn';
+  copyBtn.type = 'button';
+  copyBtn.textContent = 'Copiar modelo';
+  var exemplo = document.querySelector('.exemplo-mensagem');
+  if (exemplo) {
+    exemplo.appendChild(copyBtn);
+    copyBtn.addEventListener('click', function () {
+      var pre = exemplo.querySelector('pre');
+      if (!pre) return;
+      var text = pre.innerText.replace(/\u00A0/g, ' ');
+      navigator.clipboard.writeText(text).then(function () {
+        showToast('Modelo copiado para a área de transferência');
+      }).catch(function (err) {
+        showToast('Não foi possível copiar automaticamente. Selecione o texto e copie.');
+        console.warn('Clipboard error', err);
+      });
+    });
+  }
+
+  // Toast utilitário
+  function showToast(msg, time) {
+    time = time || 2600;
+    var t = document.querySelector('.ajuda-toast');
+    if (!t) {
+      t = document.createElement('div');
+      t.className = 'ajuda-toast';
+      document.body.appendChild(t);
+    }
+    t.textContent = msg;
+    requestAnimationFrame(function () { t.classList.add('show'); });
+    clearTimeout(t._to);
+    t._to = setTimeout(function () { t.classList.remove('show'); }, time);
+  }
 });

@@ -27,6 +27,38 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // Toggle de tema (persistente em localStorage como 'mixTema')
+  try {
+    const btnToggleTheme = document.getElementById('btnToggleTheme');
+    const btnToggleText = document.getElementById('btnToggleThemeText');
+    const iconEl = btnToggleTheme ? btnToggleTheme.querySelector('i') : null;
+    const THEME_KEY = 'mixTema';
+    function applyTheme(t) {
+      if (t === 'dark') {
+        document.body.classList.add('theme-dark');
+        if (btnToggleTheme) btnToggleTheme.setAttribute('aria-pressed', 'true');
+        if (btnToggleText) btnToggleText.textContent = 'Tema claro';
+        if (iconEl) { iconEl.classList.remove('fa-moon'); iconEl.classList.add('fa-sun'); }
+      } else {
+        document.body.classList.remove('theme-dark');
+        if (btnToggleTheme) btnToggleTheme.setAttribute('aria-pressed', 'false');
+        if (btnToggleText) btnToggleText.textContent = 'Tema escuro';
+        if (iconEl) { iconEl.classList.remove('fa-sun'); iconEl.classList.add('fa-moon'); }
+      }
+    }
+    // inicializa a partir do storage
+    const stored = localStorage.getItem(THEME_KEY);
+    applyTheme(stored === 'dark' ? 'dark' : 'light');
+    if (btnToggleTheme) {
+      btnToggleTheme.addEventListener('click', function (e) {
+        e && e.preventDefault();
+        const now = document.body.classList.contains('theme-dark') ? 'light' : 'dark';
+        applyTheme(now);
+        try { localStorage.setItem(THEME_KEY, now); } catch (err) {}
+      });
+    }
+  } catch (err) { /* ignore */ }
+
   // Modal helpers para confirmação com senha
   function abrirModalConfirmacao() {
     return new Promise(resolve => {
@@ -44,6 +76,8 @@ document.addEventListener("DOMContentLoaded", () => {
           <button class="modal-close" id="modalCloseBtn" aria-label="Fechar">×</button>
           <h2 id="modalTitle">Confirmar exclusão de conta</h2>
           <p>Por favor, digite sua senha para confirmar a exclusão permanente da sua conta.</p>
+          <p class="modal-warning">Aviso sobre privacidade e proteção de dados: ao confirmar a exclusão e autenticar com sua senha, sua conta e os dados pessoais a ela vinculados serão solicitados para remoção definitiva de nossos sistemas. Exceções poderão ser aplicadas quando houver obrigação legal ou regulatória de manutenção de determinados registros (por exemplo, para fins fiscais, contábeis ou processos judiciais). O procedimento de exclusão será conduzido em conformidade com a Lei nº 13.709/2018 (LGPD). Em caso de dúvidas ou necessidade de esclarecimentos, entre em contato com nosso suporte antes de confirmar.</p>
+          <div class="modal-warning-actions"><button id="modalAjuda" class="modal-warning-btn">Ajuda</button></div>
           <div class="modal-body">
             <label for="modalSenha" class="modal-label">Senha</label>
             <div class="input-icon modal-input-wrap">
@@ -55,6 +89,7 @@ document.addEventListener("DOMContentLoaded", () => {
               <button id="modalCancelar" class="btn btn-secondary">Cancelar</button>
               <button id="modalConfirmar" class="btn btn-danger"><span class="btn-text">Excluir conta</span><span class="btn-spinner" aria-hidden="true"></span></button>
             </div>
+            
           </div>
         </div>`;
 
@@ -65,6 +100,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const btnConfirmar = overlay.querySelector('#modalConfirmar');
       const btnClose = overlay.querySelector('#modalCloseBtn');
       const btnToggle = overlay.querySelector('#modalToggleSenha');
+      const btnAjuda = overlay.querySelector('#modalAjuda');
       const modalError = overlay.querySelector('#modalError');
 
       let settled = false;
@@ -78,6 +114,7 @@ document.addEventListener("DOMContentLoaded", () => {
           btnConfirmar && btnConfirmar.removeEventListener('click', onConfirmar);
           btnClose && btnClose.removeEventListener('click', onCancelar);
           btnToggle && btnToggle.removeEventListener('click', toggleSenha);
+          btnAjuda && btnAjuda.removeEventListener('click', onAjuda);
           senhaInput && senhaInput.removeEventListener('input', onInput);
           overlay.removeEventListener('click', onOverlayClick);
           window.removeEventListener('keydown', onKey);
@@ -128,8 +165,11 @@ document.addEventListener("DOMContentLoaded", () => {
       btnConfirmar && btnConfirmar.addEventListener('click', onConfirmar);
       btnClose && btnClose.addEventListener('click', onCancelar);
       btnToggle && btnToggle.addEventListener('click', toggleSenha);
+      btnAjuda && btnAjuda.addEventListener('click', onAjuda);
       senhaInput && senhaInput.addEventListener('input', onInput);
       overlay.addEventListener('click', onOverlayClick);
+
+      function onAjuda(e) { e && e.preventDefault(); try { window.location.href = 'ajuda.html'; } catch (err) { console.warn('Erro ao abrir ajuda', err); } }
 
       function onKey(e) { if (e.key === 'Escape') { onCancelar(); } }
       window.addEventListener('keydown', onKey);
@@ -953,37 +993,40 @@ document.addEventListener("DOMContentLoaded", () => {
     setValue(['estadoCliente','campo-estado'], cliente.estado || '');
     setValue(['cepCliente','campo-cep'], cliente.cep || '');
 
-    // Aplica foto enviada em base64, se houver
+    // Aplicar foto do cliente: preferir `fotoBase64` no payload,
+    // senão tentar carregar a imagem pública do servidor (/api/cliente/:id/foto)
     if (cliente.fotoBase64) {
       const dataUrl = `data:${cliente.fotoMime||'image/jpeg'};base64,${cliente.fotoBase64}`;
       ['fotoCliente','mp-avatar','fotoClienteResumo','fotoClienteSidebar','fotoClienteSidebarImg'].forEach(id=>{
         const el = document.getElementById(id);
         if (el) el.src = dataUrl;
       });
-    }
+    } else {
+      // Tentar foto pública no servidor; se falhar, exibir avatar com iniciais
+      const serverUrl = (typeof apiBase !== 'undefined' && apiBase) ? apiBase : '';
+      const fotoUrl = `${serverUrl}/api/cliente/${clienteId}/foto?cb=${Date.now()}`;
 
-    // Gera um avatar SVG com iniciais como fallback (evita requests a /img/default-user.png)
-    function generateInitialsAvatar(name, size = 128) {
-      const initials = (name || '')
-        .split(/\s+/)
-        .filter(Boolean)
-        .map(n => n[0])
-        .slice(0,2)
-        .join('')
-        .toUpperCase() || 'U';
-      const bg = '#e6e6e6';
-      const fg = '#6b7280';
-      const fontSize = Math.floor(size * 0.45);
-      const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='${size}' height='${size}'><rect width='100%' height='100%' fill='${bg}'/><text x='50%' y='50%' dy='0.35em' text-anchor='middle' fill='${fg}' font-family='system-ui,Segoe UI,Roboto,Arial' font-size='${fontSize}'>${initials}</text></svg>`;
-      return 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svg)));
-    }
+      function generateInitialsAvatar(name, size = 128) {
+        const initials = (name || '')
+          .split(/\s+/)
+          .filter(Boolean)
+          .map(n => n[0])
+          .slice(0,2)
+          .join('')
+          .toUpperCase() || 'U';
+        const bg = '#e6e6e6';
+        const fg = '#6b7280';
+        const fontSize = Math.floor(size * 0.45);
+        const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='${size}' height='${size}'><rect width='100%' height='100%' fill='${bg}'/><text x='50%' y='50%' dy='0.35em' text-anchor='middle' fill='${fg}' font-family='system-ui,Segoe UI,Roboto,Arial' font-size='${fontSize}'>${initials}</text></svg>`;
+        return 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svg)));
+      }
 
-    // Se já temos `fotoBase64` no payload público, aplica; caso contrário usa avatar por iniciais
-    if (!cliente.fotoBase64) {
-      const url = generateInitialsAvatar((cliente.nome || '') + ' ' + (cliente.sobrenome || ''));
+      const fallback = generateInitialsAvatar((cliente.nome || '') + ' ' + (cliente.sobrenome || ''));
       ['fotoCliente','mp-avatar','fotoClienteResumo','fotoClienteSidebar','fotoClienteSidebarImg'].forEach(id=>{
         const el = document.getElementById(id);
-        if (el) el.src = url;
+        if (!el) return;
+        el.onerror = function () { try { this.onerror = null; this.src = fallback; } catch (e) {} };
+        el.src = fotoUrl;
       });
     }
 
@@ -994,16 +1037,73 @@ document.addEventListener("DOMContentLoaded", () => {
   // Pré-visualizar nova foto
   const inputFoto = document.getElementById("inputFotoCliente");
   if (inputFoto) {
-    inputFoto.addEventListener("change", e => {
+    inputFoto.addEventListener("change", async e => {
       const file = e.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = ev => {
-          document.getElementById("fotoCliente").src = ev.target.result;
-          const fotoResumo = document.getElementById("fotoClienteResumo");
-          if (fotoResumo) fotoResumo.src = ev.target.result;
-        };
-        reader.readAsDataURL(file);
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = ev => {
+        const dataUrl = ev.target.result;
+        const elMain = document.getElementById("fotoCliente");
+        if (elMain) elMain.src = dataUrl;
+        const fotoResumo = document.getElementById("fotoClienteResumo");
+        if (fotoResumo) fotoResumo.src = dataUrl;
+      };
+      reader.readAsDataURL(file);
+
+      // upload automático ao selecionar (somente se temos clienteId e token)
+      try {
+        if (!clienteId) return;
+        const form = new FormData();
+        form.append('foto', file);
+        // Priorizar o backend em localhost:3000 para evitar enviar requisições ao Live Server
+        const bases = ['http://localhost:3000', 'http://127.0.0.1:3000'];
+        if (typeof apiBase !== 'undefined' && apiBase) bases.push(apiBase);
+        bases.push('');
+        let uploaded = false;
+        for (const b of bases) {
+          const base = (b ? b : '');
+          try {
+            const resp = await fetch(base + `/api/cliente/${clienteId}/foto`, {
+              method: 'PUT',
+              headers: token ? { 'Authorization': 'Bearer ' + token } : {},
+              body: form
+            });
+            if (resp && resp.ok) {
+              uploaded = true;
+              break;
+            } else {
+              // tentar extrair mensagem de erro do servidor
+              let errMsg = `status ${resp && resp.status}`;
+              try {
+                const j = await resp.json();
+                if (j && j.mensagem) errMsg = j.mensagem;
+              } catch (e) {}
+              console.debug('[meu-perfil] upload resposta', base, resp && resp.status, errMsg);
+              // se for 500, exibir mensagem ao usuário e tentar próximo base
+              mostrarPopup('Falha ao enviar foto: ' + errMsg, 'erro');
+              continue;
+            }
+          } catch (err) {
+            // tentar próximo base
+            continue;
+          }
+        }
+
+        if (uploaded) {
+          mostrarPopup('Foto atualizada com sucesso!', 'sucesso');
+          // atualizar imagens carregando a rota pública para garantir consistência (cache bust)
+          const serverUrl = (typeof apiBase !== 'undefined' && apiBase) ? apiBase : '';
+          const cb = Date.now();
+          ['fotoCliente','fotoClienteResumo','fotoClienteSidebar','mp-avatar','fotoClienteSidebarImg'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.src = `${serverUrl}/api/cliente/${clienteId}/foto?cb=${cb}`;
+          });
+        } else {
+          mostrarPopup('Não foi possível enviar a foto. Tente novamente.', 'erro');
+        }
+      } catch (err) {
+        console.error('Erro upload foto:', err);
+        mostrarPopup('Erro ao enviar a foto.', 'erro');
       }
     });
   }
