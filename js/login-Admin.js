@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
       'admin-area.html',
       'html/admin-area.html',
       '/admin-area.html',
-      './html/admin-area.html',
+      '/html/admin-area.html',
       `${window.location.pathname.replace(/\/.+$/, '')}/admin-area.html`
     ];
     for (const p of candidates) {
@@ -40,14 +40,40 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       try {
-        const base = window.AUTH_SERVER || window.location.origin;
-        const response = await fetch(`${base.replace(/\/$/, '')}/login-admin`, {
+        // Se `AUTH_SERVER` estiver definido usa ele, caso contrário
+        // detecta se estamos rodando pelo Live Server (porta 5500/5501)
+        // e aponta para o backend em http://localhost:3000 por padrão.
+        const defaultBackend = `${window.location.protocol}//localhost:3000`;
+        const isLiveServer = !!(window.location.port && (window.location.port === '5500' || window.location.port === '5501'));
+        const base = window.AUTH_SERVER || (isLiveServer ? defaultBackend : window.location.origin);
+        let response = await fetch(`${base.replace(/\/$/, '')}/login-admin`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ usuario, senha })
         });
 
-        const result = await response.json();
+        // Se o servidor de arquivos respondeu 405 (Method Not Allowed),
+        // provavelmente estamos apontando para o Live Server. Tenta o backend padrão.
+        if (response.status === 405 && base !== defaultBackend) {
+          try {
+            response = await fetch(`${defaultBackend}/login-admin`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ usuario, senha })
+            });
+          } catch (e) {
+            // fallback continua para tratar erro abaixo
+          }
+        }
+
+        // Tratar respostas sem corpo JSON para evitar 'Unexpected end of JSON input'
+        let result = {};
+        try {
+          const text = await response.text();
+          result = text ? JSON.parse(text) : {};
+        } catch (e) {
+          result = {};
+        }
 
         if (response.ok && result.sucesso) {
           // guarda dados no navegador
@@ -56,9 +82,31 @@ document.addEventListener("DOMContentLoaded", () => {
           localStorage.setItem("sobrenome", result.sobrenome);
           localStorage.setItem("tipoUsuario", "Administrador");
           localStorage.setItem("isAdmin", "true"); // 🔹 garante compatibilidade com comentarios.js
-
           // redirect to admin area after successful admin login
-          window.location.href = "admin-area.html";
+          // tenta detectar o caminho correto (pode estar em ./ ou ./html/)
+          async function resolveAndRedirect() {
+            const candidates = [
+              'admin-area.html',
+              'html/admin-area.html',
+              '/admin-area.html',
+              '/html/admin-area.html',
+              `${window.location.pathname.replace(/\/.+$/, '')}/admin-area.html`
+            ];
+            for (const p of candidates) {
+              try {
+                const res = await fetch(p, { method: 'HEAD' });
+                if (res && res.ok) {
+                  window.location.href = p;
+                  return;
+                }
+              } catch (e) {
+                // ignora e tenta próximo
+              }
+            }
+            // fallback simples
+            window.location.href = 'admin-area.html';
+          }
+          resolveAndRedirect();
         } else {
           if (mensagemErro) {
             mensagemErro.innerText = result.mensagem || "Usuário ou senha inválidos.";

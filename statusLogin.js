@@ -272,17 +272,11 @@ document.addEventListener("DOMContentLoaded", () => {
         statusActions.appendChild(logoutAdmin);
       }
 
-      const estaNaAreaAdmin = paginaAtual.endsWith("/admin-area.html") || paginaAtual.endsWith("admin-area.html");
-      let btnAreaAdmin = document.getElementById("btnAreaAdmin");
-
-      if (!estaNaAreaAdmin && !btnAreaAdmin) {
-        btnAreaAdmin = document.createElement("a");
-        btnAreaAdmin.id = "btnAreaAdmin";
-        btnAreaAdmin.className = "btn-admin-area";
-        btnAreaAdmin.href = "admin-area.html";
-        btnAreaAdmin.innerHTML = "<i class=\"fa-solid fa-screwdriver-wrench\" aria-hidden=\"true\"></i><span>Área Admin</span>";
-        statusActions.insertBefore(btnAreaAdmin, logoutAdmin || null);
-      }
+      // Não exibir botão "Área Admin" — apenas mostrar status e o botão Sair
+      try {
+        const existingAdminBtn = document.getElementById('btnAreaAdmin');
+        if (existingAdminBtn && existingAdminBtn.parentNode) existingAdminBtn.parentNode.removeChild(existingAdminBtn);
+      } catch (e) { /* ignore */ }
     }
     if (loginButtons) loginButtons.style.display = "none"; // 🔹 Esconde botões de login
     // Esconde botão de logout do cliente se existir (evita duplicidade)
