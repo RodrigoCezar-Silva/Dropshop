@@ -14,11 +14,12 @@
 
   <!-- Ícones Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link rel="stylesheet" href="/css/chatbot-widget.css" />
   <link rel="stylesheet" href="/css/responsive.css" />
+  <link rel="stylesheet" href="/css/chatbot-widget.css" />
   <link rel="stylesheet" href="/css/popup.css" />
   <link rel="stylesheet" href="/css/admin-reclamacoes.css" />
   <link rel="stylesheet" href="/css/lightbox.css" />
+  <!-- scripts de desenvolvimento removidos para evitar 404/MIME errors -->
 </head>
 <body>
   <!-- Cabeçalho -->
@@ -30,6 +31,8 @@
       </span>
     </div>
   </header>
+
+  <div id="backendStatusBanner" class="backend-banner" style="display:none;padding:12px;background:#fff3cd;border:1px solid #ffeeba;color:#856404;text-align:center;">Servidor backend indisponível. <button id="btnTentarReconectar" style="margin-left:8px;padding:6px 10px;">Tentar reconectar</button></div>
 
   <!-- Banner -->
   <section class="banner-personalizado">
@@ -407,8 +410,8 @@
   <script src="/js/logo.js"></script>
   <script src="/js/btn-topo.js"></script>
   <script src="/js/bloquear-copia.js"></script>
-  <script src="/js/chatbot-widget.js"></script>
   <script src="/js/lightbox.js"></script>
+  <script src="/js/chatbot-widget.js"></script>
   <script src="/js/responsive-nav.js"></script>
 
 </body>

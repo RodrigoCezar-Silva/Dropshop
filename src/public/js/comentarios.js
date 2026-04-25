@@ -246,7 +246,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!resp.ok) throw new Error('API base respondeu ' + resp.status);
       } catch (err) {
         // tentativa fallback relativo
-        resp = await fetch('/api/comentarios', { method: 'POST', body: fd });
+        resp = await fetch((function(){ try{ const port = location.port; if(port && port !== '3000') return `${location.protocol}//${location.hostname}:3000`; }catch(e){} return ''; })() + '/api/comentarios', { method: 'POST', body: fd });
       }
       const j = await resp.json();
       if (!resp.ok || !j.sucesso) {
@@ -304,7 +304,7 @@ document.addEventListener("DOMContentLoaded", () => {
               resp = await fetch(apiBase + '/api/comentarios/' + encodeURIComponent(id), { method: 'DELETE', headers: { 'Content-Type': 'application/json' } });
               if (!resp.ok) throw new Error('API base respondeu ' + resp.status);
             } catch (err) {
-              resp = await fetch('/api/comentarios/' + encodeURIComponent(id), { method: 'DELETE', headers: { 'Content-Type': 'application/json' } });
+              resp = await fetch((function(){ try{ const port = location.port; if(port && port !== '3000') return `${location.protocol}//${location.hostname}:3000`; }catch(e){} return ''; })() + '/api/comentarios/' + encodeURIComponent(id), { method: 'DELETE', headers: { 'Content-Type': 'application/json' } });
             }
             const j = await resp.json();
             if (!resp.ok) return alert(j.mensagem || 'Falha ao remover comentário');

@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MIX-PROMOÇÃO - Emails Promocionais</title>
+
+  <link rel="stylesheet" href="/src/public/css/style-index.css" />
+  <link rel="stylesheet" href="/src/public/css/menu.css" />
+  <link rel="stylesheet" href="/src/public/css/logo.css" />
+  <link rel="stylesheet" href="/src/public/css/statusLogin.css" />
+  <link rel="stylesheet" href="/src/public/css/minhaConta.css" />
+  <link rel="stylesheet" href="/src/public/css/btn-topo.css" />
+  <link rel="stylesheet" href="/src/public/css/footer.css" />
+  <link rel="stylesheet" href="/src/public/css/admin-emails.css" />
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+</head>
+<body>
+  <header class="site-header">
+    <div class="logo">
+      <span class="logo-icon">🛒</span>
+      <span class="logo-text">
+        <span class="mix">MIX</span><span class="promocao">PROMOÇÃO</span>
+      </span>
+    </div>
+
+    <nav class="menu" aria-label="Menu principal">
+      <ul>
+        <li><a href="index.html"><i class="fa-solid fa-house menu-link-icon" aria-hidden="true"></i><span>Início</span></a></li>
+        <li><a href="loja.html"><i class="fa-solid fa-store menu-link-icon" aria-hidden="true"></i><span>Nossa Loja</span></a></li>
+        <li><a href="QuemSomos.html"><i class="fa-solid fa-circle-info menu-link-icon" aria-hidden="true"></i><span>Sobre</span></a></li>
+        <li><a href="contato.html"><i class="fa-solid fa-envelope menu-link-icon" aria-hidden="true"></i><span>Contato</span></a></li>
+        <li><a href="trocas-devolucoes.html"><i class="fa-solid fa-right-left menu-link-icon" aria-hidden="true"></i><span>Trocas e Devoluções</span></a></li>
+      </ul>
+    </nav>
+
+    <div id="loginButtons">
+      <a href="login-cliente.html" class="btn-login cliente">👤 Login Cliente</a>
+      <a href="admin-login.html" class="btn-login admin">👤 Login Administrativo</a>
+    </div>
+
+    <div id="statusLogado" class="status-admin" style="display:none;">
+      <span class="status-text">👑 Administrador: <strong id="nomeUsuario"></strong></span>
+      <button id="logout" class="btn-logout">Sair</button>
+    </div>
+
+    <div id="clienteStatus" style="display:none;">
+      <img id="fotoCliente" class="foto-perfil" src="" alt="Foto Cliente">
+      <span id="nomeCliente"></span>
+      <span id="sobrenomeCliente"></span>
+      <button id="btnMinhaConta" class="btn-minha-conta">Minha Conta</button>
+      <button id="logoutBtn" class="btn-logout">Sair</button>
+    </div>
+  </header>
+
+  <main class="emails-main">
+    <!-- Hero -->
+    <section class="emails-hero">
+      <div class="emails-eyebrow">
+        <i class="fa-solid fa-envelope-open-text" aria-hidden="true"></i>
+        <span>Marketing & Promoções</span>
+      </div>
+      <h1>Emails Promocionais</h1>
+      <p>Crie e envie emails com promoções e imagens para seus clientes. Use a IA para gerar conteúdo promocional automaticamente!</p>
+    </section>
+
+    <!-- ===== Gerador IA ===== -->
+    <section class="ia-gerador">
+      <div class="ia-header">
+        <div class="ia-titulo">
+          <div class="ia-icone-pulse">
+            <i class="fa-solid fa-wand-magic-sparkles"></i>
+          </div>
+          <div>
+            <h2>Assistente IA de Promoções</h2>
+            <p>Selecione produtos e deixe a IA criar promoções irresistíveis para seus clientes</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="ia-conteudo">
+        <!-- Seletor de Produtos -->
+        <div class="ia-produtos-section">
+          <label><i class="fa-solid fa-box"></i> Produtos da Loja</label>
+          <div class="ia-busca-produto">
+            <input type="text" id="iaBuscaProduto" placeholder="🔍 Buscar produto por nome...">
+          </div>
+          <div class="ia-produtos-lista" id="iaListaProdutos"></div>
+          <div class="ia-selecionados" id="iaTagsSelecionados"></div>
+        </div>
+
+        <!-- Opções de tom -->
+        <div class="ia-opcoes">
+          <div class="ia-opcao-grupo">
+            <label><i class="fa-solid fa-palette"></i> Tom da Promoção</label>
+            <div class="ia-tom-btns">
+              <button class="ia-tom-btn ativo" data-tom="urgente"><i class="fa-solid fa-fire"></i> Urgente</button>
+              <button class="ia-tom-btn" data-tom="elegante"><i class="fa-solid fa-gem"></i> Elegante</button>
+              <button class="ia-tom-btn" data-tom="divertido"><i class="fa-solid fa-face-laugh-beam"></i> Divertido</button>
+              <button class="ia-tom-btn" data-tom="exclusivo"><i class="fa-solid fa-crown"></i> Exclusivo</button>
+            </div>
+          </div>
+
+          <div class="ia-opcao-grupo">
+            <label><i class="fa-solid fa-bullseye"></i> Tipo de Campanha</label>
+            <div class="ia-tom-btns">
+              <button class="ia-campanha-btn ativo" data-campanha="desconto"><i class="fa-solid fa-percent"></i> Desconto</button>
+              <button class="ia-campanha-btn" data-campanha="lancamento"><i class="fa-solid fa-rocket"></i> Lançamento</button>
+              <button class="ia-campanha-btn" data-campanha="frete"><i class="fa-solid fa-truck-fast"></i> Frete Grátis</button>
+              <button class="ia-campanha-btn" data-campanha="flash"><i class="fa-solid fa-bolt"></i> Flash Sale</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Botão gerar -->
+        <button class="ia-btn-gerar" id="btnGerarIA">
+          <i class="fa-solid fa-wand-magic-sparkles"></i>
+          <span>Gerar Promoção com IA</span>
+        </button>
+
+        <!-- Loading -->
+        <div class="ia-loading" id="iaLoading" style="display:none;">
+          <div class="ia-loading-spinner"></div>
+          <div class="ia-loading-texto">
+            <span id="iaLoadingMsg">Analisando produtos...</span>
+          </div>
+        </div>
+
+        <!-- Resultado -->
+        <div class="ia-resultado" id="iaResultado" style="display:none;">
+          <div class="ia-resultado-header">
+            <span><i class="fa-solid fa-sparkles"></i> Promoção Gerada pela IA</span>
+            <div class="ia-resultado-acoes">
+              <button class="ia-btn-refazer" id="btnRefazerIA" title="Gerar outra versão"><i class="fa-solid fa-rotate"></i></button>
+              <button class="ia-btn-usar" id="btnUsarIA"><i class="fa-solid fa-check"></i> Usar no Email</button>
+            </div>
+          </div>
+          <div class="ia-resultado-assunto" id="iaAssuntoGerado"></div>
+          <div class="ia-resultado-corpo" id="iaCorpoGerado"></div>
+        </div>
+      </div>
+    </section>
+
+    <div class="emails-layout">
+      <!-- Painel esquerdo: Destinatários -->
+      <aside class="emails-destinatarios">
+        <div class="dest-header">
+          <h2><i class="fa-solid fa-users"></i> Destinatários</h2>
+          <div class="dest-acoes">
+            <button class="btn-selecionar-todos" id="btnSelecionarTodos">
+              <i class="fa-solid fa-check-double"></i> Todos
+            </button>
+            <span class="dest-contagem" id="contagemSelecionados">0 selecionados</span>
+          </div>
+        </div>
+        <input type="text" class="dest-busca" id="buscaCliente" placeholder="🔍 Buscar cliente por nome ou email...">
+        <div class="dest-lista" id="listaClientes">
+          <p class="dest-carregando"><i class="fa-solid fa-spinner fa-spin"></i> Carregando clientes...</p>
+        </div>
+      </aside>
+
+      <!-- Painel direito: Composição -->
+      <section class="emails-composer">
+        <h2><i class="fa-solid fa-pen-fancy"></i> Compor Email</h2>
+
+        <!-- Destinatários selecionados -->
+        <div class="composer-dest" id="composerDest">
+          <div class="composer-dest-header">
+            <span><i class="fa-solid fa-users"></i> Destinatários</span>
+            <span class="composer-dest-count" id="composerDestCount">0</span>
+          </div>
+          <div class="composer-dest-add">
+            <input type="email" id="inputAddEmail" placeholder="Digite um email e pressione Enter..." autocomplete="off">
+            <button id="btnAddEmail" title="Adicionar email"><i class="fa-solid fa-plus"></i></button>
+          </div>
+          <div class="composer-dest-lista" id="composerDestLista">
+            <span class="composer-dest-vazio">Adicione destinatários acima ou selecione na lista ao lado.</span>
+          </div>
+          <div class="composer-dest-emails" id="composerDestEmails"></div>
+        </div>
+
+        <div class="campo-grupo">
+          <label for="emailAssunto"><i class="fa-solid fa-tag"></i> Assunto</label>
+          <input type="text" id="emailAssunto" name="promo_assunto" placeholder="Ex: 🔥 Super Promoção - Até 50% OFF!" autocomplete="new-password" data-form-type="other">
+        </div>
+
+        <div class="campo-grupo">
+          <label><i class="fa-solid fa-image"></i> Imagens da Promoção</label>
+          <div class="upload-area" id="uploadArea">
+            <input type="file" id="inputImagens" multiple accept="image/*" hidden>
+            <div class="upload-placeholder" id="uploadPlaceholder">
+              <i class="fa-solid fa-cloud-arrow-up"></i>
+              <span>Clique ou arraste imagens aqui</span>
+              <small>PNG, JPG, WEBP • Máximo 5 imagens</small>
+            </div>
+          </div>
+          <div class="imagens-preview" id="imagensPreview"></div>
+          <input type="hidden" id="inputVideo" value="">
+        </div>
+
+        <div class="campo-grupo">
+          <label for="emailCorpo"><i class="fa-solid fa-align-left"></i> Mensagem</label>
+          <textarea id="emailCorpo" rows="8" placeholder="Escreva a mensagem da promoção para seus clientes..."></textarea>
+        </div>
+
+        <!-- Preview do email -->
+        <div class="email-preview-toggle">
+          <button id="btnPreview"><i class="fa-solid fa-eye"></i> Pré-visualizar Email</button>
+        </div>
+
+        <div class="email-preview" id="emailPreview" style="display:none;">
+          <div class="preview-header">
+            <span>📧 Pré-visualização</span>
+            <button id="fecharPreview">&times;</button>
+          </div>
+          <div class="preview-body" id="previewBody"></div>
+        </div>
+
+        <!-- Botão enviar -->
+        <button class="btn-enviar-email" id="btnEnviarEmail">
+          <i class="fa-solid fa-paper-plane"></i> Enviar Email Promocional
+        </button>
+
+        <p class="email-status" id="emailStatus"></p>
+      </section>
+    </div>
+
+    <!-- Histórico de emails enviados -->
+    <section class="emails-historico">
+      <h2><i class="fa-solid fa-clock-rotate-left"></i> Emails Enviados</h2>
+      <div id="listaHistorico">
+        <p class="historico-vazio" id="msgHistoricoVazio">Nenhum email enviado ainda.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-top-bar"></div>
+    <div class="footer-main">
+      <div class="footer-brand">
+        <div class="footer-logo">
+          <span class="footer-logo-icon">🛒</span>
+          <span class="footer-logo-text"><span class="mix">MIX</span><span class="promo">PROMOÇÃO</span></span>
+        </div>
+        <p class="footer-desc">Oferecemos os melhores produtos com qualidade e preço justo. Promoções exclusivas e ofertas imperdíveis todos os dias!</p>
+        <div class="footer-social">
+          <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+          <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+          <a href="#" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+          <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+        </div>
+      </div>
+      <div class="footer-links">
+        <h4>Navegação</h4>
+        <ul>
+          <li><a href="index.html"><i class="fa-solid fa-chevron-right"></i> Início</a></li>
+          <li><a href="loja.html"><i class="fa-solid fa-chevron-right"></i> Nossa Loja</a></li>
+          <li><a href="QuemSomos.html"><i class="fa-solid fa-chevron-right"></i> Sobre Nós</a></li>
+          <li><a href="contato.html"><i class="fa-solid fa-chevron-right"></i> Contato</a></li>
+        </ul>
+      </div>
+      <div class="footer-links">
+        <h4>Suporte</h4>
+        <ul>
+          <li><a href="contato.html"><i class="fa-solid fa-chevron-right"></i> Central de Ajuda</a></li>
+          <li><a href="trocas-devolucoes.html"><i class="fa-solid fa-chevron-right"></i> Trocas e Devoluções</a></li>
+          <li><a href="contato.html"><i class="fa-solid fa-chevron-right"></i> Fale Conosco</a></li>
+          <li><a href="carrinho.html"><i class="fa-solid fa-chevron-right"></i> Meu Carrinho</a></li>
+        </ul>
+      </div>
+      <!-- Contato removido -->
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-bottom-inner">
+        <p>&copy; 2026 MIX-PROMOÇÃO. Todos os direitos reservados.</p>
+        <div class="footer-pagamentos">
+          <span>Pagamentos:</span>
+          <i class="fab fa-cc-visa"></i>
+          <i class="fab fa-cc-mastercard"></i>
+          <i class="fab fa-pix"></i>
+          <i class="fa-solid fa-barcode"></i>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/src/public/js/statusLogin.js"></script>
+  <script src="/src/public/js/logo.js"></script>
+  <script src="/src/public/js/btn-topo.js"></script>
+  <script src="/src/public/js/admin-emails.js"></script>
+</body>
+</body>
+<footer style="text-align:center; color:#888; font-size:12px; margin-top:40px;">rdota be</footer>
+</html>

@@ -30,6 +30,10 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "npx concurrently \"npx kill-port 5501 && npx live-server src/public --port=5501 --open=html/index.html\" \"node src/server.js\"",
+    "dev:node5501": "npx cross-env PORT=5501 node src/server.js",
+    "start:5501:win": "set PORT=5501&& node src/server.js",
+    "start:5501:unix": "PORT=5501 node src/server.js",
+    "start:liveport": "node src/server.js",
     "prepare:docs": "node scripts/copy-public-to-docs.js && node scripts/normalize-docs-paths.js && node scripts/flatten-docs.js",
     "build:docs": "npm run prepare:docs",
     "predeploy": "npm run prepare:docs",
@@ -46,6 +50,7 @@
   },
   "devDependencies": {
     "concurrently": "^8.0.1",
+    "cross-env": "^7.0.3",
     "gh-pages": "^6.3.0",
     "live-server": "^1.2.0"
   }

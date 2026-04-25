@@ -298,6 +298,47 @@ async function garantirTabelas() {
       INDEX (pedido_id)
     )
   `);
+    // Tabelas para chat/conversas
+    await connection.execute(`
+      CREATE TABLE IF NOT EXISTS chat_conversations (
+        id BIGINT PRIMARY KEY AUTO_INCREMENT,
+        name VARCHAR(255) DEFAULT 'Cliente',
+        status VARCHAR(40) DEFAULT 'open',
+        unread INT DEFAULT 0,
+        last_message_preview VARCHAR(1000),
+        online TINYINT DEFAULT 0,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+      )
+    `);
+
+    // garantir coluna cliente_email se não existir
+    try {
+      const [cols] = await connection.execute(
+        `SELECT COUNT(*) as cnt FROM information_schema.COLUMNS WHERE table_schema = ? AND table_name = 'chat_conversations' AND column_name = 'cliente_email'`,
+        [dbConfig.database]
+      );
+      const existsEmail = cols && cols[0] && Number(cols[0].cnt) > 0;
+      if (!existsEmail) {
+        try {
+          await connection.execute(`ALTER TABLE chat_conversations ADD COLUMN cliente_email VARCHAR(255) NULL`);
+        } catch (e) { console.debug('garantirTabelas: failed to add cliente_email', e && e.message); }
+      }
+    } catch (e) { console.debug('garantirTabelas: check cliente_email failed', e && e.message); }
+
+    await connection.execute(`
+      CREATE TABLE IF NOT EXISTS chat (
+        id BIGINT PRIMARY KEY AUTO_INCREMENT,
+        conversation_id BIGINT NOT NULL,
+        sender VARCHAR(40) DEFAULT 'visitor',
+        sender_name VARCHAR(255),
+        text LONGTEXT,
+        sent_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        INDEX (conversation_id),
+        FOREIGN KEY (conversation_id) REFERENCES chat_conversations(id) ON DELETE CASCADE
+      )
+    `);
     // Garantir coluna de foto em clientes (BLOB) para evitar falha ao salvar imagens
     try {
       await connection.execute(`
@@ -572,6 +613,298 @@ app.get("/api/cliente/cep/:cep", async (req, res) => {
     res.status(500).json({ sucesso: false, mensagem: "Erro ao buscar endereço.", detalhes: error.message });
   }
 });
+
+// ---------------- SIMPLE CHAT STORE (DEV) ---------------- //
+// Endpoints usados pelo frontend de atendimento/admin para listar conversas e mensagens.
+const CHAT_STORE_PATH = path.join(__dirname, 'tmp', 'chat_store.json');
+function readChatStore() {
+  try {
+    if (!fs.existsSync(CHAT_STORE_PATH)) return { conversations: [] };
+    const raw = fs.readFileSync(CHAT_STORE_PATH, 'utf8');
+    return JSON.parse(raw || '{"conversations":[]}');
+  } catch (e) { console.warn('readChatStore error', e && e.message); return { conversations: [] }; }
+}
+function writeChatStore(data) {
+  try {
+    fs.mkdirSync(path.dirname(CHAT_STORE_PATH), { recursive: true });
+    fs.writeFileSync(CHAT_STORE_PATH, JSON.stringify(data, null, 2), 'utf8');
+    return true;
+  } catch (e) { console.error('writeChatStore error', e && e.message); return false; }
+}
+
+// Listar conversas
+app.get('/api/conversations', (req, res) => {
+  (async () => {
+    // tentar persistência em DB primeiro
+    try {
+      const conn = await createDbConnection();
+      const clienteEmail = req.query && req.query.cliente_email ? String(req.query.cliente_email).trim() : null;
+      let query = `SELECT id, name, status, unread, last_message_preview as lastMessagePreview, online, UNIX_TIMESTAMP(updated_at)*1000 AS updatedAt FROM chat_conversations`;
+      const params = [];
+      if (clienteEmail) {
+        query += ` WHERE cliente_email = ?`;
+        params.push(clienteEmail);
+      }
+      query += ` ORDER BY updated_at DESC`;
+      const [rows] = await conn.execute(query, params);
+        if (Array.isArray(rows) && rows.length) {
+          await conn.end();
+          return res.json(rows.map(r => ({ id: r.id, name: r.name, status: r.status, unread: r.unread, lastMessagePreview: r.lastMessagePreview, online: !!r.online, updatedAt: r.updatedAt })));
+        }
+
+        // Se não houver registros em chat_conversations, tentar derivar conversas da tabela 'chat'
+        // (caso mensagens existam sem registro na tabela de conversas)
+        let rows2;
+        if (clienteEmail) {
+          // juntar com chat_conversations para filtrar por cliente_email
+          [rows2] = await conn.execute(`
+            SELECT cc.id AS id,
+                   cc.name AS name,
+                   (SELECT text FROM chat WHERE conversation_id = cc.id ORDER BY sent_at DESC LIMIT 1) AS lastMessagePreview,
+                   UNIX_TIMESTAMP(MAX(ch.sent_at))*1000 AS updatedAt,
+                   cc.unread AS unread,
+                   cc.online AS online
+            FROM chat ch
+            JOIN chat_conversations cc ON cc.id = ch.conversation_id
+            WHERE cc.cliente_email = ?
+            GROUP BY cc.id
+            ORDER BY updatedAt DESC
+          `, [clienteEmail]);
+        } else {
+          [rows2] = await conn.execute(`
+            SELECT ch.conversation_id AS id,
+                   (SELECT name FROM chat_conversations cc WHERE cc.id = ch.conversation_id LIMIT 1) AS name,
+                   (SELECT text FROM chat WHERE conversation_id = ch.conversation_id ORDER BY sent_at DESC LIMIT 1) AS lastMessagePreview,
+                   UNIX_TIMESTAMP(MAX(ch.sent_at))*1000 AS updatedAt,
+                   0 AS unread,
+                   1 AS online
+            FROM chat ch
+            GROUP BY ch.conversation_id
+            ORDER BY updatedAt DESC
+          `);
+        }
+        await conn.end();
+        if (Array.isArray(rows2) && rows2.length) {
+          return res.json(rows2.map(r => ({ id: r.id, name: r.name || (`Conversa ${r.id}`), status: 'open', unread: r.unread || 0, lastMessagePreview: r.lastMessagePreview || '', online: !!r.online, updatedAt: r.updatedAt })));
+        }
+    } catch (e) {
+      // falha DB: fallback silencioso
+    }
+    try {
+      const store = readChatStore();
+      return res.json(store.conversations || []);
+    } catch (e) { return res.status(500).json({ sucesso: false, mensagem: 'Erro ao ler conversas.' }); }
+  })();
+});
+
+// Criar nova conversa
+app.post('/api/conversations', express.json(), (req, res) => {
+  (async () => {
+    const body = req.body || {};
+    const name = body.name || 'Visitante';
+    // tentar inserir no DB
+    try {
+      const conn = await createDbConnection();
+      const clienteEmail = body.cliente_email || body.email || null;
+      const [result] = await conn.execute(`INSERT INTO chat_conversations (name, status, unread, last_message_preview, online, cliente_email) VALUES (?, 'open', 0, ?, 1, ?)`, [name, body.lastMessagePreview || '', clienteEmail]);
+      const insertedId = result && (result.insertId || (result[0] && result[0].insertId)) ? (result.insertId || (result[0] && result[0].insertId)) : null;
+      await conn.end();
+      const conv = { id: insertedId, name, lastMessagePreview: body.lastMessagePreview || '', unread: 0, online: true, createdAt: Date.now(), status: 'open' };
+      return res.json(conv);
+    } catch (e) {
+      console.warn('create conversation DB failed, using file store fallback', e && e.message);
+    }
+    // fallback file store
+    try {
+      const now = Date.now();
+      const conv = { id: now, name, cliente_email: body.cliente_email || body.email || null, messages: [], lastMessagePreview: body.lastMessagePreview || '', unread: 0, online: true, createdAt: now, status: 'open', escalated: false };
+      const store = readChatStore();
+      store.conversations = store.conversations || [];
+      store.conversations.unshift(conv);
+      writeChatStore(store);
+      return res.json(conv);
+    } catch (e) { console.error('POST /api/conversations error', e && e.message); return res.status(500).json({ sucesso: false }); }
+  })();
+});
+
+// Listar mensagens de uma conversa
+app.get('/api/conversations/:id/messages', (req, res) => {
+  (async () => {
+    const { id } = req.params;
+    // tentar DB
+    try {
+      const conn = await createDbConnection();
+      const [rows] = await conn.execute(`SELECT id, sender as \`from\`, sender_name as fromName, text, UNIX_TIMESTAMP(sent_at)*1000 as time FROM chat WHERE conversation_id = ? ORDER BY sent_at ASC`, [id]);
+      await conn.end();
+      if (Array.isArray(rows)) return res.json(rows.map(r => ({ id: r.id, from: r.from, fromName: r.fromName, text: r.text, time: r.time })));
+    } catch (e) {
+      // continue to fallback
+    }
+    try {
+      const store = readChatStore();
+      const conv = (store.conversations || []).find(c => String(c.id) === String(id));
+      if (!conv) return res.status(404).json({ sucesso: false, mensagem: 'Conversa não encontrada' });
+      return res.json(conv.messages || []);
+    } catch (e) { console.error('GET messages error', e && e.message); return res.status(500).json({ sucesso: false }); }
+  })();
+});
+
+// Enviar/append mensagem a uma conversa
+app.post('/api/conversations/:id/messages', express.json(), (req, res) => {
+  (async () => {
+    const { id } = req.params;
+    const body = req.body || {};
+    // tentar persistir no DB
+    try {
+      const conn = await createDbConnection();
+      const sender = body.from || 'visitor';
+      const senderName = body.fromName || (sender === 'bot' ? 'Assistente' : 'Visitante');
+      const text = body.text || '';
+      const [result] = await conn.execute(`INSERT INTO chat (conversation_id, sender, sender_name, text) VALUES (?, ?, ?, ?)`, [id, sender, senderName, text]);
+      const insertId = result && (result.insertId || (result[0] && result[0].insertId)) ? (result.insertId || (result[0] && result[0].insertId)) : null;
+      // atualizar metadados da conversa
+      try {
+        await conn.execute(`UPDATE chat_conversations SET last_message_preview = ?, unread = unread + ? WHERE id = ?`, [String(text).slice(0,200), (sender === 'bot' ? 0 : 1), id]);
+      } catch(e) { /* não crítico */ }
+      await conn.end();
+      const msg = { id: insertId, from: sender, fromName: senderName, text, time: Date.now() };
+      return res.json({ sucesso: true, message: msg });
+    } catch (e) {
+      console.warn('POST message DB failed, falling back to file store', e && e.message);
+    }
+    // fallback file store
+    try {
+      const store = readChatStore();
+      const conv = (store.conversations || []).find(c => String(c.id) === String(id));
+      if (!conv) return res.status(404).json({ sucesso: false, mensagem: 'Conversa não encontrada' });
+      const now = Date.now();
+      const msg = { id: now, from: body.from || 'visitor', fromName: body.fromName || (body.from === 'bot' ? 'Assistente' : 'Visitante'), text: body.text || '', time: now };
+      conv.messages = conv.messages || [];
+      conv.messages.push(msg);
+      conv.lastMessagePreview = msg.text ? String(msg.text).slice(0, 200) : '';
+      if (msg.from !== 'bot') conv.unread = (conv.unread || 0) + 1;
+      writeChatStore(store);
+      return res.json({ sucesso: true, message: msg });
+    } catch (e) { console.error('POST message error', e && e.message); return res.status(500).json({ sucesso: false }); }
+  })();
+});
+
+// Exportar conversas para arquivo Word (HTML salvo como .doc) — inclui cabeçalho e tabela de mensagens
+app.get('/api/conversations/:id/export-doc', async (req, res) => {
+  const { id } = req.params;
+  try {
+    const conn = await createDbConnection();
+    // buscar metadados da conversa
+    const [[convRow]] = await conn.execute(`SELECT id, name, cliente_email FROM chat_conversations WHERE id = ? LIMIT 1`, [id]);
+    // buscar mensagens
+    const [msgs] = await conn.execute('SELECT sender AS senderType, sender_name as fromName, text, UNIX_TIMESTAMP(sent_at)*1000 as time FROM chat WHERE conversation_id = ? ORDER BY sent_at ASC', [id]);
+    await conn.end();
+
+    const title = convRow && convRow.name ? convRow.name : (`Conversa ${id}`);
+    const clienteEmail = convRow && convRow.cliente_email ? convRow.cliente_email : '';
+
+    // montar HTML simples com tabela
+    let rowsHtml = '';
+    (Array.isArray(msgs) ? msgs : []).forEach(m => {
+      const when = m.time ? new Date(Number(m.time)).toLocaleString('pt-BR') : '';
+        const who = m.fromName || m.senderType || '';
+      const text = String(m.text || '').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br/>');
+      rowsHtml += `<tr><td style="border:1px solid #ccc;padding:6px">${when}</td><td style="border:1px solid #ccc;padding:6px">${who}</td><td style="border:1px solid #ccc;padding:6px">${text}</td></tr>`;
+    });
+
+    const html = `<!doctype html><html><head><meta charset="utf-8"><title>${escapeHtml(title)}</title></head><body><h2>${escapeHtml(title)}</h2><div><strong>Cliente:</strong> ${escapeHtml(clienteEmail)}</div><table style="border-collapse:collapse;width:100%;margin-top:12px"><thead><tr><th style="border:1px solid #ccc;padding:6px;background:#f5f5f5">Data/Hora</th><th style="border:1px solid #ccc;padding:6px;background:#f5f5f5">Remetente</th><th style="border:1px solid #ccc;padding:6px;background:#f5f5f5">Mensagem</th></tr></thead><tbody>${rowsHtml}</tbody></table></body></html>`;
+
+    const filename = `conversa_${id}.doc`;
+    res.setHeader('Content-Type', 'application/msword; charset=utf-8');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    return res.send(Buffer.from(html, 'utf8'));
+  } catch (e) {
+    console.error('export doc failed', e && e.message);
+    return res.status(500).json({ sucesso: false, mensagem: 'Falha ao exportar conversa.' });
+  }
+});
+
+function escapeHtml(s){ if(!s) return ''; return String(s).replace(/[&<>\"]/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[c]) || c; }); }
+
+// Endpoint de migração: importa tmp/chat_store.json para o banco (apenas em dev)
+app.post('/api/migrate-chat-store', async (req, res) => {
+  if (EM_PRODUCAO) return res.status(404).json({ sucesso: false, mensagem: 'Unavailable in production' });
+  try {
+    const store = readChatStore();
+    if (!store || !Array.isArray(store.conversations) || store.conversations.length === 0) return res.json({ sucesso: true, migrated: 0, message: 'Nenhuma conversa para migrar.' });
+    const conn = await createDbConnection();
+    const migrated = { conversations: 0, messages: 0 };
+    for (const conv of store.conversations) {
+      try {
+        // inserir conversa
+        const createdAt = conv.createdAt ? new Date(Number(conv.createdAt)) : new Date();
+        const [resConv] = await conn.execute(`INSERT INTO chat_conversations (name, status, unread, last_message_preview, online, created_at) VALUES (?, ?, ?, ?, ?, ?)`,
+          [conv.name || 'Cliente', conv.status || 'open', conv.unread || 0, conv.lastMessagePreview || '', conv.online ? 1 : 0, createdAt]);
+        const insertedConvId = resConv && (resConv.insertId || (resConv[0] && resConv[0].insertId)) ? (resConv.insertId || (resConv[0] && resConv[0].insertId)) : null;
+        if (!insertedConvId) continue;
+        migrated.conversations++;
+        // inserir mensagens
+        if (Array.isArray(conv.messages) && conv.messages.length) {
+          for (const m of conv.messages) {
+            try {
+              const sentAt = m.time ? new Date(Number(m.time)) : new Date();
+              await conn.execute(`INSERT INTO chat (conversation_id, sender, sender_name, text, sent_at) VALUES (?, ?, ?, ?, ?)`,
+                [insertedConvId, (m.from || 'visitor'), (m.fromName || ''), (m.text || ''), sentAt]);
+              migrated.messages++;
+            } catch (e) { console.warn('migrate: failed inserting message', e && e.message); }
+          }
+        }
+      } catch (e) { console.warn('migrate: failed inserting conversation', e && e.message); }
+    }
+    await conn.end();
+    return res.json({ sucesso: true, migrated });
+  } catch (e) {
+    console.error('migrate-chat-store error', e && e.message);
+    return res.status(500).json({ sucesso: false, mensagem: 'Erro ao migrar chat store', detalhes: e && e.message });
+  }
+});
+
+// Endpoint para sincronizar offline store enviado pelo cliente (conversas criadas em localStorage)
+app.post('/api/sync-offline-chats', express.json({ limit: '10mb' }), async (req, res) => {
+  try {
+    const store = req.body;
+    if (!store || !Array.isArray(store.conversations)) return res.status(400).json({ sucesso: false, mensagem: 'Formato inválido' });
+    const conn = await createDbConnection();
+    const mapping = {}; // oldId -> newId
+    let migrated = { conversations: 0, messages: 0 };
+    for (const conv of store.conversations) {
+      try {
+        // inserir conversa no DB
+        const createdAt = conv.createdAt ? new Date(Number(conv.createdAt)) : new Date();
+        const [rConv] = await conn.execute(`INSERT INTO chat_conversations (name, status, unread, last_message_preview, online, created_at) VALUES (?, ?, ?, ?, ?, ?)`,
+          [conv.name || 'Cliente', conv.status || 'open', conv.unread || 0, conv.lastMessagePreview || '', conv.online ? 1 : 0, createdAt]);
+        const newId = rConv && (rConv.insertId || (rConv[0] && rConv[0].insertId)) ? (rConv.insertId || (rConv[0] && rConv[0].insertId)) : null;
+        if (!newId) continue;
+        migrated.conversations++;
+        mapping[String(conv.id)] = newId;
+        // inserir mensagens
+        if (Array.isArray(conv.messages) && conv.messages.length) {
+          for (const m of conv.messages) {
+            try {
+              const sentAt = m.time ? new Date(Number(m.time)) : new Date();
+              await conn.execute(`INSERT INTO chat (conversation_id, sender, sender_name, text, sent_at) VALUES (?, ?, ?, ?, ?)`,
+                [newId, (m.from || 'visitor'), (m.fromName || ''), (m.text || ''), sentAt]);
+              migrated.messages++;
+            } catch (e) { console.warn('sync-offline-chats: failed inserting message', e && e.message); }
+          }
+        }
+      } catch (e) {
+        console.warn('sync-offline-chats: failed inserting conversation', e && e.message);
+      }
+    }
+    await conn.end();
+    return res.json({ sucesso: true, migrated, mapping });
+  } catch (e) {
+    console.error('sync-offline-chats error', e && e.message);
+    return res.status(500).json({ sucesso: false, mensagem: 'Erro ao sincronizar store', detalhes: e && e.message });
+  }
+});
+
 
 // Endpoint para receber reclamação com anexos (até 5 imagens e 1 vídeo)
 app.post('/api/reclamacao', upload.array('anexos', 6), async (req, res) => {
@@ -2785,4 +3118,3 @@ app.use((req, res, next) => {
     process.exit(1);
   }
 })();
-

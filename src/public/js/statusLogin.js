@@ -632,11 +632,11 @@ document.addEventListener("DOMContentLoaded", () => {
       // Preferir foto do servidor quando possível, cair para base64 em localStorage ou para o avatar padrão
       try {
         const clienteId = localStorage.getItem('clienteId');
-        const serverUrl = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-          ? `${window.location.protocol}//${window.location.hostname}:3000`
-          : window.location.origin;
+        // Evitar apontar automaticamente para :3000 quando a página está em Live Server
+        const explicitApiBase = (typeof window.__API_BASE__ !== 'undefined' && window.__API_BASE__) ? window.__API_BASE__ : null;
+        const serverUrl = explicitApiBase || ((window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') && (!location.port || location.port === '3000') ? `${window.location.protocol}//${window.location.hostname}:3000` : window.location.origin);
         if (clienteId && fotoCliente) {
-          const url = `${serverUrl}/api/cliente/${clienteId}/foto?cb=${Date.now()}`;
+          const url = (serverUrl && serverUrl.indexOf(':3000')>-1) ? `${serverUrl}/api/cliente/${clienteId}/foto?cb=${Date.now()}` : null;
           fotoCliente.onerror = function () {
             // se falhar, tentar usar foto em base64 armazenada localmente
             try {
@@ -645,7 +645,14 @@ document.addEventListener("DOMContentLoaded", () => {
             } catch (e) { /* ignore */ }
             try { this.onerror = null; this.src = getDefaultAvatarDataUri(); } catch (e) {}
           };
-          fotoCliente.src = url;
+          // Não atribuir src se não formos apontar para o backend (evita ERR_CONNECTION_REFUSED)
+          if (url) fotoCliente.src = url; else {
+            try {
+              const fb = localStorage.getItem('foto');
+              if (fb && fb !== 'null') { fotoCliente.src = 'data:image/png;base64,' + fb; }
+              else fotoCliente.src = getDefaultAvatarDataUri();
+            } catch (e) { fotoCliente.src = getDefaultAvatarDataUri(); }
+          }
         } else {
           const fotoBase64 = localStorage.getItem("foto");
           if (fotoBase64 && fotoCliente && fotoBase64 !== "null") {
