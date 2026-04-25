@@ -117,19 +117,11 @@ h1 {
 }
 
 .foto-perfil {
-  width: 220px;
-  height: 220px;
+  width: 120px;
+  height: 120px;
   border-radius: 50%;
   border: 3px solid #007bff;
   object-fit: cover;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
-}
-
-@media (max-width: 768px) {
-  .foto-perfil {
-    width: 120px;
-    height: 120px;
-  }
 }
 
 .perfil-form {

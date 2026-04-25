@@ -24,6 +24,7 @@
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
   <link rel="stylesheet" href="/css/chatbot-widget.css" />
   <link rel="stylesheet" href="/css/responsive.css" />
+  <link rel="stylesheet" href="/css/loja.css" />
 </head>
 
 <body>
@@ -83,31 +84,40 @@
 
 
 
-  <!-- Hero da Loja -->
+  <!-- Hero da Loja (BEM) -->
   <section class="loja-hero">
-    <div class="hero-overlay"></div>
-    <div class="hero-content">
-      <span class="hero-badge"><i class="fa-solid fa-fire"></i> Ofertas Exclusivas</span>
-      <h1 class="hero-titulo">Nossa <span>Loja</span></h1>
-      <p class="hero-subtitulo">Encontre os melhores produtos com preços imbatíveis. Aproveite promoções todos os dias!</p>
-      <div class="hero-stats">
-        <div class="hero-stat">
-          <i class="fa-solid fa-box-open"></i>
-          <span><strong id="heroTotalProdutos">0</strong> Produtos</span>
-        </div>
-        <div class="hero-stat">
-          <i class="fa-solid fa-truck-fast"></i>
-          <span>Frete Grátis +R$100</span>
-        </div>
-        <div class="hero-stat">
-          <i class="fa-solid fa-shield-halved"></i>
-          <span>Compra Segura</span>
-        </div>
-        <div class="hero-stat">
-          <i class="fa-solid fa-credit-card"></i>
-          <span>Até 12x s/ juros</span>
-        </div>
+    <div class="loja-hero__overlay"></div>
+    <div class="loja-hero__inner">
+      <div class="loja-hero__main">
+        <span class="loja-hero__badge"><i class="fa-solid fa-fire" aria-hidden="true"></i> Ofertas Exclusivas</span>
+        <h1 class="loja-hero__title">Nossa <span class="loja-hero__title--accent">Loja</span></h1>
+        <p class="loja-hero__subtitle">Encontre os melhores produtos com preços imbatíveis. Aproveite promoções todos os dias!</p>
+        <div class="loja-hero__extra"><p class="loja-hero__extra-text">Seleção diária de produtos com ofertas relâmpago, frete grátis e garantia estendida.</p></div>
       </div>
+
+      <aside class="loja-hero__aside" aria-hidden="false">
+        <div class="loja-hero__stats">
+          <div class="loja-hero__stat" role="button" tabindex="0">
+            <div class="loja-hero__stat-icon"><i class="fa-solid fa-box-open" aria-hidden="true"></i></div>
+            <div class="loja-hero__stat-body"><div class="loja-hero__stat-value"><strong id="heroTotalProdutos" data-init="0">0</strong></div><div class="loja-hero__stat-label">Produtos</div></div>
+          </div>
+
+          <div class="loja-hero__stat" role="button" tabindex="0">
+            <div class="loja-hero__stat-icon"><i class="fa-solid fa-truck-fast" aria-hidden="true"></i></div>
+            <div class="loja-hero__stat-body"><div class="loja-hero__stat-value">Frete</div><div class="loja-hero__stat-label">Grátis acima R$100</div></div>
+          </div>
+
+          <div class="loja-hero__stat" role="button" tabindex="0">
+            <div class="loja-hero__stat-icon"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i></div>
+            <div class="loja-hero__stat-body"><div class="loja-hero__stat-value">Segurança</div><div class="loja-hero__stat-label">Compra protegida</div></div>
+          </div>
+
+          <div class="loja-hero__stat" role="button" tabindex="0">
+            <div class="loja-hero__stat-icon"><i class="fa-solid fa-credit-card" aria-hidden="true"></i></div>
+            <div class="loja-hero__stat-body"><div class="loja-hero__stat-value">Parcelas</div><div class="loja-hero__stat-label">Até 12x sem juros</div></div>
+          </div>
+        </div>
+      </aside>
     </div>
   </section>
 
@@ -596,6 +606,7 @@
 
   <!-- Scripts -->
   <script src="/js/VoltaraoTopo.js"></script>
+  <script src="/js/theme-toggle.js"></script>
   <script src="/js/script-vitrine.js"></script>
   <script src="/js/statusLogin.js"></script>
   <script src="/js/popupEditar.js"></script>
@@ -606,7 +617,8 @@
   <script src="/js/chatbot-widget.js"></script>
   <script src="/js/promo-carousel.js"></script>
   <script src="/js/loja.js"></script>
-</body>
+  <script src="/js/loja-hero.js"></script>
+  <script src="/js/theme-control.js"></script>
 </body>
 
 </html>

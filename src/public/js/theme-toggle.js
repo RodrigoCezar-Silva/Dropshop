@@ -4,6 +4,8 @@
   function shouldShowSwitch() {
     var fn = (location.pathname.split('/').pop() || '').toLowerCase();
     if (!fn) return true; // raiz -> mostrar
+    // se for visualizado em dispositivo móvel, não mostrar o switch (solicitação do usuário)
+    if (isMobile()) return false;
     // páginas admin começam com 'admin'
     if (fn.indexOf('admin') === 0) return false;
     // página de perfil/área do cliente
@@ -17,6 +19,17 @@
     else document.body.classList.remove('theme-dark');
     try { localStorage.setItem('mixTema', theme); } catch(e) {}
     updateSwitch(theme);
+  }
+
+  // Detectar dispositivo móvel de forma robusta
+  function isMobile() {
+    try {
+      if (typeof navigator !== 'undefined' && /Mobi|Android|iPhone|iPad|iPod|IEMobile|Opera Mini/i.test(navigator.userAgent)) return true;
+      if (window.matchMedia && window.matchMedia('(max-width: 800px)').matches) return true;
+      // pointer:coarse indica toque em muitos dispositivos móveis
+      if (window.matchMedia && window.matchMedia('(pointer: coarse)').matches) return true;
+    } catch (e) {}
+    return false;
   }
 
   function readTheme() {
@@ -76,6 +89,11 @@
   }
 
   document.addEventListener('DOMContentLoaded', function () {
+    // Aplicar tema móvel automaticamente quando for um dispositivo móvel
+    if (isMobile()) {
+      document.body.classList.add('theme-mobile');
+    }
+
     var initial = readTheme();
     applyTheme(initial);
 
@@ -122,4 +140,103 @@
       updateSwitch(initial);
     }
   });
+
+  // -------------------------
+  // Mobile menu (hamburger) helper
+  // Quando `body.theme-mobile` estiver presente, substitui os botões desktop
+  // por um botão hambúrguer que abre/fecha a versão empilhada do menu.
+  // -------------------------
+  function ensureMobileMenuToggle() {
+    try {
+      if (!document.body.classList.contains('theme-mobile')) return;
+      // encontrar o container do menu (padrão: .menu) e o bloco de botões (#loginButtons)
+      var menu = document.querySelector('.menu');
+      var loginButtons = document.getElementById('loginButtons');
+      var header = document.querySelector('header') || document.querySelector('.site-header');
+
+      if (!menu || !header) return;
+
+      // criar botão toggle se não existir
+      if (!header.querySelector('.menu-toggle')) {
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'menu-toggle';
+        btn.setAttribute('aria-expanded', 'false');
+        btn.setAttribute('aria-label', 'Abrir menu');
+        btn.innerHTML = '<span class="hamburger-line"></span>';
+        // inserir antes do menu para ficar visível no topo
+        header.insertBefore(btn, header.firstChild);
+
+        btn.addEventListener('click', function () {
+          var open = menu.classList.toggle('open');
+          btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+          // ajustar label
+          btn.setAttribute('aria-label', open ? 'Fechar menu' : 'Abrir menu');
+          // mostrar/ocultar blocos que estavam à direita (loginButtons)
+          try {
+            if (loginButtons) {
+              loginButtons.style.display = open ? 'flex' : 'none';
+            }
+          } catch (e) { /* ignore */ }
+
+          // mobile panel: cria painel com links/clones para navegação em modo mobile
+          try {
+            var panel = document.querySelector('.mobile-panel');
+            if (open) {
+              if (!panel) {
+                panel = document.createElement('div');
+                panel.className = 'mobile-panel';
+                panel.setAttribute('role','dialog');
+                panel.setAttribute('aria-modal','true');
+
+                var closeBtn = document.createElement('button');
+                closeBtn.className = 'mobile-panel-close';
+                closeBtn.setAttribute('aria-label','Fechar menu');
+                closeBtn.innerHTML = '×';
+                closeBtn.addEventListener('click', function () { if (panel) panel.remove(); menu.classList.remove('open'); btn.setAttribute('aria-expanded','false'); });
+
+                var inner = document.createElement('div');
+                inner.className = 'mobile-panel-inner';
+
+                // clona a lista de links do menu (se existir)
+                var ul = menu.querySelector('ul');
+                if (ul) inner.appendChild(ul.cloneNode(true));
+
+                // inclui blocos de login/cliente/cart como opções adicionais
+                try {
+                  if (loginButtons) inner.appendChild(loginButtons.cloneNode(true));
+                } catch (e) {}
+                try { var clienteStatus = document.getElementById('clienteStatus'); if (clienteStatus) inner.appendChild(clienteStatus.cloneNode(true)); } catch (e) {}
+                try { var cart = document.querySelector('.cart-icon'); if (cart) inner.appendChild(cart.cloneNode(true)); } catch (e) {}
+
+                panel.appendChild(closeBtn);
+                panel.appendChild(inner);
+                document.body.appendChild(panel);
+                // clique fora do painel fecha
+                panel.addEventListener('click', function (ev) { if (ev.target === panel) { panel.remove(); menu.classList.remove('open'); btn.setAttribute('aria-expanded','false'); } });
+              }
+              // abrir
+              panel.style.display = 'flex';
+              document.body.classList.add('mobile-menu-open');
+            } else {
+              if (panel) panel.remove();
+              document.body.classList.remove('mobile-menu-open');
+            }
+          } catch (e) { /* ignore */ }
+        });
+      }
+      // inicialmente ocultar loginButtons em theme-mobile se existir e não estiver aberto
+      try { if (loginButtons && !menu.classList.contains('open')) loginButtons.style.display = 'none'; } catch (e) {}
+    } catch (e) { /* ignore */ }
+  }
+
+  // aplica ao carregar e também em mudanças de classe no body (observer)
+  document.addEventListener('DOMContentLoaded', ensureMobileMenuToggle);
+  // observar mudanças na classe do body para ativar/desativar dinamicamente
+  try {
+    var obs = new MutationObserver(function (mut) {
+      ensureMobileMenuToggle();
+    });
+    obs.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+  } catch (e) { /* ignore */ }
 })();

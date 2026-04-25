@@ -52,8 +52,8 @@
 
 /* Foto de perfil estilizada */
 .foto-perfil {
-  width: 220px;
-  height: 220px;
+  width: 140px;
+  height: 140px;
   border-radius: 50%;
   border: 3px solid #007bff;
   object-fit: cover;
@@ -63,14 +63,6 @@
 
 .foto-perfil:hover {
   transform: scale(1.05);
-}
-
-/* Responsividade: reduzir avatar em telas pequenas */
-@media (max-width: 768px) {
-  .foto-perfil {
-    width: 120px;
-    height: 120px;
-  }
 }
 
 /* Botão alterar foto logo abaixo da imagem */

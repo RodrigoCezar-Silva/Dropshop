@@ -19,22 +19,24 @@
   const STATS_KEY = "chatbot_stats";
   const FAQ_KEY = "chatbot_faq";
 
-  // Verificar se widget está ativo
+  // Verificar se widget está ativo e ler configurações
+  let cfg = {};
   try {
-    const cfg = JSON.parse(localStorage.getItem("chatbot_config") || "{}");
+    cfg = JSON.parse(localStorage.getItem("chatbot_config") || "{}");
     if (cfg.ativo === false) return;
   } catch {}
 
-  // Mostrar o widget apenas para usuários logados (Cliente ou Administrador)
-  try {
-    const rawTipo = localStorage.getItem('tipoUsuario');
-    const tipo = (rawTipo && rawTipo !== 'null' && rawTipo !== '') ? rawTipo : null;
-    if (!tipo || (tipo !== 'Cliente' && tipo !== 'Administrador')) {
-      return; // não injeta o widget para visitantes não autenticados
+  // Se o admin configurou para mostrar apenas a usuários logados, respeitar essa opção
+  if (cfg.apenasLogados === true) {
+    try {
+      const rawTipo = localStorage.getItem('tipoUsuario');
+      const tipo = (rawTipo && rawTipo !== 'null' && rawTipo !== '') ? rawTipo : null;
+      if (!tipo || (tipo !== 'Cliente' && tipo !== 'Administrador')) {
+        return; // não injeta o widget para visitantes não autenticados
+      }
+    } catch (e) {
+      return;
     }
-  } catch (e) {
-    // se erro, evita injetar
-    return;
   }
 
   // ===== Criar HTML do widget =====
@@ -43,7 +45,16 @@
     const fab = document.createElement("button");
     fab.id = "chatbotFab";
     fab.className = "chatbot-fab";
-    fab.innerHTML = `<i class="fa-solid fa-robot"></i><span class="fab-badge" style="display:none">1</span>`;
+    fab.innerHTML = `
+      <span class="chatbot-fab-avatar" aria-hidden="true"> 
+        <svg width="28" height="28" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" role="img" aria-hidden="true">
+          <circle cx="32" cy="20" r="12" fill="#ffe0d6" />
+          <path d="M20 20c0 6 5 10 12 10s12-4 12-10" fill="#6b4f3f" />
+          <rect x="14" y="34" width="36" height="18" rx="4" fill="#0072ff" />
+          <rect x="22" y="38" width="20" height="8" rx="3" fill="#ffffff" />
+        </svg>
+      </span>
+      <span class="fab-badge" style="display:none">1</span>`;
     fab.title = "Conversar com a IA";
     document.body.appendChild(fab);
 
@@ -53,7 +64,14 @@
     janela.className = "chatbot-janela";
     janela.innerHTML = `
       <div class="chatbot-header">
-        <div class="chatbot-header-avatar"><i class="fa-solid fa-robot"></i></div>
+        <div class="chatbot-header-avatar">
+          <svg width="42" height="42" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" role="img" aria-hidden="true">
+            <circle cx="32" cy="18" r="14" fill="#ffe0d6" />
+            <path d="M14 18c0 7 6 12 18 12s18-5 18-12" fill="#6b4f3f" />
+            <rect x="8" y="34" width="48" height="22" rx="6" fill="#0072ff" />
+            <rect x="20" y="40" width="24" height="10" rx="4" fill="#ffffff" />
+          </svg>
+        </div>
         <div class="chatbot-header-info">
           <strong>${NOME_IA} — Assistente Virtual</strong>
           <span><span class="chatbot-status-dot"></span> Online agora</span>
@@ -93,7 +111,16 @@
     janela.classList.toggle("aberta", aberto);
     fab.innerHTML = aberto
       ? `<i class="fa-solid fa-xmark"></i>`
-      : `<i class="fa-solid fa-robot"></i><span class="fab-badge" style="display:none">1</span>`;
+      : `
+        <span class="chatbot-fab-avatar" aria-hidden="true"> 
+          <svg width="28" height="28" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" role="img" aria-hidden="true">
+            <circle cx="32" cy="20" r="12" fill="#ffe0d6" />
+            <path d="M20 20c0 6 5 10 12 10s12-4 12-10" fill="#6b4f3f" />
+            <rect x="14" y="34" width="36" height="18" rx="4" fill="#0072ff" />
+            <rect x="22" y="38" width="20" height="8" rx="3" fill="#ffffff" />
+          </svg>
+        </span>
+        <span class="fab-badge" style="display:none">1</span>`;
 
     if (aberto) {
       badge.style.display = "none";

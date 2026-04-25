@@ -88,25 +88,6 @@
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 }
 
-/* Botão de alternar tema (admin header) */
-.btn-theme-toggle {
-  background: linear-gradient(90deg,#0f7cc6,#0bbdc3);
-  color: #fff;
-  padding: 6px 10px;
-  border-radius: 6px;
-  border: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-weight: 600;
-  cursor: pointer;
-  box-shadow: 0 3px 8px rgba(0,0,0,0.18);
-  transition: transform .15s ease, box-shadow .15s ease, opacity .12s ease;
-}
-.btn-theme-toggle:hover { transform: translateY(-1px); }
-.btn-theme-toggle[aria-pressed="true"] { background: linear-gradient(90deg,#f39c12,#f6b93b); color: #111; }
-
-
 /* 🔹 Status de Cliente */
 #clienteStatus {
   background: linear-gradient(135deg, #1976d2 60%, #43cea2 100%);

@@ -4,9 +4,18 @@
   function shouldShowSwitch() {
     var fn = (location.pathname.split('/').pop() || '').toLowerCase();
     if (!fn) return true;
+    if (isMobile()) return false;
     if (fn.indexOf('admin') === 0) return false;
     if (fn === 'meu-perfil.html' || fn === 'meu-perfil') return false;
     return true;
+  }
+  function isMobile() {
+    try {
+      if (typeof navigator !== 'undefined' && /Mobi|Android|iPhone|iPad|iPod|IEMobile|Opera Mini/i.test(navigator.userAgent)) return true;
+      if (window.matchMedia && window.matchMedia('(max-width: 800px)').matches) return true;
+      if (window.matchMedia && window.matchMedia('(pointer: coarse)').matches) return true;
+    } catch (e) {}
+    return false;
   }
   function applyTheme(theme) {
     if (theme === 'dark') document.body.classList.add('theme-dark');

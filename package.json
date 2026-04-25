@@ -29,6 +29,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node src/server.js",
+    "serve:public": "node serve-static.js",
     "dev": "npx concurrently \"npx kill-port 5501 && npx live-server src/public --port=5501 --open=html/index.html\" \"node src/server.js\"",
     "prepare:docs": "node scripts/copy-public-to-docs.js && node scripts/normalize-docs-paths.js && node scripts/flatten-docs.js",
     "build:docs": "npm run prepare:docs",

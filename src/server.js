@@ -459,6 +459,54 @@ app.use("/src/public", express.static(path.join(__dirname, "public")));
 // Serve também na raiz (para /html/*, /css/*, /js/*)
 app.use(express.static(path.join(__dirname, "public")));
 
+// Rotas/dependências úteis para desenvolvimento local: upload simples sem autenticação
+if (!EM_PRODUCAO) {
+  try {
+    const devUploadsDir = path.join(__dirname, 'public', 'uploads');
+    if (!fs.existsSync(devUploadsDir)) fs.mkdirSync(devUploadsDir, { recursive: true });
+
+    const multerDev = multer.diskStorage({
+      destination: function (req, file, cb) { cb(null, devUploadsDir); },
+      filename: function (req, file, cb) {
+        const clienteId = req.params.id || 'anon';
+        const ext = path.extname(file.originalname) || (file.mimetype && file.mimetype.split('/')[1] ? '.' + file.mimetype.split('/')[1] : '.jpg');
+        cb(null, `${clienteId}${ext}`);
+      }
+    });
+    const uploadDev = multer({ storage: multerDev });
+
+    // PUT sem autenticação — apenas para desenvolvimento local. Salva em public/uploads/<id>.<ext>
+    app.put('/_dev/api/cliente/:id/foto', uploadDev.single('foto'), (req, res) => {
+      try {
+        if (!req.file) return res.status(400).json({ sucesso: false, mensagem: 'Nenhum arquivo enviado' });
+        const urlPath = `/uploads/${req.file.filename}`;
+        return res.json({ sucesso: true, foto: urlPath });
+      } catch (err) {
+        console.error('Erro ao salvar foto (dev):', err);
+        return res.status(500).json({ sucesso: false, mensagem: 'Erro ao salvar foto' });
+      }
+    });
+
+    // GET simples para verificar arquivo salvo (dev)
+    app.get('/_dev/api/cliente/:id/foto', (req, res) => {
+      try {
+        const clienteId = req.params.id;
+        const files = fs.readdirSync(devUploadsDir);
+        const match = files.find(f => f.startsWith(clienteId + '.') || f.startsWith(clienteId));
+        if (match) return res.sendFile(path.join(devUploadsDir, match));
+        return res.status(404).json({ sucesso: false, mensagem: 'Foto não encontrada (dev)' });
+      } catch (err) {
+        console.error('Erro ao buscar foto (dev):', err);
+        return res.status(500).json({ sucesso: false, mensagem: 'Erro interno' });
+      }
+    });
+
+    console.log('[dev] rotas de upload simples ativadas em /_dev/api/cliente/:id/foto');
+  } catch (e) {
+    console.warn('[dev] não foi possível ativar rotas dev de upload:', e && e.message);
+  }
+}
+
 // ---------------- ROTAS HTML ---------------- //
 // Redireciona a raiz para /html/index.html (navegação relativa funciona)
 app.get("/", (req, res) => res.redirect("/html/index.html"));
@@ -2775,7 +2823,22 @@ app.use((req, res, next) => {
   try {
     await garantirTabelas();
     app.listen(PORT, () => {
+      const os = require('os');
+      const nets = os.networkInterfaces();
+      let ip = 'localhost';
+      for (const name of Object.keys(nets)) {
+        for (const net of nets[name]) {
+          if (net.family === 'IPv4' && !net.internal) {
+            ip = net.address;
+            break;
+          }
+        }
+        if (ip !== 'localhost') break;
+      }
+
       console.log(`Servidor rodando em http://localhost:${PORT}`);
+      console.log(`Acesse a aplicação (HTML): http://localhost:${PORT}/html/index.html`);
+      console.log(`Na sua rede local: http://${ip}:${PORT}/html/index.html`);
       console.log(`Ambiente: ${NODE_ENV}`);
       console.log(`PagBank API: ${PAGBANK_API}`);
       console.log(`Webhook: ${PAGBANK_NOTIFICATION_URL}`);

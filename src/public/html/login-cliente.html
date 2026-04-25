@@ -25,11 +25,19 @@
 
   <div class="login-container">
     <!-- Status de login cliente (exibido após login) -->
-    <div id="clienteStatus" style="display:none; align-items:center; gap:18px; margin-bottom: 18px;">
-      <img id="fotoCliente" class="foto-perfil" src="" alt="Foto Cliente" style="width:64px;height:64px;border-radius:50%;object-fit:cover;">
-      <span id="nomeCliente" class="nome-usuario"></span>
-      <button id="btnMinhaConta" class="btn-minha-conta">Minha Conta</button>
-      <button id="logoutBtn" class="btn-logout">Sair</button>
+    <div id="clienteStatus" class="cliente-status" style="display:none;">
+      <div class="cliente-status-inner">
+        <div class="login-avatar">
+          <img id="fotoCliente" class="login-avatar-img" src="" alt="Foto Cliente">
+        </div>
+        <div class="cliente-info">
+          <span id="nomeCliente" class="nome-usuario"></span>
+          <div class="cliente-actions">
+            <button id="btnMinhaConta" class="btn-minha-conta">Minha Conta</button>
+            <button id="logoutBtn" class="btn-logout">Sair</button>
+          </div>
+        </div>
+      </div>
     </div>
     <h2>Área do Cliente</h2>
     <form id="loginForm">
@@ -73,12 +81,8 @@
     </div>
   </div>
 
-  <script>
-    // Forçar backend durante desenvolvimento para evitar 405 vindo do Live Server
-    window.AUTH_SERVER = window.AUTH_SERVER || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? (window.location.protocol + '//localhost:3000') : window.location.origin);
-  </script>
   <script src="/js/login-cliente.js"></script>
-    <script src="/js/auth-links.js"></script>
+  <script src="/js/auth-links.js"></script>
   <script src="/js/login-social.js"></script>
   <script src="/js/btn-topo.js"></script>
   <script src="/js/bloquear-copia.js"></script>

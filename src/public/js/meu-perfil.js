@@ -5,6 +5,18 @@
 document.addEventListener("DOMContentLoaded", () => {
   const painelCliente = document.getElementById("painelCliente");
 
+  // Aplicar preview/localStorage de foto imediatamente (se existir)
+  try {
+    const preview = localStorage.getItem('foto_preview');
+    const storedFoto = localStorage.getItem('foto');
+    const idsInit = ['fotoCliente','fotoClienteResumo','fotoClienteSidebar','mp-avatar','fotoClienteSidebarImg'];
+    if (preview) {
+      idsInit.forEach(id=>{ const el=document.getElementById(id); if (el) el.src = preview; });
+    } else if (storedFoto) {
+      idsInit.forEach(id=>{ const el=document.getElementById(id); if (el) el.src = storedFoto; });
+    }
+  } catch(e) { /* ignore */ }
+
   // Garantia defensiva: esconder modal de exclusão no carregamento (evita aberturas acidentais)
   (function ensureModalHiddenOnLoad() {
     try {
@@ -134,13 +146,16 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       function toggleSenha(e) {
-        e && e.preventDefault();
+        if (e) e.preventDefault();
         if (!senhaInput) return;
-        const tipo = senhaInput.getAttribute('type') === 'password' ? 'text' : 'password';
-        senhaInput.setAttribute('type', tipo);
+        const novoTipo = (senhaInput.getAttribute('type') === 'password') ? 'text' : 'password';
+        senhaInput.setAttribute('type', novoTipo);
         if (btnToggle) {
           const ic = btnToggle.querySelector('i');
-          if (ic) { ic.classList.toggle('fa-eye'); ic.classList.toggle('fa-eye-slash'); }
+          if (ic) {
+            ic.classList.toggle('fa-eye');
+            ic.classList.toggle('fa-eye-slash');
+          }
         }
         senhaInput.focus();
       }
@@ -900,6 +915,9 @@ document.addEventListener("DOMContentLoaded", () => {
       return null;
     }
 
+    // marca se já obtivemos dados públicos do cliente (para evitar sobrescrever com /me)
+    let gotPublic = false;
+
     try {
       // candidate bases: apiBase (configurado), depois dois hosts comuns e por fim caminho relativo
       const bases = [];
@@ -1043,10 +1061,13 @@ document.addEventListener("DOMContentLoaded", () => {
       const reader = new FileReader();
       reader.onload = ev => {
         const dataUrl = ev.target.result;
-        const elMain = document.getElementById("fotoCliente");
-        if (elMain) elMain.src = dataUrl;
-        const fotoResumo = document.getElementById("fotoClienteResumo");
-        if (fotoResumo) fotoResumo.src = dataUrl;
+        const idsToUpdate = ['fotoCliente','fotoClienteResumo','fotoClienteSidebar','mp-avatar','fotoClienteSidebarImg'];
+        idsToUpdate.forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.src = dataUrl;
+        });
+        // salvar preview temporário no localStorage para persistir entre recargas até o upload completar
+        try { localStorage.setItem('foto_preview', dataUrl); } catch(e) {}
       };
       reader.readAsDataURL(file);
 
@@ -1060,6 +1081,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (typeof apiBase !== 'undefined' && apiBase) bases.push(apiBase);
         bases.push('');
         let uploaded = false;
+        let serverReturnedFoto = null;
         for (const b of bases) {
           const base = (b ? b : '');
           try {
@@ -1069,35 +1091,43 @@ document.addEventListener("DOMContentLoaded", () => {
               body: form
             });
             if (resp && resp.ok) {
+              // tentar ler JSON de resposta caso o servidor retorne objeto com URL/base64
+              try {
+                const j = await resp.json().catch(()=>null);
+                if (j) {
+                  serverReturnedFoto = j.foto || j.url || j.path || j.data || null;
+                }
+              } catch(e) { serverReturnedFoto = null; }
               uploaded = true;
               break;
             } else {
-              // tentar extrair mensagem de erro do servidor
               let errMsg = `status ${resp && resp.status}`;
               try {
-                const j = await resp.json();
+                const j = await resp.json().catch(()=>null);
                 if (j && j.mensagem) errMsg = j.mensagem;
               } catch (e) {}
               console.debug('[meu-perfil] upload resposta', base, resp && resp.status, errMsg);
-              // se for 500, exibir mensagem ao usuário e tentar próximo base
               mostrarPopup('Falha ao enviar foto: ' + errMsg, 'erro');
               continue;
             }
           } catch (err) {
-            // tentar próximo base
             continue;
           }
         }
 
         if (uploaded) {
           mostrarPopup('Foto atualizada com sucesso!', 'sucesso');
-          // atualizar imagens carregando a rota pública para garantir consistência (cache bust)
           const serverUrl = (typeof apiBase !== 'undefined' && apiBase) ? apiBase : '';
           const cb = Date.now();
-          ['fotoCliente','fotoClienteResumo','fotoClienteSidebar','mp-avatar','fotoClienteSidebarImg'].forEach(id => {
+          const ids = ['fotoCliente','fotoClienteResumo','fotoClienteSidebar','mp-avatar','fotoClienteSidebarImg'];
+          // usar URL retornada pelo servidor quando disponível
+          const finalUrl = serverReturnedFoto ? (serverReturnedFoto.indexOf('data:')===0 ? serverReturnedFoto : (serverReturnedFoto.startsWith('http') ? serverReturnedFoto : (serverReturnedFoto.startsWith('/') ? serverReturnedFoto : serverUrl + serverReturnedFoto))) : `${serverUrl}/api/cliente/${clienteId}/foto?cb=${cb}`;
+          ids.forEach(id => {
             const el = document.getElementById(id);
-            if (el) el.src = `${serverUrl}/api/cliente/${clienteId}/foto?cb=${cb}`;
+            if (el) el.src = finalUrl;
           });
+          // atualizar localStorage para persistir imagem do cliente
+          try { localStorage.setItem('foto', finalUrl); localStorage.removeItem('foto_preview'); } catch(e) {}
         } else {
           mostrarPopup('Não foi possível enviar a foto. Tente novamente.', 'erro');
         }
@@ -1107,6 +1137,19 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   }
+
+  // Tornar o overlay e a moldura do avatar acionáveis para abrir o seletor de arquivos
+  try {
+    const btnOverlay = document.getElementById('btnAlterarFotoOverlay');
+    const avatarFrameEl = document.getElementById('avatarFrame');
+    if (btnOverlay) {
+      btnOverlay.addEventListener('click', (ev) => { ev && ev.preventDefault(); if (inputFoto) inputFoto.click(); });
+    }
+    if (avatarFrameEl) {
+      avatarFrameEl.addEventListener('click', (ev) => { if (ev && ev.target && ev.target.id !== 'btnAlterarFotoOverlay') { if (inputFoto) inputFoto.click(); } });
+      avatarFrameEl.addEventListener('keydown', (ev) => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); if (inputFoto) inputFoto.click(); } });
+    }
+  } catch (err) { /* não bloquear se algo falhar */ }
 
   // Botão Alterar Dados
   const btnAlterarDados = document.getElementById("btnAlterarDados");
@@ -1194,17 +1237,19 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       // Abrir modal sempre que o usuário clicar para confirmar a exclusão
-      const senha = await abrirModalConfirmacao();
-      if (!senha) {
+      const resultado = await abrirModalConfirmacao();
+      if (!resultado || !resultado.senha) {
         // usuário cancelou
         return;
       }
 
+      const senhaInformada = resultado.senha;
+
       try {
         const resp = await fetch((typeof apiBase !== 'undefined' ? apiBase : '') + `/api/cliente/${clienteId}/excluir-com-senha`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ senha })
+          headers: Object.assign({ 'Content-Type': 'application/json' }, token ? { 'Authorization': 'Bearer ' + token } : {}),
+          body: JSON.stringify({ senha: senhaInformada })
         });
         const j = await resp.json().catch(()=>({sucesso:false}));
         if (resp.ok && j.sucesso) {

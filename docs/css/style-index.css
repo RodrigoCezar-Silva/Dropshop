@@ -238,6 +238,24 @@ body {
   border-radius: 12px;
   background: linear-gradient(135deg, #eef2ff, #e0e7ff);
   display: flex;
+
+/* =========================
+   Tema móvel forçado via JS (docs)
+   ========================= */
+body.theme-mobile {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+}
+body.theme-mobile .container { width: 96%; max-width: 980px; flex-direction: column; gap: 10px; }
+body.theme-mobile .site-header { padding: 10px 12px; }
+body.theme-mobile .logo { font-size: 1.15rem; }
+body.theme-mobile .menu ul { display: none; }
+body.theme-mobile .hero-index { padding: 40px 12px 48px; }
+body.theme-mobile .destaques-rapidos { grid-template-columns: 1fr; margin: 0 auto; border-radius: 8px; }
+body.theme-mobile .hero-btns { flex-direction: column; gap: 12px; }
+body.theme-mobile .btn-hero-primary, body.theme-mobile .btn-hero-secondary { width: 100%; padding: 12px 16px; }
+body.theme-mobile p, body.theme-mobile .menu a { font-size: 0.95rem; }
+
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
@@ -399,6 +417,37 @@ body.theme-dark a {
 }
 body.theme-dark a:hover {
   color: #cfefff;
+}
+
+/* Melhorar legibilidade para elementos fora do .container */
+body.theme-dark .hero-index {
+  background: linear-gradient(135deg, #071022 0%, #081828 60%, #061226 100%);
+}
+body.theme-dark .hero-index h1 { color: #ffffff; }
+body.theme-dark .hero-index p { color: rgba(255,255,255,0.92); }
+body.theme-dark .hero-index .hero-badge { background: rgba(159,184,255,0.08); color: #bcdcff; border-color: rgba(159,184,255,0.12); }
+
+body.theme-dark .destaques-rapidos {
+  background: linear-gradient(180deg,#071219,#0a1620);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.65);
+}
+body.theme-dark .destaque-item { background: transparent; border-right-color: rgba(255,255,255,0.03); }
+body.theme-dark .destaque-item strong { color: #e6f6ff; }
+body.theme-dark .destaque-item span { color: #9fb8d6; }
+
+body.theme-dark .banners-promocionais, body.theme-dark .banners-promocionais .banner { color: #e6f3ff; }
+
+/* Hero buttons contrast */
+body.theme-dark .btn-hero-primary { box-shadow: 0 6px 24px rgba(0,0,0,0.6); }
+body.theme-dark .btn-hero-secondary { color: rgba(255,255,255,0.9); border-color: rgba(255,255,255,0.08); }
+
+/* Header quick fixes for elements that sit outside the main .container */
+body.theme-dark header, body.theme-dark .site-header { color: #e6f6ff; }
+body.theme-dark .site-header .menu a { color: #dbefff; }
+
+/* garantir contraste em quaisquer textos fora do container: aplicável a elementos de topo e rodapé */
+body.theme-dark > header .container, body.theme-dark > .hero-index, body.theme-dark > .destaques-rapidos, body.theme-dark > .banners-promocionais {
+  color: #e6f3ff;
 }
 /* Destaques e badges */
 body.theme-dark .destaque-item strong, body.theme-dark .destaque-item span, body.theme-dark .hero-index p {

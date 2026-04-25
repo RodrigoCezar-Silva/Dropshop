@@ -9,6 +9,35 @@ document.addEventListener("DOMContentLoaded", () => {
   const usuarioInput = document.getElementById("usuario"); // campo de e-mail
   const senhaInput = document.getElementById("senha");
   const toggleSenha = document.getElementById("toggleSenha");
+  const fotoEl = document.getElementById('fotoCliente');
+  const nomeEl = document.getElementById('nomeCliente');
+  const clienteStatusEl = document.getElementById('clienteStatus');
+
+  function getDefaultAvatarDataUri(name) {
+    const initials = (name || 'U').split(/\s+/).filter(Boolean).map(n=>n[0]).slice(0,2).join('').toUpperCase();
+    const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><rect width='100%' height='100%' fill='%23eef2ff'/><text x='50%' y='50%' dy='0.35em' text-anchor='middle' fill='%234f46e5' font-family='system-ui,Segoe UI,Roboto,Arial' font-size='56'>${initials}</text></svg>`;
+    return 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svg)));
+  }
+
+  function showClienteStatus() {
+    try { if (clienteStatusEl) clienteStatusEl.style.display = 'block'; } catch(e){}
+  }
+
+  function applyStoredProfileToUI() {
+    try {
+      const nome = localStorage.getItem('nome');
+      const foto = localStorage.getItem('foto');
+      if (nomeEl && nome) nomeEl.textContent = nome;
+      if (fotoEl) {
+        if (foto && foto.indexOf('data:image') === 0) fotoEl.src = foto;
+        else if (foto) fotoEl.src = foto;
+        else fotoEl.src = getDefaultAvatarDataUri(nome);
+      }
+      if (localStorage.getItem('tipoUsuario') === 'Cliente' && localStorage.getItem('clienteId')) {
+        showClienteStatus();
+      }
+    } catch (e) { /* ignore */ }
+  }
 
   // Mostrar/ocultar senha
   if (toggleSenha && senhaInput) {
@@ -87,6 +116,17 @@ document.addEventListener("DOMContentLoaded", () => {
           localStorage.setItem("dataNascimento", data.dataNascimento);
           localStorage.setItem("foto", data.foto);
           localStorage.setItem("tipoUsuario", "Cliente");
+
+          // Atualiza pré-visualização do avatar imediatamente
+          try {
+            if (nomeEl && data.nome) nomeEl.textContent = data.nome;
+            if (fotoEl) {
+              if (data.foto && data.foto.indexOf && data.foto.indexOf('data:image') === 0) fotoEl.src = data.foto;
+              else if (data.foto) fotoEl.src = data.foto;
+              else fotoEl.src = getDefaultAvatarDataUri(data.nome);
+            }
+            showClienteStatus();
+          } catch (e) { /* ignore */ }
 
           // 🔹 Redireciona para checkout.html se houver flag, senão para a página indicada em returnTo
           setTimeout(() => {

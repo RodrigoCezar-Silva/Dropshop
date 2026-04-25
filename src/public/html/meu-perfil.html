@@ -52,7 +52,6 @@
       </div>
       <div class="cliente-topbar-actions">
         <a href="index.html" class="cliente-mini-link"><i class="fa-solid fa-house"></i><span>Início</span></a>
-        <button id="btnToggleTheme" type="button" class="cliente-mini-link cliente-mini-link-outline" aria-pressed="false"><i class="fa fa-moon"></i><span id="btnToggleThemeText">Tema escuro</span></button>
         <a href="contato.html" class="cliente-mini-link cliente-mini-link-outline"><i class="fa-solid fa-headset"></i><span>Suporte</span></a>
       </div>
     </section>
@@ -77,7 +76,10 @@
               <p class="overview-kicker">Bem-vindo de volta</p>
               <h3 id="resumoNome">Cliente MIX-PROMOÇÃO</h3>
               <p id="resumoEmail" class="overview-muted">Seu e-mail aparecerá aqui.</p>
-              <!-- overview chips removed as requested -->
+              <div class="overview-chips">
+                <span class="overview-chip" id="resumoEstado">Estado não informado</span>
+                <span class="overview-chip" id="resumoBairro">Bairro não informado</span>
+              </div>
               <div class="overview-actions botoes-perfil">
                 <!-- Ações rápidas (mantenha compacto) -->
               </div>
@@ -130,24 +132,31 @@
       <section class="tab-content" id="perfil">
         <div class="perfil-layout">
           <aside class="perfil-sidebar-card">
-            <div class="foto-wrapper">
-              <label for="inputFotoCliente" class="foto-clickable" aria-label="Alterar foto do cliente">
-                <img id="fotoClienteSidebar" class="foto-perfil" src="" alt="Foto Cliente Sidebar">
-                <span class="foto-overlay"><i class="fa-solid fa-camera"></i></span>
-              </label>
-              <input type="file" id="inputFotoCliente" accept="image/*">
+            <div class="perfil-avatar-wrapper">
+              <div class="avatar-frame" id="avatarFrame" tabindex="0" role="button" aria-label="Alterar foto">
+                <img id="fotoClienteSidebar" class="foto-perfil avatar-img" src="" alt="Foto Cliente Sidebar">
+                <button type="button" id="btnAlterarFotoOverlay" class="avatar-overlay" aria-label="Alterar foto">
+                  <i class="fa-solid fa-camera"></i>
+                </button>
+              </div>
+              <div class="perfil-avatar-actions">
+                <h3 id="perfilSidebarNome">Cliente</h3>
+                <p id="perfilSidebarEmail">email@cliente.com</p>
+                <span class="overview-badge" id="perfilStatusConta">Conta ativa</span>
+                <input type="file" id="inputFotoCliente" accept="image/*" aria-hidden="true">
+              </div>
             </div>
 
-            <h3 id="perfilSidebarNome">Cliente</h3>
-            <p id="perfilSidebarEmail">email@cliente.com</p>
-
-            <div class="campo alterar-foto">
-              <label class="custom-upload" for="inputFotoCliente"><i class="fa-solid fa-upload"></i><span>Alterar foto</span></label>
+            <div class="perfil-sidebar-info">
+              <div>
+                <span>Telefone</span>
+                <strong id="perfilSidebarTelefone">Não informado</strong>
+              </div>
+              <div>
+                <span>Estado</span>
+                <strong id="perfilSidebarEstado">Não informado</strong>
+              </div>
             </div>
-
-            
-
-            
           </aside>
 
           <div class="perfil-main-card">

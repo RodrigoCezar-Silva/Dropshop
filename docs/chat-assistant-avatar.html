@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Preview Atendente MixPromoção</title>
+  <link rel="stylesheet" href="./css/chat-assistant-avatar.css">
+</head>
+<body>
+  <main class="preview-root">
+    <h1>Preview: Atendente MixPromoção (avatar)</h1>
+
+    <p class="help">Faça upload da foto original (ou salve a imagem enviada como <strong>atendente.jpg</strong> em <em>docs/img/</em>) e veja a versão com uniforme da MixPromoção. Clique em "Exportar" para baixar a imagem final.</p>
+
+    <div class="controls">
+      <label class="btn"><input id="fileInput" type="file" accept="image/*"> Carregar foto</label>
+      <button id="useDefault" class="btn">Usar docs/img/atendente.jpg</button>
+      <button id="exportBtn" class="btn primary">Exportar imagem</button>
+    </div>
+
+    <div class="avatar-stage">
+      <div id="avatarWrapper" class="avatar-wrapper">
+        <img id="sourceImg" src="./img/atendente.jpg" alt="Foto do atendimento" crossorigin="anonymous">
+
+        <!-- Overlays estilizados: boné, crachá, faixa da camisa -->
+        <div class="overlay cap"><span>MixPromoção</span></div>
+        <div class="overlay badge"><span>Atendente</span></div>
+        <div class="overlay polo"></div>
+      </div>
+    </div>
+
+    <canvas id="exportCanvas" style="display:none"></canvas>
+  </main>
+
+  <script src="./js/chat-assistant-avatar.js"></script>
+</body>
+</html>

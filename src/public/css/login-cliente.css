@@ -17,8 +17,8 @@
 #fotoCliente {
   border-radius: 50%;
   border: 3px solid #ffd700;
-  width: 64px;
-  height: 64px;
+  width: 140px;
+  height: 140px;
   object-fit: cover;
   box-shadow: 0 2px 12px #0002;
   background: #fff;
@@ -145,7 +145,7 @@ body {
   padding: 30px;
   border-radius: 12px;
   box-shadow: 0 4px 15px rgba(0,0,0,0.25);
-  width: 350px;
+  width: 420px;
   max-width: 90%;
   text-align: center;
 }
@@ -284,6 +284,35 @@ body {
   margin-top: 12px;
   font-size: 13px;
   min-height: 20px;
+}
+
+/* Novo layout do status do cliente (avatar maior) */
+.cliente-status { max-width: 560px; margin: 0 auto 18px; }
+.cliente-status-inner { display:flex; align-items:center; gap:18px; padding: 12px; }
+.login-avatar { flex: 0 0 auto; }
+.login-avatar-img { width: 140px; height: 140px; border-radius: 50%; object-fit: cover; border: 4px solid #fff; box-shadow: 0 8px 26px rgba(15,23,42,0.18); }
+.cliente-info { text-align: left; display:flex; flex-direction:column; gap:8px; }
+.cliente-actions { display:flex; gap:10px; margin-top:8px; }
+
+/* Responsivo: reduzir avatar e container em telas pequenas */
+@media (max-width:520px) {
+  #fotoCliente, .login-avatar-img { width: 90px; height: 90px; }
+  .login-container { width: 92%; padding: 18px; }
+}
+
+/* Forçar tamanho do avatar na página de login para evitar regras globais conflitantes */
+#clienteStatus .login-avatar-img,
+#clienteStatus #fotoCliente {
+  width: 140px !important;
+  height: 140px !important;
+}
+
+@media (max-width:520px) {
+  #clienteStatus .login-avatar-img,
+  #clienteStatus #fotoCliente {
+    width: 90px !important;
+    height: 90px !important;
+  }
 }
 
 /* Loading spinner nos botões sociais */

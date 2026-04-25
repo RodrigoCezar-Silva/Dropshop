@@ -1,0 +1,31 @@
+:root{
+  --brand-red: #e31b23;
+  --brand-yellow: #ffd24d;
+  --bg: #f6f8fb;
+}
+*{box-sizing:border-box}
+body{font-family:Segoe UI, system-ui, Arial, sans-serif;background:var(--bg);margin:0;padding:28px;color:#102028}
+.preview-root{max-width:980px;margin:0 auto}
+h1{font-size:1.2rem;margin:0 0 8px}
+.help{margin:6px 0 18px;color:#334155;font-size:0.95rem}
+.controls{display:flex;gap:8px;align-items:center;margin-bottom:16px}
+.btn{background:#fff;border:1px solid #d1d5db;padding:8px 12px;border-radius:8px;cursor:pointer}
+.btn.primary{background:var(--brand-red);color:#fff;border-color:transparent}
+.avatar-stage{display:flex;justify-content:center;padding:18px}
+.avatar-wrapper{position:relative;width:360px;height:480px;background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 12px 36px rgba(16,32,40,0.12);display:flex;align-items:flex-start;justify-content:center}
+.avatar-wrapper img{width:100%;height:100%;object-fit:cover;display:block}
+
+/* Cap (boné) - posiciona no topo da cabeça */
+.overlay.cap{position:absolute;left:50%;transform:translateX(-50%);top:28px;width:220px;height:64px;background:linear-gradient(180deg,var(--brand-red),#c1151a);border-radius:40px 40px 12px 12px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:14px;box-shadow:0 6px 18px rgba(0,0,0,0.18)}
+.overlay.cap span{padding-top:6px}
+
+/* Badge (crachá) */
+.overlay.badge{position:absolute;left:28px;bottom:110px;background:#fff;border-radius:6px;padding:8px 10px;border:2px solid rgba(0,0,0,0.08);box-shadow:0 6px 14px rgba(0,0,0,0.08);font-weight:700;color:var(--brand-red)}
+
+/* Polo (faixa roja sobre o torso) */
+.overlay.polo{position:absolute;left:0;right:0;bottom:0;height:160px;background:linear-gradient(180deg,var(--brand-red),#c1151a);opacity:0.95}
+
+/* Responsivo */
+@media (max-width:420px){.avatar-wrapper{width:280px;height:380px}.overlay.cap{width:180px;height:52px;top:20px}.overlay.polo{height:140px}}
+
+.note{margin-top:12px;color:#475569;font-size:0.9rem}

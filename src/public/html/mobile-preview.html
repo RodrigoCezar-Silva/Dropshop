@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Preview Mobile — MIX-PROMOÇÃO</title>
+  <link rel="stylesheet" href="/css/mobile-preview.css">
+</head>
+<body>
+  <header class="mp-header">
+    <h1>Preview Mobile</h1>
+    <p class="mp-sub">Teste seu site em molduras de celular e tablet — escolha dispositivo, sistema e orientação.</p>
+  </header>
+
+  <section class="mp-controls">
+    <label>Dispositivo
+      <select id="mpDevice"></select>
+    </label>
+    <div id="mpDeviceInfo" class="mp-device-info" aria-live="polite"></div>
+
+    <label>SO
+      <select id="mpOs">
+        <option value="ios">iOS</option>
+        <option value="android">Android</option>
+      </select>
+    </label>
+
+    <button id="mpRotate" title="Rotacionar">⤾</button>
+    <label class="mp-checkbox"><input type="checkbox" id="mpForceMobile" checked> Forçar tema móvel</label>
+    <label class="mp-checkbox"><input type="checkbox" id="mpShowChrome"> Mostrar chrome do navegador</label>
+    <label class="mp-checkbox"><input type="checkbox" id="mpShowAll"> Mostrar todos os modelos</label>
+    <label class="mp-url">URL: <input id="mpUrl" value="/html/index.html"></label>
+    <button id="mpLoad">Carregar</button>
+    <button id="mpToggleTheme" title="Alternar tema">Tema: Escuro</button>
+  </section>
+
+  <main class="mp-main">
+    <div id="mpSingleWrap">
+      <div id="mpFrame" class="device ios portrait">
+        <div class="device-brand"></div>
+        <div class="screen-wrap">
+          <iframe id="mpIframe" src="/html/index.html" frameborder="0" sandbox="allow-same-origin allow-scripts allow-forms"></iframe>
+        </div>
+        <div class="device-footer"></div>
+      </div>
+    </div>
+
+    <div id="mpMultiContainer" class="devices-grid" style="display:none"></div>
+  </main>
+
+  <footer class="mp-footer">Use este preview para testar aparência mobile. Atualize a página dentro do iframe com <strong>F5</strong>.</footer>
+
+  <script src="/js/mobile-preview.js"></script>
+</body>
+</html>

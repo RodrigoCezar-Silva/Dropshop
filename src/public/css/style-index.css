@@ -12,19 +12,11 @@ body {
   color: #333;
 }
 
-/* Assistive text class */
-.sr-only { position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
-
 /* ===== Cabeçalho ===== */
 .site-header {
   background-color: #1e1e2f;
-  padding: 15px 20px;
-  display: flex;
-  align-items: center;
-  gap: 16px;
+  padding: 15px 0;
 }
-
-.site-header .menu { margin-left: 20px; flex: 1; }
 
 .container {
   width: 90%;
@@ -266,124 +258,6 @@ body {
   margin: 48px auto;
   padding: 0 20px;
 }
-
-/* Tema escuro global (ativado com `body.theme-dark`) */
-body.theme-dark {
-  background-color: #0b0f14;
-  color: #e6eef6;
-}
-body.theme-dark .site-header { background-color: #081223; }
-body.theme-dark .logo, body.theme-dark .logo i { color: #8fe6ff; }
-body.theme-dark .menu a { color: #d7eefc; }
-body.theme-dark .menu a:hover, body.theme-dark .menu a.active { color: #9fb8ff; }
-
-/* Botão de alternar tema próximo ao logo (aparece nas páginas principais) */
-.logo { position: relative; }
-.btn-theme-site {
-  margin-left: 10px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 6px 9px;
-  font-size: 0.95rem;
-  background: rgba(255,255,255,0.06);
-  color: inherit;
-  border: 1px solid rgba(255,255,255,0.06);
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background 160ms, transform 160ms, box-shadow 160ms;
-}
-.btn-theme-site:hover { transform: translateY(-2px); background: rgba(255,255,255,0.09); }
-.btn-theme-site i { font-size: 1rem; }
-
-/* Footer: tornar o ícone/logo do rodapé com fundo branco no tema escuro */
-body.theme-dark .footer-brand .footer-logo-icon {
-  background: #ffffff;
-  color: #0b0f14;
-  padding: 6px;
-  border-radius: 6px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-body.theme-dark .footer-brand .footer-logo-text .mix { color: #9fb8ff; }
-body.theme-dark .footer-brand .footer-logo-text .promo { color: #ffffff; }
-body.theme-dark .footer-pagamentos i { color: #ffffff; }
-
-/* Theme switch (slider) styles */
-.theme-switch {
-  display: inline-block;
-  vertical-align: middle;
-  margin-left: 12px;
-  position: relative;
-}
-.theme-switch input { position: absolute; opacity: 0; width: 0; height: 0; }
-.theme-switch .switch-track {
-  width: 54px;
-  height: 28px;
-  background: rgba(255,255,255,0.08);
-  border-radius: 20px;
-  display: inline-block;
-  position: relative;
-  transition: background 180ms;
-  border: 1px solid rgba(255,255,255,0.06);
-}
-.theme-switch .switch-knob {
-  width: 22px;
-  height: 22px;
-  background: #fff;
-  border-radius: 50%;
-  position: absolute;
-  left: 4px;
-  top: 50%;
-  transform: translateY(-50%);
-  box-shadow: 0 4px 12px rgba(2,6,23,0.25);
-  transition: left 180ms, background 180ms, transform 180ms;
-}
-.theme-switch input:checked + .switch-track { background: #4f46e5; border-color: #3b3beb; }
-.theme-switch input:checked + .switch-track .switch-knob { left: calc(100% - 4px - 22px); background: #fff; }
-
-/* Wrapper and icon next to the switch */
-.theme-switch-wrapper {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  margin-left: 12px;
-}
-.theme-switch-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  font-size: 18px;
-  color: inherit;
-  opacity: 0;
-  transition: opacity 260ms ease, transform 260ms ease;
-  transform: translateY(-4px);
-  pointer-events: none;
-}
-.theme-switch-wrapper .theme-switch { margin: 0; }
-
-/* Admin area adjustments */
-body.theme-dark .admin-card,
-body.theme-dark .admin-area-notes {
-  background: #0f1724;
-  border-color: #162231;
-  color: #d7e9f8;
-  box-shadow: 0 10px 24px rgba(0,0,0,0.6);
-}
-body.theme-dark .admin-card h2,
-body.theme-dark .admin-area-notes h2 { color: #e6f3ff; }
-body.theme-dark .admin-card p,
-body.theme-dark .admin-area-notes ul { color: #bcd6ea; }
-body.theme-dark .admin-card-link { color: #7dd3fc; }
-body.theme-dark .admin-card-link:hover { color: #5ec3ff; }
-
-/* Ensure header/client status contrast */
-body.theme-dark #clienteStatus, body.theme-dark .status-admin { background: linear-gradient(135deg,#0e2a3a,#06202b); color: #e7f8ff; }
-
 
 /* Removido bloco inválido de keyframes ou adicione um @keyframes se necessário */
 

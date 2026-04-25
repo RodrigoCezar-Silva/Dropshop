@@ -51,6 +51,16 @@
   animation: chatbot-bounce 1s ease infinite;
 }
 
+/* Avatar dentro do FAB */
+.chatbot-fab-avatar {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:28px;
+  height:28px;
+}
+.chatbot-fab-avatar svg { width:28px; height:28px; display:block; }
+
 @keyframes chatbot-pulse {
   0%, 100% { box-shadow: 0 6px 24px rgba(0, 114, 255, 0.4); }
   50% { box-shadow: 0 6px 36px rgba(0, 114, 255, 0.65), 0 0 0 8px rgba(0, 114, 255, 0.08); }
