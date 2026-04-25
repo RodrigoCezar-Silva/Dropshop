@@ -36,6 +36,8 @@
 
   let conversationId = null;
   let polling = null;
+  let protocolTimer = null;
+  const PROTOCOL_TIMEOUT = 5 * 60 * 1000; // 5 minutos
   let backendAvailable = true;
   let backendCheckInterval = null;
   const BACKEND_POLL_INTERVAL = 5000; // ms
@@ -182,8 +184,9 @@
         }
         // criar nova conversa local (quando createIfMissing === true)
         const nome = (localStorage.getItem('nome') || '') + ' ' + (localStorage.getItem('sobrenome') || '');
+        const clienteEmailLocal = localStorage.getItem('email') || localStorage.getItem('userEmail') || null;
         const now = Date.now();
-        const conv = { id: now, name: `Atendimento - ${nome.trim() || 'Cliente'}`, messages: [], lastMessagePreview: '', unread: 0, online: false, createdAt: now, status: 'open', escalated: false };
+        const conv = { id: now, name: `Atendimento - ${nome.trim() || 'Cliente'}`, cliente_email: clienteEmailLocal, messages: [], lastMessagePreview: '', unread: 0, online: false, createdAt: now, status: 'open', escalated: false };
         store.conversations = store.conversations || [];
         store.conversations.unshift(conv);
         localStorage.setItem('offline_chat_store', JSON.stringify(store));
@@ -228,7 +231,8 @@
     // criar nova conversa
     const nome = (localStorage.getItem('nome') || '') + ' ' + (localStorage.getItem('sobrenome') || '');
     const rawPhoto = localStorage.getItem('foto') || localStorage.getItem('userPhoto') || null;
-    const body = { name: `Atendimento - ${nome.trim() || 'Cliente'}`, photo: normalizeApiPath(rawPhoto) };
+    const clienteEmail = localStorage.getItem('email') || localStorage.getItem('userEmail') || null;
+    const body = { name: `Atendimento - ${nome.trim() || 'Cliente'}`, photo: normalizeApiPath(rawPhoto), cliente_email: clienteEmail };
     try{
       // quick backend availability check before attempting to create conversation
       try{
@@ -372,6 +376,7 @@
     mensagensEl.innerHTML = '';
     list.forEach(m => appendMsg(m));
     scrollDown();
+    scheduleProtocolTimer();
   }
 
   function appendMsg(m){
@@ -381,6 +386,7 @@
     const html = `<div class="balao">${m.text ? esc(m.text) : ''}${m.extra || ''}</div><div class="hora">${new Date(m.time||Date.now()).toLocaleString()}</div>`;
     div.innerHTML = html;
     mensagensEl.appendChild(div);
+    try{ scheduleProtocolTimer(); }catch(e){}
   }
 
   function scrollDown(){ requestAnimationFrame(()=>{ mensagensEl.scrollTop = mensagensEl.scrollHeight; }); }
@@ -391,6 +397,11 @@
     // send message as client
     const payload = { text, from: 'user', fromName: (localStorage.getItem('nome') || '') + ' ' + (localStorage.getItem('sobrenome') || ''), photo: normalizeApiPath(localStorage.getItem('foto') || null) };
     try{
+      // otimista: mostrar a mensagem imediatamente no UI para feedback instantâneo
+      try{
+        const optimistic = { id: 'tmp-' + Date.now(), from: 'user', fromName: payload.fromName, text: payload.text, time: Date.now() };
+        appendMsg(optimistic);
+      }catch(e){}
       // se estivermos em modo Live Server offline, salvar localmente
       if (isLiveServerFallback) {
         try {
@@ -450,7 +461,8 @@
       }
 
       const msg = await r.json();
-      // após envio, buscar mensagens atuais
+      // após envio, atualizar UI: preferimos recarregar mensagens do servidor
+      scheduleProtocolTimer();
       await fetchAndRender();
       try{ input.focus(); }catch(e){}
     }catch(e){
@@ -482,6 +494,49 @@
     polling = setInterval(fetchAndRender, 2500);
   }
 
+  function scheduleProtocolTimer(){
+    try{ if(protocolTimer) { clearTimeout(protocolTimer); protocolTimer = null; } }catch(e){}
+    if (!conversationId) return;
+    protocolTimer = setTimeout(async ()=>{
+      try{
+        // tentar gerar protocolo no servidor
+        if (!isLiveServerFallback) {
+          try{
+            const resp = await apiFetch(`/api/conversations/${conversationId}/generate-protocol`, { method: 'POST', credentials: 'same-origin' });
+            if (resp && resp.ok) {
+              const data = await resp.json();
+              if (data && data.sucesso) {
+                // mostrar mensagem do sistema
+                appendMsg(data.message || { from: 'system', fromName: 'Sistema', text: `Protocolo: ${data.protocol || ''}`, time: Date.now() });
+                // exibir protocolo no cabeçalho
+                try{ currentConvNameEl.textContent = (currentConvNameEl.textContent || '') + ' — Protocolo: ' + (data.protocol || ''); }catch(e){}
+                return;
+              }
+            }
+          }catch(e){ console.warn('generate-protocol failed', e); }
+        }
+        // fallback: criar mensagem localmente
+        try{
+          const proto = 'PROTO-' + Date.now().toString(36).toUpperCase().slice(0,8);
+          const text = `Protocolo de atendimento: ${proto} — Atendimento registrado como necessário.`;
+          const raw = localStorage.getItem('offline_chat_store');
+          const store = raw ? JSON.parse(raw) : { conversations: [] };
+          const conv = (store.conversations || []).find(c => String(c.id) === String(conversationId));
+          if (conv) {
+            const now = Date.now();
+            const msg = { id: now, from: 'system', fromName: 'Sistema', text, time: now };
+            conv.messages = conv.messages || [];
+            conv.messages.push(msg);
+            conv.lastMessagePreview = String(text).slice(0,200);
+            localStorage.setItem('offline_chat_store', JSON.stringify(store));
+            appendMsg(msg);
+            try{ currentConvNameEl.textContent = (currentConvNameEl.textContent || '') + ' — Protocolo: ' + proto; }catch(e){}
+          }
+        }catch(e){ console.error('protocol fallback failed', e); }
+      }catch(e){ console.error('protocol timer error', e); }
+    }, PROTOCOL_TIMEOUT);
+  }
+
   // suporte tanto a submit quanto ao botão enviar (novo layout)
   if(form){
     form.addEventListener('submit', async function(ev){
@@ -508,7 +563,51 @@
   if(newConvBtn){
     newConvBtn.addEventListener('click', async ()=>{
       try{
-        // Forçar criação de nova conversa: limpar referencias e criar uma nova
+        // Se houver conversa offline, tentar migrar ao backend antes de criar nova
+        const offlineId = localStorage.getItem('offline_conversation');
+        const clienteEmail = localStorage.getItem('email') || localStorage.getItem('userEmail') || null;
+        if (offlineId) {
+          // checar backend rápido
+          const ok = await checkBackend();
+          if (ok) {
+            try {
+              const raw = localStorage.getItem('offline_chat_store');
+              const store = raw ? JSON.parse(raw) : { conversations: [] };
+              const conv = (store.conversations || []).find(c => String(c.id) === String(offlineId));
+              if (conv) {
+                // criar conversa no servidor
+                const body = { name: conv.name || (`Atendimento - ${clienteEmail || 'Cliente'}`), cliente_email: clienteEmail };
+                const r = await fetch(backendBase + '/api/conversations', { method: 'POST', headers: { 'Content-Type':'application/json' }, body: JSON.stringify(body) });
+                if (r && r.ok) {
+                  const created = await r.json();
+                  const serverId = created.id;
+                  // enviar mensagens locais para o servidor
+                  for (const m of (conv.messages || [])) {
+                    try {
+                      await fetch(backendBase + `/api/conversations/${serverId}/messages`, { method: 'POST', headers: { 'Content-Type':'application/json' }, body: JSON.stringify({ text: m.text, from: m.from || 'user', fromName: m.fromName || (localStorage.getItem('nome')||'' ) }) });
+                    } catch (e) { console.warn('msg upload failed', e); }
+                  }
+                  // ajustar referências locais
+                  localStorage.setItem('atendimento_conversation', String(serverId));
+                  localStorage.removeItem('offline_conversation');
+                  // opcional: remover da store offline
+                  try {
+                    store.conversations = (store.conversations || []).filter(c=>String(c.id)!==String(offlineId));
+                    localStorage.setItem('offline_chat_store', JSON.stringify(store));
+                  } catch(e){}
+                  // abrir a conversa criada no servidor
+                  conversationId = serverId;
+                  appendLocalNotice('Conversa enviada ao servidor e aberta.');
+                  await fetchAndRender();
+                  startPolling();
+                  return;
+                }
+              }
+            } catch (e) { console.warn('migration failed', e); }
+          }
+        }
+
+        // fallback: limpar referências locais e criar/abrir nova conversa (pode criar no backend)
         localStorage.removeItem('atendimento_conversation');
         localStorage.removeItem('offline_conversation');
         await criarOuAbrirConversacao(true);

@@ -789,6 +789,45 @@ app.post('/api/conversations/:id/messages', express.json(), (req, res) => {
   })();
 });
 
+// Gerar protocolo de atendimento e inserir mensagem do sistema na conversa
+app.post('/api/conversations/:id/generate-protocol', express.json(), async (req, res) => {
+  const { id } = req.params;
+  (async () => {
+    try {
+      const protocol = 'PROTO-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2,6).toUpperCase();
+      const text = `Protocolo de atendimento: ${protocol} — Atendimento registrado como necessário.`;
+      // tentar inserir no DB
+      try {
+        const conn = await createDbConnection();
+        await conn.execute(`INSERT INTO chat (conversation_id, sender, sender_name, text) VALUES (?, 'system', 'Sistema', ?)` , [id, text]);
+        try {
+          await conn.execute(`UPDATE chat_conversations SET last_message_preview = ? WHERE id = ?`, [String(text).slice(0,200), id]);
+        } catch(e) {}
+        await conn.end();
+        return res.json({ sucesso: true, protocol, message: { from: 'system', fromName: 'Sistema', text, time: Date.now() } });
+      } catch (e) {
+        console.warn('generate-protocol DB failed, falling back to file store', e && e.message);
+      }
+      // fallback file store
+      try {
+        const store = readChatStore();
+        const conv = (store.conversations || []).find(c => String(c.id) === String(id));
+        if (!conv) return res.status(404).json({ sucesso: false, mensagem: 'Conversa não encontrada' });
+        const now = Date.now();
+        const msg = { id: now, from: 'system', fromName: 'Sistema', text, time: now };
+        conv.messages = conv.messages || [];
+        conv.messages.push(msg);
+        conv.lastMessagePreview = String(text).slice(0,200);
+        writeChatStore(store);
+        return res.json({ sucesso: true, protocol, message: msg });
+      } catch (e) { console.error('generate-protocol fallback failed', e && e.message); return res.status(500).json({ sucesso: false }); }
+    } catch (e) {
+      console.error('generate-protocol error', e && e.message);
+      return res.status(500).json({ sucesso: false, mensagem: 'Falha ao gerar protocolo.' });
+    }
+  })();
+});
+
 // Exportar conversas para arquivo Word (HTML salvo como .doc) — inclui cabeçalho e tabela de mensagens
 app.get('/api/conversations/:id/export-doc', async (req, res) => {
   const { id } = req.params;
