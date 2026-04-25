@@ -88,6 +88,25 @@
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 }
 
+/* Botão de alternar tema (admin header) */
+.btn-theme-toggle {
+  background: linear-gradient(90deg,#0f7cc6,#0bbdc3);
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.18);
+  transition: transform .15s ease, box-shadow .15s ease, opacity .12s ease;
+}
+.btn-theme-toggle:hover { transform: translateY(-1px); }
+.btn-theme-toggle[aria-pressed="true"] { background: linear-gradient(90deg,#f39c12,#f6b93b); color: #111; }
+
+
 /* 🔹 Status de Cliente */
 #clienteStatus {
   background: linear-gradient(135deg, #1976d2 60%, #43cea2 100%);
@@ -271,3 +290,143 @@ header.site-header #clienteStatus #fotoCliente {
 /* Garante que a área do cliente no header não mostre spans vazios */
 header.site-header #clienteStatus span { display: inline-block; vertical-align: middle; }
 header.site-header #clienteStatus span:empty { display: none; }
+
+/* Botão para sair da página administrativa (visível apenas em páginas admin) */
+header.site-header { position: relative; }
+.admin-badge {
+  display: none; /* controlado por JS */
+  align-items: center;
+  justify-content: center;
+  padding: 6px 12px;
+  margin-left: 12px;
+  border-radius: 10px;
+  background: transparent;
+  color: #cfeef5;
+  font-weight: 700;
+  font-size: 0.95rem;
+  box-shadow: none;
+}
+.admin-badge::before {
+  content: "";
+  display: none;
+}
+
+.admin-badge-exit {
+  margin-left: 12px;
+  padding: 10px 16px;
+  min-width: 86px;
+  height: 42px;
+  border-radius: 10px;
+  border: none;
+  background: linear-gradient(90deg,#ff6b6b,#ff5252);
+  color: #fff;
+  font-weight: 800;
+  font-size: 1.02rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.14);
+}
+.admin-badge-exit:hover { transform: translateY(-1px); }
+
+/* Forçar ocultação do bloco de status em páginas onde o usuário é admin
+   Usa a classe `is-admin-mode` adicionada por `statusLogin.js` */
+body.is-admin-mode .status-admin,
+body.is-admin-mode #statusLogado,
+body.is-admin-mode .status-text,
+body.is-admin-mode .admin-label,
+body.is-admin-mode .logo-text.admin-name {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+.btn-exit-admin {
+  position: absolute;
+  right: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2000;
+  display: none; /* controlado por JS */
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: linear-gradient(90deg,#ff6b6b,#ff5252);
+  color: #fff;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(255,82,82,0.12);
+}
+.btn-exit-admin:hover { transform: translateY(-50%) scale(1.02); }
+
+@media (max-width: 820px) {
+  .btn-exit-admin { right: 12px; padding: 6px 10px; }
+}
+
+/* Botão pequeno ao lado do status (quando status está visível) */
+.btn-exit-near {
+  display: none; /* controlado por JS */
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: none;
+  background: linear-gradient(90deg,#00e6c3,#00b8ff);
+  color: #042a33;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(0,182,200,0.12);
+}
+.btn-exit-near:hover { transform: scale(1.03); }
+
+@media (max-width: 640px) {
+  .btn-exit-near { padding: 6px 10px; font-size: 0.95rem; }
+}
+
+/* Botão pequeno à direita do status (ícone) */
+.btn-exit-right {
+  display: none; /* controlado por JS */
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 36px;
+  border-radius: 8px;
+  border: none;
+  margin-left: 8px;
+  background: linear-gradient(90deg,#ff7a7a,#ff5252);
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(255,82,82,0.12);
+  display: inline-flex;
+}
+.btn-exit-right i { font-size: 1rem; }
+.btn-exit-right:hover { transform: scale(1.04); }
+
+@media (max-width: 640px) {
+  .btn-exit-right { width: 36px; height: 32px; margin-left: 6px; }
+}
+
+/* Botão maior posicionado do lado de fora do bloco de status */
+.btn-exit-outside {
+  display: none; /* controlado por JS */
+  align-items: center;
+  justify-content: center;
+  padding: 10px 16px;
+  border-radius: 20px;
+  border: none;
+  background: linear-gradient(90deg,#00f0c6,#00d0ff);
+  color: #042a33;
+  font-weight: 800;
+  box-shadow: 0 10px 30px rgba(0,200,220,0.12);
+  cursor: pointer;
+  margin-left: 12px;
+}
+.btn-exit-outside:hover { transform: scale(1.03); }
+
+@media (max-width: 820px) {
+  .btn-exit-outside { display: none !important; }
+}

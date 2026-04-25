@@ -19,7 +19,21 @@
 <body>
   <header class="site-header">
     <div class="logo">
-      <span class="logo-icon">??</span>
+      <span class="logo-icon" aria-hidden="true">
+        <!-- Inline SVG do ícone de carrinho (cor e estilo ajustáveis via CSS) -->
+        <svg width="40" height="28" viewBox="0 0 64 44" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Ícone carrinho">
+          <defs>
+            <linearGradient id="g1" x1="0" x2="1">
+              <stop offset="0%" stop-color="#00d0ff"/>
+              <stop offset="50%" stop-color="#00f0c6"/>
+              <stop offset="100%" stop-color="#6fe6c4"/>
+            </linearGradient>
+          </defs>
+          <path d="M6 6h6l6 22h34l8-16H20" stroke="url(#g1)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+          <circle cx="24" cy="36" r="3.6" fill="#00c6ff" />
+          <circle cx="46" cy="36" r="3.6" fill="#00c6ff" />
+        </svg>
+      </span>
       <span class="logo-text">
         <span class="mix">MIX</span><span class="promocao">PROMOCAO</span>
       </span>
@@ -41,7 +55,28 @@
     </div>
 
     <div id="statusLogado" class="status-admin" style="display:none;">
-      <span class="status-text">?? Administrador: <strong id="nomeUsuario"></strong></span>
+      <button id="btnLogoutInline" class="btn-logout-inline" title="Sair do modo admin" aria-label="Sair do modo admin">
+        <i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i>
+      </button>
+      <span class="status-text">
+        <span class="admin-icon" aria-hidden="true">
+          <svg width="28" height="22" viewBox="0 0 64 44" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Ícone carrinho">
+            <defs>
+              <linearGradient id="g-status" x1="0" x2="1">
+                <stop offset="0%" stop-color="#00f0c6"/>
+                <stop offset="100%" stop-color="#00d0ff"/>
+              </linearGradient>
+            </defs>
+            <path d="M6 6h6l6 22h34l8-16H20" stroke="url(#g-status)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+            <circle cx="24" cy="36" r="3.6" fill="#00c6ff" />
+            <circle cx="46" cy="36" r="3.6" fill="#00c6ff" />
+          </svg>
+        </span>
+        <span class="admin-label">Administrador:</span>
+        <strong id="nomeUsuario"></strong>
+      </span>
+      <button id="btnExitNearStatus" class="btn-exit-near" title="Sair do modo admin">Sair</button>
+      <button id="btnExitRight" class="btn-exit-right" title="Sair do modo admin"><i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i></button>
       <button id="logout" class="btn-logout">Sair</button>
     </div>
 
@@ -52,6 +87,11 @@
       <button id="btnMinhaConta" class="btn-minha-conta">Minha Conta</button>
       <button id="logoutBtn" class="btn-logout">Sair</button>
     </div>
+    <!-- Botão de logout fixo no canto direito do cabeçalho -->
+    <button id="btnLogoutHeader" class="btn-logout-header" style="display:none;" aria-label="Sair">
+      <i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i>
+      <span>Sair</span>
+    </button>
   </header>
 
   <main class="admin-area-main">
@@ -198,6 +238,7 @@
   <script src="/js/btn-topo.js"></script>
   <script src="/js/bloquear-copia.js"></script>
   <script src="/js/admin-area.js"></script>
+  <script src="/js/admin-cards.js"></script>
   <script src="/js/responsive-nav.js"></script>
 </body>
 </html>

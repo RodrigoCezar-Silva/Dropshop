@@ -68,3 +68,63 @@
   .hero-text-box.redesign { padding: 22px 8vw 18px 8vw; font-size: 1rem; }
   .hero-btn-group-outside { gap: 10px; padding: 0 4vw; }
 }
+
+/* Estilos para a seção de etapas e template */
+.etapas-lista {
+  max-width: 980px;
+  margin: 26px auto;
+  background: linear-gradient(180deg,#ffffff,#fbfbff);
+  border-radius: 14px;
+  padding: 22px 28px;
+  box-shadow: 0 8px 30px rgba(15,15,40,0.06);
+  color: #1f2937;
+}
+.etapas-lista ol { padding-left: 1.1rem; margin-bottom: 18px; }
+.etapas-lista li { margin: 10px 0; line-height: 1.6; }
+.etapas-lista li.active-step { background: linear-gradient(90deg,#eef2ff,#f8fafc); border-radius:8px; padding:8px 12px; box-shadow:0 6px 18px rgba(99,102,241,0.06); }
+.etapas-lista .fake-btn {
+  display: inline-block;
+  background: linear-gradient(90deg,#f8fafc,#eef2ff);
+  border: 1px solid #e6e9f7;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: default;
+}
+.exemplo-mensagem { position: relative; margin: 18px 0; }
+.exemplo-mensagem pre {
+  background: #0f172a; color: #e6eef8; padding: 18px; border-radius: 10px; overflow:auto; font-size:0.95rem; line-height:1.45;
+}
+.copy-btn {
+  position: absolute; top: 10px; right: 10px; background: linear-gradient(90deg,#06b6d4,#7c3aed); color:#fff; border:none; padding:8px 12px; border-radius:8px; cursor:pointer; box-shadow:0 6px 18px rgba(99,102,241,0.18);
+}
+.nota-seguranca { margin-top: 8px; color:#334155; font-size:0.95rem; }
+
+/* toast */
+.ajuda-toast { position: fixed; right: 18px; bottom: 18px; background: #111827; color:#fff; padding:10px 14px; border-radius:8px; box-shadow:0 8px 30px rgba(2,6,23,0.4); transform: translateY(8px); opacity:0; pointer-events:none; transition:opacity .25s, transform .25s; z-index:1200; }
+.ajuda-toast.show { opacity:1; transform:none; pointer-events:auto; }
+
+@media (prefers-color-scheme: dark) {
+  .etapas-lista { background: linear-gradient(180deg,#0b1020,#0f1724); color:#e6eef8; box-shadow: 0 8px 40px rgba(2,6,23,0.6); }
+  .etapas-lista pre { background:#071028; color:#dbeafe; }
+  .fake-btn { background: linear-gradient(90deg,#0f1724,#11203a); border-color:#16233a; color:#dbeafe; }
+  .nota-seguranca { color:#cbd5e1; }
+  .etapas-lista li.active-step { background: linear-gradient(90deg,#071028,#0b1524); box-shadow: 0 6px 18px rgba(2,6,23,0.6); }
+}
+
+/* Timeline - estilo idêntico a trocas-devolucoes */
+.timeline { position: relative; padding-left: 40px; }
+.timeline::before { content: ""; position: absolute; left: 15px; top: 0; bottom: 0; width: 3px; background: linear-gradient(180deg, #6366f1, #a855f7, #ec4899); border-radius: 3px; }
+.timeline-step { position: relative; margin-bottom: 40px; padding: 28px 32px; background: #fff; border-radius: 16px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); border: 1px solid rgba(0, 0, 0, 0.04); transition: transform 0.3s ease, box-shadow 0.3s ease; }
+.timeline-step:hover { transform: translateX(6px); box-shadow: 0 8px 30px rgba(99, 102, 241, 0.1); }
+.timeline-step::before { content: attr(data-step); position: absolute; left: -40px; top: 28px; width: 32px; height: 32px; background: linear-gradient(135deg, #6366f1, #a855f7); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 800; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3); }
+.timeline-step h3 { font-size: 1.1rem; font-weight: 800; color: #1e293b; margin: 0 0 8px; display: flex; align-items: center; gap: 10px; }
+.timeline-step h3 i { color: #6366f1; font-size: 1rem; }
+.timeline-step p { font-size: 0.92rem; color: #64748b; line-height: 1.7; margin: 0; }
+
+@media (max-width:800px) {
+  .timeline { padding-left: 20px; }
+  .timeline::before { left: 15px; }
+  .timeline-step { padding: 20px; }
+  .timeline-step::before { left: -36px; }
+}
