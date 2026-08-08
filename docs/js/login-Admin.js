@@ -43,9 +43,39 @@ document.addEventListener("DOMContentLoaded", () => {
         // Se `AUTH_SERVER` estiver definido usa ele, caso contrário
         // detecta se estamos rodando pelo Live Server (porta 5500/5501)
         // e aponta para o backend em http://localhost:3000 por padrão.
-        const defaultBackend = `${window.location.protocol}//localhost:3000`;
+        const defaultBackend = `http://localhost:3000`;
         const isLiveServer = !!(window.location.port && (window.location.port === '5500' || window.location.port === '5501'));
-        const base = window.AUTH_SERVER || (isLiveServer ? defaultBackend : window.location.origin);
+        const rawBase = window.AUTH_SERVER || (isLiveServer ? defaultBackend : null);
+        const isPlaceholderBase = rawBase && /SEU_API_DOMAIN|your-api|example\.com/i.test(rawBase);
+        const isInvalidAuthServer = rawBase && (rawBase.includes('.html') || rawBase.includes('/admin-login') || rawBase.includes('/repos') || isPlaceholderBase);
+        const base = isInvalidAuthServer ? (isLiveServer ? defaultBackend : null) : rawBase;
+
+        if (!base) {
+          const cfg = window.AUTH_CONFIG || {};
+          if (cfg.mockAdmin && cfg.mockAdmin.enabled) {
+            if (usuario === cfg.mockAdmin.user && senha === cfg.mockAdmin.pass) {
+              localStorage.setItem("token", "MOCK_TOKEN");
+              localStorage.setItem("nome", cfg.mockAdmin.user);
+              localStorage.setItem("sobrenome", "");
+              localStorage.setItem("tipoUsuario", "Administrador");
+              localStorage.setItem("isAdmin", "true");
+              await navigateToAdmin();
+              return;
+            }
+            if (mensagemErro) {
+              mensagemErro.innerText = "Usuário ou senha inválidos (mock).";
+              mensagemErro.style.color = "red";
+            }
+            return;
+          }
+
+          if (mensagemErro) {
+            mensagemErro.innerText = "Configuração de backend inválida. Atualize docs/auth-config.json com a URL da sua API.";
+            mensagemErro.style.color = "red";
+          }
+          return;
+        }
+
         let response = await fetch(`${base.replace(/\/$/, '')}/login-admin`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
