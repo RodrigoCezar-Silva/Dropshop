@@ -1,9 +1,9 @@
 ﻿{
-  "authServer": "https://rodrigocezar-silva.github.io/Dropshop/admin-login.html",
+  "authServer": "https://SEU_API_DOMAIN",
   "mockAdmin": {
     "enabled": false,
     "user": "AdminMaster",
-    "pass": "Nioh2@2130"
+    "pass": "admin123"
   }
 }
 

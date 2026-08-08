@@ -43,7 +43,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // Se `AUTH_SERVER` estiver definido usa ele, caso contrário
         // detecta se estamos rodando pelo Live Server (porta 5500/5501)
         // e aponta para o backend em http://localhost:3000 por padrão.
-        const defaultBackend = `${window.location.protocol}//localhost:3000`;
+        const defaultBackend = `http://localhost:3000`;
         const isLiveServer = !!(window.location.port && (window.location.port === '5500' || window.location.port === '5501'));
         const base = window.AUTH_SERVER || (isLiveServer ? defaultBackend : window.location.origin);
         let response = await fetch(`${base.replace(/\/$/, '')}/login-admin`, {
