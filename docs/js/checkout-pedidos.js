@@ -312,7 +312,7 @@ document.addEventListener("DOMContentLoaded", () => {
     form.reset();
     if (pagamentoSelect) pagamentoSelect.dispatchEvent(new Event("change"));
     setTimeout(() => {
-      window.location.href = "./html/meu-perfil.html";
+      window.location.href = "/html/meu-perfil.html";
     }, 1600);
   }
 

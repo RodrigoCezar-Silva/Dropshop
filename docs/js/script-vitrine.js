@@ -25,14 +25,37 @@ let categoriaAtiva = "todos";
 let termoBusca = "";
 let ordenacao = "padrao";
 
+// Determine API base: if page served on a different port than backend (3000), use backend origin
+const API_BASE = (function(){
+  try{
+    const host = location.hostname;
+    const port = location.port;
+    if(port && port !== '3000') return `${location.protocol}//${host}:3000`;
+  }catch(e){}
+  return '';
+})();
+
 async function carregarProdutosDoBanco() {
   try {
-    const response = await fetch("http://localhost:3000/api/produtos");
-    const data = await response.json();
-    if (response.ok && data.sucesso && Array.isArray(data.produtos)) {
+    const response = await fetch((API_BASE||'') + '/api/produtos');
+    const text = await response.text();
+    if (!response.ok) {
+      console.error('Erro ao carregar /api/produtos - status:', response.status, 'body:', text);
+      return;
+    }
+    let data = null;
+    try {
+      data = JSON.parse(text);
+    } catch (e) {
+      console.error('Resposta de /api/produtos não é JSON válido:', e, 'body:', text);
+      return;
+    }
+    if (data && data.sucesso && Array.isArray(data.produtos)) {
       produtos = data.produtos;
       produtos.forEach(p => { if (!p.categoria) p.categoria = "outros"; });
       localStorage.setItem("loja", JSON.stringify(produtos));
+    } else {
+      console.error('Formato inesperado de /api/produtos:', data);
     }
   } catch (error) {
     console.error("Erro ao carregar produtos do banco:", error);
@@ -99,7 +122,7 @@ async function registrarVisualizacaoProduto(id) {
     const chave = `produto_visualizado_${id}`;
     if (sessionStorage.getItem(chave)) return;
 
-    const response = await fetch(`http://localhost:3000/api/produtos/${id}/visualizacao`, {
+    const response = await fetch(`/api/produtos/${id}/visualizacao`, {
       method: "POST",
       keepalive: true
     });
@@ -313,8 +336,11 @@ function atualizarBotoesEditar() {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
-  await carregarProdutosDoBanco();
-  montarVitrine(paginaAtual);
+  const hasVitrine = !!document.getElementById("vitrine-container");
+  if (hasVitrine) {
+    await carregarProdutosDoBanco();
+    montarVitrine(paginaAtual);
+  }
   atualizarBotoesEditar();
 
   // Busca de produtos

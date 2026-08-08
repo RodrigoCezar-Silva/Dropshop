@@ -1,4 +1,4 @@
-// JS de demonstração para o docs: mesmo comportamento do src/public/js/admin-cards.js
+// Pequeno script para melhorar interacoes de hover/focus nos cards da area admin
 document.addEventListener('DOMContentLoaded', function () {
   var selector = '.admin-card, .admin-stat-card, .stat-card, .reclamacao-card, .pagamento-card';
   var nodes = document.querySelectorAll(selector);
@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', function () {
     el.addEventListener('focus', function () { el.classList.add('is-hover'); });
     el.addEventListener('blur', function () { el.classList.remove('is-hover'); });
 
+    // Touch support: ativa classe por um curto periodo
     el.addEventListener('touchstart', function () { el.classList.add('is-hover'); });
     el.addEventListener('touchend', function () { setTimeout(function () { el.classList.remove('is-hover'); }, 350); });
   });

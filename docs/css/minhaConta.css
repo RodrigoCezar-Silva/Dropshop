@@ -42,6 +42,49 @@
   box-shadow: 0 0 0 3px rgba(0,123,255,0.5);
 }
 
+/* Header: status do cliente (avatar pequeno + nome + botão) */
+#clienteStatus {
+  display: none; /* controlado por JS */
+  align-items: center;
+  gap: 10px;
+}
+
+#clienteStatus.show {
+  display: flex;
+}
+
+#clienteStatus .foto-perfil.pequena,
+.foto-perfil.pequena {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid rgba(0,0,0,0.06);
+  object-fit: cover;
+}
+
+.cliente-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.cliente-nome {
+  font-weight: 600;
+  color: #0b1f3a;
+  max-width: 160px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Esconder botão de logout no header (mantém para funcionalidade se necessário) */
+#clienteStatus .header-logout { display: none; }
+
+#clienteStatus .btn-minha-conta {
+  padding: 6px 14px;
+  font-size: 13px;
+}
+
 /* Responsividade */
 @media (max-width: 600px) {
   .btn-minha-conta {
@@ -117,11 +160,19 @@ h1 {
 }
 
 .foto-perfil {
-  width: 120px;
-  height: 120px;
+  width: 220px;
+  height: 220px;
   border-radius: 50%;
   border: 3px solid #007bff;
   object-fit: cover;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+}
+
+@media (max-width: 768px) {
+  .foto-perfil {
+    width: 120px;
+    height: 120px;
+  }
 }
 
 .perfil-form {

@@ -157,7 +157,14 @@
       .join("");
     sugestoesEl.querySelectorAll(".chatbot-sugestao").forEach(btn => {
       btn.addEventListener("click", () => {
-        enviarMensagem(btn.textContent);
+        const text = (btn.textContent || '').trim();
+        // se for sugestão de falar com atendente, redireciona para a página de atendimento
+        if (/falar com um atendente|fala com um atendente|falar com uma atendente|atendente/i.test(text)) {
+          try { localStorage.setItem('chatbot_escalamento', JSON.stringify({ time: Date.now(), msg: text })) } catch (e) {}
+          window.location.href = '/html/atendimento.html';
+          return;
+        }
+        enviarMensagem(text);
       });
     });
   }
@@ -182,12 +189,12 @@
     `;
     corpo.appendChild(div);
 
-    mostrarSugestoes([
+      mostrarSugestoes([
       "🔍 Ver promoções",
       "🛒 Como comprar?",
       "🚚 Prazo de entrega",
       "🔄 Trocas e devoluções",
-      "📞 Falar no WhatsApp"
+      "📞 Fala com um atendente"
     ]);
   }
 
@@ -225,7 +232,7 @@
     if (/^(oi|ola|eai|e ai|hey|bom dia|boa tarde|boa noite|salve|hello|hi)\b/.test(lower)) {
       return {
         texto: `Olá! 😊 Que bom ter você aqui! Sou a <strong>${NOME_IA}</strong>, assistente virtual da ${NOME_LOJA}. Como posso ajudar?`,
-        sugestoes: ["🔍 Ver promoções", "🛒 Como funciona?", "📞 Falar no WhatsApp"]
+        sugestoes: ["🔍 Ver promoções", "🛒 Como funciona?", "📞 Fala com um atendente"]
       };
     }
 
@@ -233,7 +240,7 @@
     if (/obrigad[oa]|valeu|thanks|brigad/.test(lower)) {
       return {
         texto: `De nada! 😊 Fico feliz em ajudar. Se precisar de mais alguma coisa, é só chamar!`,
-        sugestoes: ["🔍 Ver promoções", "📞 Falar no WhatsApp"]
+        sugestoes: ["🔍 Ver promoções", "📞 Fala com um atendente"]
       };
     }
 
@@ -241,8 +248,8 @@
     if (/promo[cç][aã]o|oferta|desconto|barato|produto|ver produto|loja|vitrine/.test(lower)) {
       if (produtos.length === 0) {
         return {
-          texto: `No momento estamos atualizando nosso catálogo 📦. Visite a <a href="./html/loja.html" style="color:#0072ff;font-weight:700">nossa loja</a> para ver os produtos disponíveis!`,
-          sugestoes: ["🛒 Como comprar?", "📞 Falar no WhatsApp"]
+          texto: `No momento estamos atualizando nosso catálogo 📦. Visite a <a href="/html/loja.html" style="color:#0072ff;font-weight:700">nossa loja</a> para ver os produtos disponíveis!`,
+          sugestoes: ["🛒 Como comprar?", "📞 Fala com um atendente"]
         };
       }
 
@@ -256,13 +263,13 @@
             <strong>${esc(p.nome)}</strong>
             <span class="preco">${esc(p.precoAtual)}</span>
             ${p.desconto ? `<span class="desconto-badge">🏷️ ${esc(p.desconto)}</span>` : ""}
-            <a href="./html/produto.html?id=${p.id}">Ver produto →</a>
+            <a href="/html/produto.html?id=${p.id}">Ver produto →</a>
           </div>
         </div>
       `).join("");
 
       return {
-        texto: `🔥 Temos <strong>${produtos.length} produto(s)</strong> na loja! Aqui estão alguns destaques:${cards}<br>👉 <a href="./html/loja.html" style="color:#0072ff;font-weight:700">Ver todos os produtos</a>`,
+        texto: `🔥 Temos <strong>${produtos.length} produto(s)</strong> na loja! Aqui estão alguns destaques:${cards}<br>👉 <a href="/html/loja.html" style="color:#0072ff;font-weight:700">Ver todos os produtos</a>`,
         sugestoes: ["💰 Produto mais barato", "🛒 Como comprar?", "🚚 Tem frete grátis?"]
       };
     }
@@ -282,7 +289,7 @@
                 <strong>${esc(p.nome)}</strong>
                 <span class="preco">${esc(p.precoAtual)}</span>
                 ${p.desconto ? `<span class="desconto-badge">🏷️ ${esc(p.desconto)}</span>` : ""}
-                <a href="./html/produto.html?id=${p.id}">Ver produto →</a>
+                <a href="/html/produto.html?id=${p.id}">Ver produto →</a>
               </div>
             </div>
           `).join("");
@@ -292,8 +299,8 @@
           };
         }
         return {
-          texto: `Não encontrei nenhum produto com "<em>${esc(termos)}</em>" 😕. Tente outro nome ou visite a <a href="./html/loja.html" style="color:#0072ff;font-weight:700">loja completa</a>.`,
-          sugestoes: ["🔍 Ver promoções", "📞 Falar no WhatsApp"]
+          texto: `Não encontrei nenhum produto com "<em>${esc(termos)}</em>" 😕. Tente outro nome ou visite a <a href="/html/loja.html" style="color:#0072ff;font-weight:700">loja completa</a>.`,
+          sugestoes: ["🔍 Ver promoções", "📞 Fala com um atendente"]
         };
       }
     }
@@ -314,7 +321,7 @@
               <strong>${esc(p.nome)}</strong>
               <span class="preco">${esc(p.precoAtual)}</span>
               ${p.desconto ? `<span class="desconto-badge">🏷️ ${esc(p.desconto)}</span>` : ""}
-              <a href="./html/produto.html?id=${p.id}">Ver produto →</a>
+              <a href="/html/produto.html?id=${p.id}">Ver produto →</a>
             </div>
           </div>
         `;
@@ -329,12 +336,12 @@
     if (/como comprar|como funciona|como fa[cç]o|comprar|adicionar ao carrinho|carrinho/.test(lower)) {
       return {
         texto: `Comprar na ${NOME_LOJA} é super fácil! 🛒<br><br>
-          <strong>1.</strong> Acesse a <a href="./html/loja.html" style="color:#0072ff;font-weight:700">loja</a> e escolha seus produtos<br>
+          <strong>1.</strong> Acesse a <a href="/html/loja.html" style="color:#0072ff;font-weight:700">loja</a> e escolha seus produtos<br>
           <strong>2.</strong> Selecione o tamanho (se aplicável) e clique em <strong>Adicionar ao Carrinho</strong><br>
           <strong>3.</strong> Vá ao carrinho e confira os itens<br>
           <strong>4.</strong> Finalize a compra no checkout<br><br>
           Simples assim! 😉`,
-        sugestoes: ["🚚 Prazo de entrega", "💳 Formas de pagamento", "📞 Falar no WhatsApp"]
+        sugestoes: ["🚚 Prazo de entrega", "💳 Formas de pagamento", "📞 Fala com um atendente"]
       };
     }
 
@@ -347,7 +354,7 @@
           texto: `🎉 <strong>FRETE GRÁTIS!</strong><br><br>
             Compras acima de <strong>R$ 100,00</strong> têm frete grátis na ${NOME_LOJA}!<br>
             Seu carrinho atual: <strong>R$ ${subtotal.toFixed(2).replace(".", ",")}</strong> — você já tem frete grátis! 🚚✨`,
-          sugestoes: ["🛒 Ir ao checkout", "🔍 Ver promoções", "📞 Falar no WhatsApp"]
+          sugestoes: ["🛒 Ir ao checkout", "🔍 Ver promoções", "📞 Fala com um atendente"]
         };
       }
       aguardandoCep = true;
@@ -357,7 +364,7 @@
           ${subtotal > 0 ? `Seu carrinho: <strong>R$ ${subtotal.toFixed(2).replace(".", ",")}</strong><br>` : ""}
           💡 <strong>Dica:</strong> Compras acima de R$ 100,00 têm <strong>FRETE GRÁTIS</strong>!<br><br>
           👇 <strong>Digite seu CEP</strong> (8 dígitos) para ver as opções de frete e valores:`,
-        sugestoes: ["📞 Falar no WhatsApp", "🔍 Ver promoções"]
+        sugestoes: ["📞 Fala com um atendente", "🔍 Ver promoções"]
       };
     }
 
@@ -369,7 +376,7 @@
           • Cartão de Crédito (até 12x)<br>
           • Boleto Bancário<br><br>
           Todas as transações são <strong>100% seguras</strong> 🔒`,
-        sugestoes: ["🛒 Como comprar?", "🚚 Prazo de entrega", "📞 Falar no WhatsApp"]
+        sugestoes: ["🛒 Como comprar?", "🚚 Prazo de entrega", "📞 Fala com um atendente"]
       };
     }
 
@@ -380,8 +387,8 @@
           • Você tem até <strong>7 dias</strong> após o recebimento para solicitar troca ou devolução<br>
           • O produto deve estar na embalagem original e sem uso<br>
           • Para defeitos, entre em contato e resolveremos o mais rápido possível<br><br>
-          📄 Veja a política completa: <a href="./html/trocas-devolucoes.html" style="color:#0072ff;font-weight:700">Trocas e Devoluções</a>`,
-        sugestoes: ["📞 Falar no WhatsApp", "✉️ Enviar reclamação"]
+          📄 Veja a política completa: <a href="/html/trocas-devolucoes.html" style="color:#0072ff;font-weight:700">Trocas e Devoluções</a>`,
+        sugestoes: ["📞 Fala com um atendente", "✉️ Enviar reclamação"]
       };
     }
 
@@ -390,10 +397,10 @@
       return {
         texto: `Lamento que tenha tido algum problema 😔. Queremos resolver isso para você!<br><br>
           Você pode:<br>
-          • <a href="./html/contato.html" style="color:#0072ff;font-weight:700">Enviar uma mensagem</a> pelo formulário de contato<br>
+          • <a href="/html/contato.html" style="color:#0072ff;font-weight:700">Enviar uma mensagem</a> pelo formulário de contato<br>
           • Falar diretamente pelo WhatsApp para atendimento rápido<br><br>
           Faremos o possível para ajudar! 💪`,
-        sugestoes: ["📞 Falar no WhatsApp", "🔄 Política de trocas"],
+        sugestoes: ["📞 Fala com um atendente", "🔄 Política de trocas"],
         extra: botaoWhatsApp("Olá, tenho uma reclamação sobre um pedido")
       };
     }
@@ -412,8 +419,8 @@
       return {
         texto: `🛒 A <strong>${NOME_LOJA}</strong> é uma loja online com as melhores ofertas e preços imperdíveis!<br><br>
           Trabalhamos para oferecer produtos de qualidade com entrega rápida e atendimento humano. 💙<br><br>
-          📄 Saiba mais: <a href="./html/QuemSomos.html" style="color:#0072ff;font-weight:700">Quem Somos</a>`,
-        sugestoes: ["🔍 Ver promoções", "📞 Falar no WhatsApp"]
+          📄 Saiba mais: <a href="/html/QuemSomos.html" style="color:#0072ff;font-weight:700">Quem Somos</a>`,
+        sugestoes: ["🔍 Ver promoções", "📞 Fala com um atendente"]
       };
     }
 
@@ -421,10 +428,10 @@
     if (/meu pedido|rastrear|rastreio|acompanhar|onde est[aá]|status do pedido/.test(lower)) {
       return {
         texto: `📦 Para acompanhar seu pedido:<br><br>
-          <strong>1.</strong> Acesse <a href="./html/meu-perfil.html" style="color:#0072ff;font-weight:700">Meu Perfil</a><br>
+          <strong>1.</strong> Acesse <a href="/html/meu-perfil.html" style="color:#0072ff;font-weight:700">Meu Perfil</a><br>
           <strong>2.</strong> Verifique o status na seção de pedidos<br><br>
-          Se precisar de ajuda com algum pedido específico, entre em contato pelo WhatsApp!`,
-        sugestoes: ["📞 Falar no WhatsApp", "🔄 Trocas e devoluções"],
+          Se precisar de ajuda com algum pedido específico, entre em contato com nossa equipe!`,
+        sugestoes: ["📞 Fala com um atendente", "🔄 Trocas e devoluções"],
         extra: botaoWhatsApp("Olá, gostaria de rastrear meu pedido")
       };
     }
@@ -433,8 +440,8 @@
     if (/cadastr|criar conta|registrar|login|entrar|minha conta|perfil/.test(lower)) {
       return {
         texto: `👤 Para criar sua conta ou fazer login:<br><br>
-          • <a href="./html/cadastro-cliente.html" style="color:#0072ff;font-weight:700">Criar conta</a> (é rápido!)<br>
-          • <a href="./html/login-cliente.html" style="color:#0072ff;font-weight:700">Fazer login</a><br><br>
+          • <a href="/html/cadastro-cliente.html" style="color:#0072ff;font-weight:700">Criar conta</a> (é rápido!)<br>
+          • <a href="/html/login-cliente.html" style="color:#0072ff;font-weight:700">Fazer login</a><br><br>
           Com a conta você pode acompanhar pedidos e salvar favoritos! ⭐`,
         sugestoes: ["🛒 Como comprar?", "🔍 Ver promoções"]
       };
@@ -449,7 +456,7 @@
           • Política de trocas e devoluções transparente<br>
           • Atendimento humano sempre disponível<br><br>
           Pode comprar com tranquilidade! 😊`,
-        sugestoes: ["💳 Formas de pagamento", "📞 Falar no WhatsApp"]
+        sugestoes: ["💳 Formas de pagamento", "📞 Fala com um atendente"]
       };
     }
 
@@ -459,8 +466,8 @@
         texto: `📏 <strong>Sobre Tamanhos:</strong><br><br>
           • Cada produto tem os tamanhos disponíveis na página do produto<br>
           • Selecione o tamanho antes de adicionar ao carrinho<br>
-          • Na dúvida, entre em contato pelo WhatsApp que ajudamos a escolher!`,
-        sugestoes: ["🔍 Ver produtos", "📞 Falar no WhatsApp"]
+          • Na dúvida, fale com uma atendente que ajudamos a escolher!`,
+        sugestoes: ["🔍 Ver produtos", "📞 Fala com um atendente"]
       };
     }
 
@@ -468,7 +475,7 @@
     if (/tchau|ate mais|adeus|bye|flw|falou|ate logo/.test(lower)) {
       return {
         texto: `Até mais! 👋 Foi um prazer ajudar. Volte sempre que precisar! 😊💙`,
-        sugestoes: ["🔍 Ver promoções", "📞 Falar no WhatsApp"]
+        sugestoes: ["🔍 Ver promoções", "📞 Fala com um atendente"]
       };
     }
 
@@ -480,18 +487,18 @@
         • 🚚 <strong>Frete e entrega</strong><br>
         • 🔄 <strong>Trocas e devoluções</strong><br>
         • 💳 <strong>Formas de pagamento</strong><br><br>
-        Ou fale diretamente com nossa equipe pelo WhatsApp! 📱`,
-      sugestoes: ["🔍 Ver promoções", "🛒 Como comprar?", "🚚 Frete", "📞 WhatsApp"],
+          Ou fale diretamente com nossa equipe pelo atendimento! 📱`,
+      sugestoes: ["🔍 Ver promoções", "🛒 Como comprar?", "🚚 Frete", "📞 Fala com um atendente"],
       extra: botaoWhatsApp("Olá! Preciso de ajuda com uma dúvida")
     };
   }
 
   // ===== Botão WhatsApp =====
   function botaoWhatsApp(mensagem) {
-    const tel = getNumeroWhatsApp();
-    const url = `https://wa.me/${tel}?text=${encodeURIComponent(mensagem)}`;
-    return `<button class="chatbot-redirecionar-wpp" onclick="(function(){try{var h=new Date().toISOString().slice(0,10),s=JSON.parse(localStorage.getItem('chatbot_stats')||'{}');if(!s[h])s[h]={conversas:0,perguntas:0,whatsapp:0,resolvidos:0};s[h].whatsapp++;localStorage.setItem('chatbot_stats',JSON.stringify(s))}catch(e){};window.open('${url}','_blank')})()">
-      <i class="fab fa-whatsapp"></i> Abrir WhatsApp
+    // Redireciona para a página de atendimento interna em vez do WhatsApp
+    const atendimentoUrl = '/html/atendimento.html';
+    return `<button class="chatbot-redirecionar-wpp" onclick="(function(){try{var h=new Date().toISOString().slice(0,10),s=JSON.parse(localStorage.getItem('chatbot_stats')||'{}');if(!s[h])s[h]={conversas:0,perguntas:0,atendimentos:0,resolvidos:0};s[h].atendimentos++;localStorage.setItem('chatbot_stats',JSON.stringify(s))}catch(e){};try{localStorage.setItem('chatbot_escalamento',JSON.stringify({time:Date.now(),msg:${JSON.stringify(mensagem)}}))}catch(e){};window.location.href=atendimentoUrl})()">
+      <i class="fa-solid fa-headset"></i> Falar com uma atendente
     </button>`;
   }
 
@@ -594,7 +601,7 @@
 
         if (dados.erro) {
           addMsg("bot", `❌ CEP <strong>${cep.replace(/(\d{5})(\d{3})/, "$1-$2")}</strong> não encontrado. Verifique o número e tente novamente.`);
-          mostrarSugestoes(["🚚 Calcular frete", "📞 Falar no WhatsApp"]);
+          mostrarSugestoes(["🚚 Calcular frete", "📞 Fala com um atendente"]);
           aguardandoCep = true;
           inputEl.disabled = false;
           btnEnviar.disabled = false;
@@ -672,20 +679,20 @@
             localStorage.setItem("calculouFrete", "1");
 
             addMsg("bot", `✅ Frete <strong>${tipo}</strong> selecionado: <strong>${formatV(valor)}</strong>! ${subtotal > 0 ? `Total da compra: <strong>${formatV(subtotal + valor)}</strong>` : ""}<br><br>
-              👉 <a href="./html/checkout.html" style="color:#0072ff;font-weight:700">Finalizar compra no checkout →</a>`);
-            mostrarSugestoes(["🛒 Ir ao checkout", "🔍 Ver promoções", "📞 Falar no WhatsApp"]);
+              👉 <a href="/html/checkout.html" style="color:#0072ff;font-weight:700">Finalizar compra no checkout →</a>`);
+            mostrarSugestoes(["🛒 Ir ao checkout", "🔍 Ver promoções", "📞 Fala com um atendente"]);
           });
         });
 
-        mostrarSugestoes(["🛒 Ir ao checkout", "🔍 Ver promoções", "📞 Falar no WhatsApp"]);
+        mostrarSugestoes(["🛒 Ir ao checkout", "🔍 Ver promoções", "📞 Fala com um atendente"]);
         inputEl.disabled = false;
         btnEnviar.disabled = false;
         inputEl.focus();
       })
       .catch(() => {
         removerDigitando();
-        addMsg("bot", `⚠️ Não consegui consultar o CEP no momento. Tente novamente ou calcule diretamente no <a href="./html/checkout.html" style="color:#0072ff;font-weight:700">checkout</a>.`);
-        mostrarSugestoes(["🚚 Calcular frete", "📞 Falar no WhatsApp"]);
+        addMsg("bot", `⚠️ Não consegui consultar o CEP no momento. Tente novamente ou calcule diretamente no <a href="/html/checkout.html" style="color:#0072ff;font-weight:700">checkout</a>.`);
+        mostrarSugestoes(["🚚 Calcular frete", "📞 Fala com um atendente"]);
         inputEl.disabled = false;
         btnEnviar.disabled = false;
         inputEl.focus();
@@ -703,7 +710,7 @@
         if (match) {
           return {
             texto: r.resposta,
-            sugestoes: ["🔍 Ver promoções", "📞 Falar no WhatsApp"]
+            sugestoes: ["🔍 Ver promoções", "📞 Fala com um atendente"]
           };
         }
       }
@@ -750,6 +757,25 @@
       localStorage.setItem(STATS_KEY, JSON.stringify(stats));
     } catch {}
   }
+
+  // Delegated click handler: qualquer botão/elemento com texto 'Fala com um atendente'
+  // redireciona para a página interna de atendimento e grava escalamento.
+  document.addEventListener('click', function (ev) {
+    try {
+      let el = ev.target;
+      while (el && el !== document) {
+        const txt = (el.textContent || '').trim();
+        if (/falar com um atendente|fala com um atendente|falar com uma atendente/i.test(txt)) {
+          try { localStorage.setItem('chatbot_escalamento', JSON.stringify({ time: Date.now(), msg: txt })); } catch (e) {}
+          // small delay to ensure localStorage write
+          setTimeout(() => { window.location.href = '/html/atendimento.html'; }, 10);
+          ev.preventDefault();
+          return;
+        }
+        el = el.parentNode;
+      }
+    } catch (e) { /* ignore */ }
+  }, { capture: false });
 
   // ===== Eventos =====
   btnEnviar.addEventListener("click", () => {

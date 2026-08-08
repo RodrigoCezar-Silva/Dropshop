@@ -92,7 +92,7 @@ document.addEventListener("DOMContentLoaded", () => {
           setTimeout(() => {
             if (localStorage.getItem('checkoutPendente') === '1') {
               localStorage.removeItem('checkoutPendente');
-              window.location.href = "./html/checkout.html";
+              window.location.href = "/html/checkout.html";
               return;
             }
             // verifica se a URL de login tinha parâmetro returnTo

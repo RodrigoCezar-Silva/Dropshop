@@ -366,9 +366,6 @@ body.theme-dark .footer-pagamentos i { color: #ffffff; }
 }
 .theme-switch-wrapper .theme-switch { margin: 0; }
 
-/* Balloon tip that appears near the switch */
-/* theme-tip removed */
-
 /* Admin area adjustments */
 body.theme-dark .admin-card,
 body.theme-dark .admin-area-notes {
@@ -386,32 +383,6 @@ body.theme-dark .admin-card-link:hover { color: #5ec3ff; }
 
 /* Ensure header/client status contrast */
 body.theme-dark #clienteStatus, body.theme-dark .status-admin { background: linear-gradient(135deg,#0e2a3a,#06202b); color: #e7f8ff; }
-
-/* Garantir legibilidade geral no tema escuro */
-body.theme-dark h1, body.theme-dark h2, body.theme-dark h3, body.theme-dark h4, body.theme-dark h5, body.theme-dark h6 {
-  color: #ffffff;
-}
-body.theme-dark p, body.theme-dark span, body.theme-dark li, body.theme-dark strong, body.theme-dark td, body.theme-dark th {
-  color: #dbefff;
-}
-body.theme-dark a {
-  color: #9fd6ff;
-}
-body.theme-dark a:hover {
-  color: #cfefff;
-}
-/* Destaques e badges */
-body.theme-dark .destaque-item strong, body.theme-dark .destaque-item span, body.theme-dark .hero-index p {
-  color: #d6ecff;
-}
-/* Cards e vitrines */
-body.theme-dark .card-info, body.theme-dark .card-nome, body.theme-dark .card-preco-unitario, body.theme-dark .carrossel-vitrines .card-produto, body.theme-dark .card-actions {
-  color: #e6f3ff;
-}
-/* Rodapé */
-body.theme-dark .footer-links a, body.theme-dark .footer-desc, body.theme-dark .footer-bottom p {
-  color: rgba(255,255,255,0.8);
-}
 
 
 /* Removido bloco inválido de keyframes ou adicione um @keyframes se necessário */

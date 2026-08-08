@@ -27,7 +27,7 @@
       if (!document.querySelector('link[href$="popup-bloqueio.css"]')) {
         const link = document.createElement('link');
         link.rel = 'stylesheet';
-        link.href = './css/popup-bloqueio.css';
+        link.href = '/css/popup-bloqueio.css';
         document.head.appendChild(link);
       }
       mostrarPopup();

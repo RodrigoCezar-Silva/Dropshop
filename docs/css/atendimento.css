@@ -1,0 +1,95 @@
+
+/* Chat de atendimento - estilo inspirado no painel escuro em duas colunas */
+:root{--bg:#071021;--panel:#071827;--muted:#98a0ad;--accent1:#6b5cff;--accent2:#9b6bff}
+body .atendimento-page{min-height:80vh;padding:20px;background:linear-gradient(180deg,#06101a,#0b1721)}
+.atendimento-app{display:flex;gap:22px;max-width:1200px;margin:0 auto;width:100%}
+.atendimento-app{margin-top:140px}
+.conversations{width:320px;background:linear-gradient(180deg,#06121a,#071827);border-radius:12px;padding:16px;color:#e6eef6;box-shadow:0 8px 30px rgba(2,6,12,0.6)}
+.conversations-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.conversations-header h3{margin:0;font-weight:700}
+.conversations .conv-actions button{background:linear-gradient(90deg,var(--accent1),var(--accent2));border:none;color:#fff;border-radius:8px;padding:6px 10px;cursor:pointer}
+.conv-search input{width:100%;padding:10px;border-radius:10px;border:none;background:#071726;color:#cfe4ff}
+.lista-conversas{margin-top:12px;min-height:420px}
+.lista-conversas .empty{opacity:0.9;text-align:center;padding:24px;color:var(--muted)}
+.conv-item{display:flex;align-items:center;gap:10px;padding:10px;border-radius:8px;cursor:pointer}
+.conv-item:hover{background:rgba(255,255,255,0.02)}
+.conv-item .avatar{width:40px;height:40px;border-radius:999px;background:linear-gradient(135deg,var(--accent1),var(--accent2));display:flex;align-items:center;justify-content:center;color:#fff}
+.conv-item .meta{flex:1}
+.conv-item .meta .name{font-weight:700;color:#f8fbff}
+.conv-item .meta .last{font-size:0.85rem;color:var(--muted)}
+
+.chat-panel{flex:1;background:linear-gradient(180deg,#06131b,#071827);border-radius:12px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 8px 30px rgba(2,6,12,0.6)}
+.chat-panel-header{padding:18px;border-bottom:1px solid rgba(255,255,255,0.03);color:#cfe4ff}
+.conv-name{font-weight:700}
+.mensagens{flex:1;padding:22px;overflow:auto;color:#dbeefe}
+.msg{margin-bottom:14px;display:flex;flex-direction:column}
+.msg.cliente{align-items:flex-end}
+.msg.atendente{align-items:flex-start}
+.balao{max-width:78%;padding:12px 16px;border-radius:14px;background:rgba(255,255,255,0.03);color:#d7e9ff}
+.msg.cliente .balao{background:linear-gradient(90deg,#2b1b7a,#6b5cff);color:#fff}
+.msg.atendente .balao{background:rgba(255,255,255,0.03);color:#cfe4ff}
+.hora{font-size:0.72rem;color:var(--muted);margin-top:6px}
+
+.chat-input-bar{display:flex;gap:10px;align-items:center;padding:12px 16px;border-top:1px solid rgba(255,255,255,0.03);background:linear-gradient(180deg,#04131a,#07121b)}
+.chat-input-bar .attach{background:transparent;border:none;color:var(--muted);font-size:18px;padding:8px;border-radius:8px}
+.chat-input-bar input{flex:1;padding:14px 16px;border-radius:999px;border:1px solid rgba(255,255,255,0.04);background:rgba(255,255,255,0.02);color:#eaf6ff}
+.chat-input-bar .send{background:linear-gradient(90deg,var(--accent1),var(--accent2));border:none;color:#fff;padding:10px 18px;border-radius:14px;cursor:pointer;font-weight:700}
+
+/* Responsividade */
+@media (max-width:900px){
+  .atendimento-app{flex-direction:column;padding:8px}
+  .conversations{width:100%;order:2}
+  .chat-panel{order:1}
+}
+
+/* Ajuste de posição do chat: reduz para telas pequenas */
+@media (max-width:900px){
+  .atendimento-app{margin-top:80px}
+}
+
+/* Overrides para garantir tema escuro e remover áreas brancas herdadas de outros CSS */
+html, body{background:linear-gradient(180deg,#06101a,#0b1721) !important;color:#eaf6ff !important}
+.site-header{background:transparent !important;border-bottom:none !important;box-shadow:none !important;color:#eaf6ff}
+.site-header .logo, .site-header .menu a, #loginButtons a, .cart-icon{color:#eaf6ff !important}
+.site-header a{color:#eaf6ff !important}
+.site-footer{background:transparent !important;border-top:none !important;color:#cfe4ff}
+main{background:transparent !important}
+.atendimento-app{background:transparent !important}
+
+/* Remover possíveis caixas brancas internas */
+.container, .page, .content{background:transparent !important}
+
+/* Estilos específicos do rodapé quando dentro da página de atendimento (tema escuro) */
+.atendimento-page .site-footer{
+  background:linear-gradient(180deg,#06121a,#071827) !important;
+  color:#cfe4ff !important;
+  border-top:1px solid rgba(255,255,255,0.04) !important;
+  padding-top:18px !important;
+}
+.atendimento-page .site-footer .footer-top-bar{height:6px;background:linear-gradient(90deg,#6b5cff,#9b6bff);border-top-left-radius:8px;border-top-right-radius:8px}
+.atendimento-page .site-footer .footer-main{padding:18px 20px;display:flex;gap:24px;align-items:flex-start;justify-content:space-between}
+.atendimento-page .site-footer .footer-brand .footer-logo .footer-logo-icon{background:linear-gradient(135deg,#6b5cff,#9b6bff);display:inline-block;padding:6px;border-radius:6px;color:#fff}
+.atendimento-page .site-footer .footer-desc{color:#bcd7ff}
+.atendimento-page .site-footer .footer-links h4{color:#eaf6ff}
+.atendimento-page .site-footer a{color:#cfe4ff}
+.atendimento-page .site-footer .footer-bottom{border-top:1px solid rgba(255,255,255,0.03);padding:12px 18px;background:transparent}
+
+/* Garantir contraste em ícones de pagamento */
+.atendimento-page .site-footer .footer-pagamentos i{color:#dbeefe;margin-left:8px}
+
+/* Correções finais para remover qualquer faixa branca abaixo do footer */
+.atendimento-page .site-footer{
+  margin-top:0 !important;
+  box-shadow:none !important;
+  position:relative !important;
+}
+.atendimento-page .site-footer, .atendimento-page .site-footer .footer-bottom{background:linear-gradient(180deg,#06121a,#071827) !important}
+html, body {height:100% !important; background:linear-gradient(180deg,#06101a,#0b1721) !important}
+body{min-height:100vh !important; display:flex !important; flex-direction:column !important}
+main{flex:1 0 auto !important}
+.atendimento-page .footer-bottom{margin-top:0 !important;padding-bottom:18px !important}
+.atendimento-page .site-footer::before{display:none !important}
+
+
+
+

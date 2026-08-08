@@ -5,21 +5,36 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MIX-PROMOCAO - Area Admin</title>
 
-  <link rel="stylesheet" href="./css/style-index.css" />
-  <link rel="stylesheet" href="./css/menu.css" />
-  <link rel="stylesheet" href="./css/logo.css" />
-  <link rel="stylesheet" href="./css/statusLogin.css" />
-  <link rel="stylesheet" href="./css/minhaConta.css" />
-  <link rel="stylesheet" href="./css/btn-topo.css" />
-  <link rel="stylesheet" href="./css/footer.css" />
-  <link rel="stylesheet" href="./css/admin-area.css" />
+  <link rel="stylesheet" href="/css/style-index.css" />
+  <link rel="stylesheet" href="/css/menu.css" />
+  <link rel="stylesheet" href="/css/logo.css" />
+  <link rel="stylesheet" href="/css/statusLogin.css" />
+  <link rel="stylesheet" href="/css/minhaConta.css" />
+  <link rel="stylesheet" href="/css/btn-topo.css" />
+  <link rel="stylesheet" href="/css/footer.css" />
+  <link rel="stylesheet" href="/css/admin-area.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-  <link rel="stylesheet" href="./css/responsive.css" />
+  <link rel="stylesheet" href="/css/responsive.css" />
+  <link rel="stylesheet" href="/css/chatbot-widget.css" />
 </head>
 <body>
   <header class="site-header">
     <div class="logo">
-      <span class="logo-icon">??</span>
+      <span class="logo-icon" aria-hidden="true">
+        <!-- Inline SVG do ícone de carrinho (cor e estilo ajustáveis via CSS) -->
+        <svg width="40" height="28" viewBox="0 0 64 44" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Ícone carrinho">
+          <defs>
+            <linearGradient id="g1" x1="0" x2="1">
+              <stop offset="0%" stop-color="#00d0ff"/>
+              <stop offset="50%" stop-color="#00f0c6"/>
+              <stop offset="100%" stop-color="#6fe6c4"/>
+            </linearGradient>
+          </defs>
+          <path d="M6 6h6l6 22h34l8-16H20" stroke="url(#g1)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+          <circle cx="24" cy="36" r="3.6" fill="#00c6ff" />
+          <circle cx="46" cy="36" r="3.6" fill="#00c6ff" />
+        </svg>
+      </span>
       <span class="logo-text">
         <span class="mix">MIX</span><span class="promocao">PROMOCAO</span>
       </span>
@@ -41,7 +56,28 @@
     </div>
 
     <div id="statusLogado" class="status-admin" style="display:none;">
-      <span class="status-text">?? Administrador: <strong id="nomeUsuario"></strong></span>
+      <button id="btnLogoutInline" class="btn-logout-inline" title="Sair do modo admin" aria-label="Sair do modo admin">
+        <i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i>
+      </button>
+      <span class="status-text">
+        <span class="admin-icon" aria-hidden="true">
+          <svg width="28" height="22" viewBox="0 0 64 44" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Ícone carrinho">
+            <defs>
+              <linearGradient id="g-status" x1="0" x2="1">
+                <stop offset="0%" stop-color="#00f0c6"/>
+                <stop offset="100%" stop-color="#00d0ff"/>
+              </linearGradient>
+            </defs>
+            <path d="M6 6h6l6 22h34l8-16H20" stroke="url(#g-status)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+            <circle cx="24" cy="36" r="3.6" fill="#00c6ff" />
+            <circle cx="46" cy="36" r="3.6" fill="#00c6ff" />
+          </svg>
+        </span>
+        <span class="admin-label">Administrador:</span>
+        <strong id="nomeUsuario"></strong>
+      </span>
+      <button id="btnExitNearStatus" class="btn-exit-near" title="Sair do modo admin">Sair</button>
+      <button id="btnExitRight" class="btn-exit-right" title="Sair do modo admin"><i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i></button>
       <button id="logout" class="btn-logout">Sair</button>
     </div>
 
@@ -52,6 +88,11 @@
       <button id="btnMinhaConta" class="btn-minha-conta">Minha Conta</button>
       <button id="logoutBtn" class="btn-logout">Sair</button>
     </div>
+    <!-- Botão de logout fixo no canto direito do cabeçalho -->
+    <button id="btnLogoutHeader" class="btn-logout-header" style="display:none;" aria-label="Sair">
+      <i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i>
+      <span>Sair</span>
+    </button>
   </header>
 
   <main class="admin-area-main">
@@ -91,6 +132,12 @@
         <h2>Cadastrar Administrador</h2>
         <p>Cadastre novos usuarios com acesso administrativo para manter a operacao do sistema organizada.</p>
         <a class="admin-card-link" href="cadastro-admin.html"><span>Abrir cadastro</span><i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+      </article>
+      <article class="admin-card">
+        <div class="admin-card-icon"><i class="fa-solid fa-user-tie" aria-hidden="true"></i></div>
+        <h2>Área de Funcionários</h2>
+        <p>Acesse a área dedicada aos funcionários com permissões restritas.</p>
+        <a class="admin-card-link" href="funcionario-area.html"><span>Abrir área</span><i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
       </article>
 
       <article class="admin-card">
@@ -133,6 +180,13 @@
         <h2>Chatbot IA</h2>
         <p>Configure o assistente virtual com inteligencia artificial que atende clientes automaticamente no site e WhatsApp.</p>
         <a class="admin-card-link" href="admin-chatbot.html"><span>Configurar chatbot</span><i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+      </article>
+
+      <article class="admin-card">
+        <div class="admin-card-icon"><i class="fa-solid fa-comments" aria-hidden="true"></i></div>
+        <h2>Central de Conversas</h2>
+        <p>Acesse a central de conversas para visualizar e responder mensagens de clientes em tempo real.</p>
+        <a class="admin-card-link" href="admin-chat-center.html"><span>Abrir central de conversas</span><i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
       </article>
     </section>
 
@@ -193,11 +247,13 @@
     </div>
   </footer>
 
-  <script src="./js/statusLogin.js"></script>
-  <script src="./js/logo.js"></script>
-  <script src="./js/btn-topo.js"></script>
-  <script src="./js/bloquear-copia.js"></script>
-  <script src="./js/admin-area.js"></script>
-  <script src="./js/responsive-nav.js"></script>
+  <script src="/js/statusLogin.js"></script>
+  <script src="/js/logo.js"></script>
+  <script src="/js/btn-topo.js"></script>
+  <script src="/js/bloquear-copia.js"></script>
+  <script src="/js/admin-area.js"></script>
+  <script src="/js/admin-cards.js"></script>
+  <script src="/js/responsive-nav.js"></script>
+  <script src="/js/chatbot-widget.js"></script>
 </body>
 </html>
