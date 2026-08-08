@@ -1,3 +1,1 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:65b41dc2e1453e884d7f4f34afca51eb7cf14feadcb3b17c7b840cb0614200a0
-size 209
+﻿{authServer:http://localhost:3000,mockAdmin:{enabled:true,user:AdminMaster,pass:admin123}}
