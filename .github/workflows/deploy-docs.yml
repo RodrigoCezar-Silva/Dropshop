@@ -20,6 +20,17 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build docs
+        run: npm run build:docs
+
       - name: Prepare docs directory (copy docs/html -> docs if needed)
         run: |
           echo "Listing docs before copy"
