@@ -35,17 +35,32 @@
       }
     }
 
-    if (!cfg) cfg = { authServer: window.location.origin };
-    const authServer = (cfg && cfg.authServer) ? cfg.authServer.replace(/\/$/, '') : window.location.origin;
+    if (!cfg) cfg = { authServer: null, mockAdmin: { enabled: true, user: 'AdminMaster', pass: 'admin123' } };
+    const rawAuthServer = (cfg && cfg.authServer) ? cfg.authServer.replace(/\/$/, '') : null;
+    const isInvalidAuthServer = rawAuthServer && (
+      /\.html($|\?)/.test(rawAuthServer) ||
+      rawAuthServer.includes('/repos') ||
+      rawAuthServer.includes('/admin-login') ||
+      rawAuthServer.includes('github.io') ||
+      /SEU_API_DOMAIN|your-api|example\.com/i.test(rawAuthServer)
+    );
+    const authServer = rawAuthServer && !isInvalidAuthServer ? rawAuthServer : null;
 
     // expose for other scripts (login handlers) to use as API base
+    window.AUTH_CONFIG = cfg;
     window.AUTH_SERVER = authServer;
 
     const btnClient = document.getElementById('githubLoginClient');
-    if (btnClient) btnClient.href = `${authServer}/auth/github-client`;
+    if (btnClient) {
+      if (authServer) btnClient.href = `${authServer}/auth/github-client`;
+      else btnClient.removeAttribute('href');
+    }
 
     const btnAdmin = document.getElementById('githubLoginAdmin');
-    if (btnAdmin) btnAdmin.href = `${authServer}/auth/github`;
+    if (btnAdmin) {
+      if (authServer) btnAdmin.href = `${authServer}/auth/github`;
+      else btnAdmin.removeAttribute('href');
+    }
   }catch(e){
     console.error('auth-links: could not load auth-config.json. Se estiver usando GitHub Pages, verifique se auth-config.json está em `docs/` e acessível. Erro original:', e && e.message);
   }
