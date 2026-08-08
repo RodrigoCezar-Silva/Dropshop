@@ -181,4 +181,8 @@ Para funcionar corretamente:
 
 ---
 
+<<<<<<< HEAD
 Esse README reúne os principais detalhes do seu projeto Dropshop e serve como referência para desenvolvimento, deploy e manutenção.
+=======
+Esse README reúne os principais detalhes do seu projeto Dropshop e serve como referência para desenvolvimento, deploy e manutenção.
+>>>>>>> origin/main
