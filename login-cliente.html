@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <title>Login do Cliente - Mix Promoção</title>
-  <link rel="stylesheet" href="/css/login-cliente.css">
-  <link rel="stylesheet" href="/css/btn-topo.css">
+  <link rel="stylesheet" href="./css/login-cliente.css">
+  <link rel="stylesheet" href="./css/btn-topo.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
-  <link rel="stylesheet" href="/css/responsive.css" />
-  <link rel="stylesheet" href="/css/chatbot-widget.css" />
+  <link rel="stylesheet" href="./css/chatbot-widget.css" />
+  <link rel="stylesheet" href="./css/responsive.css" />
 
   <!-- Google Identity Services -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -50,7 +50,7 @@
       <!-- GitHub login removed -->
       <!-- Link para recuperação de senha estiloso -->
       <div class="esqueci-senha">
-        <a href="esqueci-senha.html">Esqueci minha senha?</a>
+        <a href="./esqueci-senha.html">Esqueci minha senha?</a>
       </div>
       <p id="mensagemErro" class="erro"></p>
     </form>
@@ -58,7 +58,7 @@
     <!-- 🔹 Opções adicionais -->
     <div class="extra-options">
       <p>Não tem conta? 
-        <a href="cadastro-cliente-novo.html">Cadastre-se</a>
+        <a href="./cadastro-cliente-novo.html">Cadastre-se</a>
       </p>
       <p>Ou entre com:</p>
       <div class="social-login">
@@ -73,17 +73,13 @@
     </div>
   </div>
 
-  <script>
-    // Forçar backend durante desenvolvimento para evitar 405 vindo do Live Server
-    window.AUTH_SERVER = window.AUTH_SERVER || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? (window.location.protocol + '//localhost:3000') : window.location.origin);
-  </script>
-  <script src="/js/login-cliente.js"></script>
-    <script src="/js/auth-links.js"></script>
-  <script src="/js/login-social.js"></script>
-  <script src="/js/btn-topo.js"></script>
-  <script src="/js/bloquear-copia.js"></script>
-  <script src="/js/chatbot-widget.js"></script>
-  <script src="/js/responsive-nav.js"></script>
+  <script src="./js/login-cliente.js"></script>
+    <script src="./js/auth-links.js"></script>
+  <script src="./js/login-social.js"></script>
+  <script src="./js/btn-topo.js"></script>
+  <script src="./js/bloquear-copia.js"></script>
+  <script src="./js/chatbot-widget.js"></script>
+  <script src="./js/responsive-nav.js"></script>
 </body>
 </html>
 
