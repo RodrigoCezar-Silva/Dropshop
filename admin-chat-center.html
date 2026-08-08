@@ -1,41 +1,38 @@
 <!doctype html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Central de Conversas - MIXPROMOÇÃO</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Central de Conversas - MIX-PROMOÇÃO</title>
 
-  <link rel="stylesheet" href="/css/style-index.css">
-  <link rel="stylesheet" href="/css/menu.css">
-  <link rel="stylesheet" href="/css/admin-chat.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="stylesheet" href="/css/chatbot-widget.css" />
+  <link rel="stylesheet" href="css/style-index.css" />
+  <link rel="stylesheet" href="css/menu.css" />
+  <link rel="stylesheet" href="css/admin-chat.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 </head>
-<body class="dark-chat">
+<body>
   <header class="site-header">
     <div class="logo">
       <span class="logo-icon">🛒</span>
-      <a href="admin-area.html" class="logo-text" aria-label="Área administrativa">MIXPROMOÇÃO</a>
+      <span class="logo-text admin-name">Administrador: Rodrigo Cezar</span>
     </div>
 
     <nav class="menu" aria-label="Menu principal">
       <ul>
-        <li><a href="admin-area.html"><i class="fa-solid fa-house menu-link-icon" aria-hidden="true"></i><span>Área Admin</span></a></li>
-        <li><a href="loja.html"><i class="fa-solid fa-store menu-link-icon" aria-hidden="true"></i><span>Loja</span></a></li>
+        <li><a href="admin-area.html"><i class="fa-solid fa-house menu-link-icon" aria-hidden="true"></i><span>Area-admin</span></a></li>
+        <li><a href="loja.html"><i class="fa-solid fa-store menu-link-icon" aria-hidden="true"></i><span>Nossa Loja</span></a></li>
         <li><a href="admin-reclamacoes.html"><i class="fa-solid fa-envelope menu-link-icon" aria-hidden="true"></i><span>Emails</span></a></li>
         <li><a href="admin-chat-center.html" class="active"><i class="fa-solid fa-comments menu-link-icon" aria-hidden="true"></i><span>Conversas</span></a></li>
       </ul>
     </nav>
 
-    <div style="margin-left:auto; display:flex; gap:12px; align-items:center;">
-      <div id="adminBadge" style="display:none; color:var(--primary); font-weight:700;">Administrador: Rodrigo Cezar</div>
-      <button id="adminBadgeExit" class="admin-badge-exit" style="display:none;">Sair</button>
-    </div>
+    <!-- Botões de login/painel removidos conforme solicitado -->
+    <!-- Removed client status and login buttons for admin pages -->
   </header>
 
   <main class="chat-main">
     <div class="chat-wrap">
-      <aside class="chat-sidebar" role="navigation" aria-label="Lista de conversas">
+      <aside class="chat-sidebar">
         <div class="sidebar-top">
           <div class="sidebar-title">Conversas</div>
           <div class="sidebar-actions">
@@ -45,53 +42,44 @@
         </div>
 
         <div class="sidebar-search">
-          <input id="chatSearch" placeholder="Pesquisar conversas..." aria-label="Pesquisar conversas">
+          <input id="chatSearch" placeholder="Pesquisar ou começar uma nova conversa..." />
         </div>
 
-        <div id="conversations" class="conversations" role="list"></div>
-
-        <div id="emptyConversations" class="empty-state" role="status" aria-live="polite" style="display:none">
-          <div class="empty-title">Nenhuma conversa</div>
-          <div class="empty-desc">Quando um cliente iniciar um atendimento, a conversa aparecerá aqui.</div>
+        <div class="sidebar-filters">
+          <button class="filter active">Tudo</button>
+          <button class="filter">Não lidas</button>
+          <button class="filter">Favoritas</button>
         </div>
+
+        <div id="conversations" class="conversations"></div>
       </aside>
 
       <section class="chat-area">
-        <div class="chat-panel">
-          <header class="chat-header">
-            <div class="chat-header-left">
-              <div id="chatAvatar" class="chat-avatar">–</div>
-              <div class="chat-meta">
-                <div id="chatHeaderName">Selecione uma conversa</div>
-                <div id="chatHeaderStatus" class="chat-status"> </div>
-              </div>
-            </div>
-            <div class="chat-header-right">
-              <button id="btnSearchConv" title="Pesquisar"><i class="fa-solid fa-magnifying-glass"></i></button>
-              <button id="btnExportDoc" title="Baixar histórico (.doc)" style="margin-left:8px"><i class="fa-solid fa-download"></i></button>
-              <button id="btnMoreConv" title="Mais opções"><i class="fa-solid fa-ellipsis-vertical"></i></button>
-            </div>
-          </header>
-
-          <div id="messages" class="messages-area" role="log" aria-live="polite">
-            <div id="emptyMessages" class="empty-state" style="display:block">
-              <div class="empty-title">Nenhuma conversa selecionada</div>
-              <div class="empty-desc">Clique em uma conversa à esquerda para visualizar mensagens.</div>
+        <header class="chat-header">
+          <div class="chat-header-left">
+            <div id="chatAvatar" class="chat-avatar">U</div>
+            <div class="chat-meta">
+              <div id="chatHeaderName">Selecione uma conversa</div>
+              <div id="chatHeaderStatus" class="chat-status">visto por último recentemente</div>
             </div>
           </div>
-
-          <div class="chat-composer" role="region" aria-label="Compor mensagem">
-            <button class="composer-icon" title="Anexar" aria-hidden="true"><i class="fa-solid fa-paperclip"></i></button>
-            <input id="msgInput" placeholder="Digite uma mensagem" autocomplete="off" aria-label="Escreva sua mensagem" disabled>
-            <div class="composer-actions">
-              <button id="sendMsgBtn" class="composer-send" title="Enviar" disabled>Enviar</button>
-            </div>
+          <div class="chat-header-right">
+            <button title="Pesquisar na conversa"><i class="fa-solid fa-magnifying-glass"></i></button>
+            <button title="Mais"><i class="fa-solid fa-ellipsis-vertical"></i></button>
           </div>
+        </header>
+
+        <div id="messages" class="messages-area"></div>
+
+        <div class="chat-composer">
+          <button class="composer-icon" title="Anexar"><i class="fa-solid fa-paperclip"></i></button>
+          <input id="msgInput" placeholder="Digite uma mensagem" autocomplete="off" />
+          <button id="sendMsgBtn" class="composer-send" title="Enviar"><i class="fa-solid fa-paper-plane"></i></button>
         </div>
       </section>
     </div>
   </main>
 
-  <script src="/js/admin-chat-center.js" defer></script>
+  <script src="js/admin-chat-center.js" defer></script>
 </body>
 </html>
