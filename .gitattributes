@@ -1,7 +1,9 @@
+*.json filter=lfs diff=lfs merge=lfs -text
 # Não rastrear JSON dentro de `docs/` (Pages precisa dos arquivos reais)
 docs/** -filter -diff -merge -text
-
-*.json filter=lfs diff=lfs merge=lfs -text
+# Do not track auth config JSON files outside docs as normal text
+/src/public/js/auth-config.json -filter -diff -merge -text
+/src/public/html/auth-config.json -filter -diff -merge -text
 # Do not track package.json with LFS so Actions can parse it as JSON
 package.json -filter -diff -merge -text
 # Do not track package-lock.json with LFS, keep it as a normal JSON file
