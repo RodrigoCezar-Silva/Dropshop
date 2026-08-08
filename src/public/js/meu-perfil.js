@@ -27,6 +27,29 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // aplicar imediatamente e ouvir alterações em outras abas
+  try { syncHeaderFromLocal(); window.addEventListener('storage', syncHeaderFromLocal); } catch (e) { /* ignore */ }
+
+  // Sincroniza o header com dados do cliente (nome + foto) usando localStorage
+  function syncHeaderFromLocal() {
+    try {
+      const clienteStatus = document.getElementById('clienteStatus');
+      const nomeEl = document.getElementById('nomeCompleto') || document.getElementById('nomeCliente');
+      const fotoEl = document.getElementById('fotoCliente') || document.querySelector('#fotoClienteResumo');
+      const nome = (localStorage.getItem('nome') || '').trim();
+      const sobrenome = (localStorage.getItem('sobrenome') || '').trim();
+      const full = [nome, sobrenome].filter(Boolean).join(' ').trim();
+      if (nomeEl) nomeEl.textContent = full || '';
+      try {
+        const fb = localStorage.getItem('foto');
+        if (fb && fb !== 'null' && fotoEl) fotoEl.src = 'data:image/png;base64,' + fb;
+      } catch (e) { /* ignore */ }
+      if (clienteStatus) {
+        try { clienteStatus.classList.add('show'); } catch (e) { clienteStatus.style.display = 'flex'; }
+      }
+    } catch (e) { /* ignore */ }
+  }
+
   // Toggle de tema (persistente em localStorage como 'mixTema')
   try {
     const btnToggleTheme = document.getElementById('btnToggleTheme');

@@ -366,6 +366,30 @@ async function garantirTabelas() {
     } catch (e) {
       console.debug('garantirTabelas: erro ao checar information_schema para foto_path', e && e.message);
     }
+    // Garantir coluna 'role' em admins para suportar funções (admin, funcionario, etc.)
+    try {
+      const [colsRole] = await connection.execute(
+        `SELECT COUNT(*) as cnt FROM information_schema.COLUMNS WHERE table_schema = ? AND table_name = 'admins' AND column_name = 'role'`,
+        [dbConfig.database]
+      );
+      const hasRole = colsRole && colsRole[0] && Number(colsRole[0].cnt) > 0;
+      if (!hasRole) {
+        try {
+          await connection.execute(`ALTER TABLE admins ADD COLUMN role VARCHAR(50) DEFAULT 'admin'`);
+        } catch (e) { console.debug('garantirTabelas: falha ao adicionar coluna role em admins', e && e.message); }
+      }
+    } catch (e) {
+      console.debug('garantirTabelas: erro ao checar information_schema para coluna role', e && e.message);
+    }
+
+    // Garantir coluna de foto em admins para armazenar avatares em blob e mimetype
+    try {
+      await connection.execute(`ALTER TABLE admins ADD COLUMN IF NOT EXISTS foto LONGBLOB`);
+      await connection.execute(`ALTER TABLE admins ADD COLUMN IF NOT EXISTS foto_mime VARCHAR(120)`);
+    } catch (e) {
+      console.debug('garantirTabelas: falha ao adicionar colunas foto em admins', e && e.message);
+    }
+    
   await connection.end();
 }
 
@@ -1415,15 +1439,26 @@ function localStorageFallback() {
 }
 
 // Cadastro de administrador
-app.post("/admins", async (req, res) => {
+// Cadastro de administrador
+app.post("/admins", upload.single('foto'), async (req, res) => {
   try {
-    const { usuario, senha, nome, sobrenome } = req.body;
+    const body = req.body || {};
+    const usuario = body.usuario?.toString().trim();
+    const senha = body.senha?.toString();
+    const nome = body.nome?.toString().trim();
+    const sobrenome = body.sobrenome?.toString().trim();
     if (!usuario || !senha || !nome || !sobrenome) {
       return res.status(400).json({ sucesso: false, mensagem: "Preencha usuario, senha, nome e sobrenome." });
     }
     const hash = await bcrypt.hash(senha, 10);
+    const fotoBuffer = req.file && req.file.buffer ? req.file.buffer : null;
+    const fotoMime = req.file && req.file.mimetype ? req.file.mimetype : null;
     const connection = await createDbConnection();
-    await connection.execute("INSERT INTO admins (usuario, senhaHash, nome, sobrenome) VALUES (?, ?, ?, ?)", [usuario, hash, nome, sobrenome]);
+    const role = (body.role || 'admin');
+    await connection.execute(
+      "INSERT INTO admins (usuario, senhaHash, nome, sobrenome, role, foto, foto_mime) VALUES (?, ?, ?, ?, ?, ?, ?)",
+      [usuario, hash, nome, sobrenome, role, fotoBuffer, fotoMime]
+    );
     await connection.end();
     res.json({ sucesso: true, mensagem: "Administrador cadastrado com sucesso!" });
   } catch (error) {
@@ -1440,6 +1475,8 @@ app.post("/admins", async (req, res) => {
     res.status(500).json({ sucesso: false, mensagem: `Erro no servidor: ${error.message}` });
   }
 });
+
+ 
 
 app.get("/api/produtos", async (req, res) => {
   try {
@@ -1693,6 +1730,24 @@ app.put("/api/produtos/:id", autenticarToken, exigirAdmin, async (req, res) => {
   } catch (error) {
     console.error("Erro ao atualizar produto:", error.message);
     res.status(500).json({ sucesso: false, mensagem: `Erro ao atualizar produto: ${error.message}` });
+  }
+});
+
+app.delete("/api/produtos/:id", autenticarToken, exigirAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const connection = await createDbConnection();
+    const [result] = await connection.execute("DELETE FROM produtos WHERE id = ?", [id]);
+    await connection.end();
+
+    if (!result.affectedRows) {
+      return res.status(404).json({ sucesso: false, mensagem: "Produto nao encontrado." });
+    }
+
+    res.json({ sucesso: true, mensagem: "Produto removido com sucesso." });
+  } catch (error) {
+    console.error("Erro ao remover produto:", error.message);
+    res.status(500).json({ sucesso: false, mensagem: "Erro ao remover produto." });
   }
 });
 
@@ -1963,15 +2018,23 @@ app.post("/login-admin", async (req, res) => {
     const senhaValida = await bcrypt.compare(senha, admin.senhaHash);
     if (!senhaValida) return res.status(401).json({ sucesso: false, mensagem: "Senha incorreta!" });
 
-    const token = jwt.sign({ id: admin.id, usuario: admin.usuario, role: "admin" }, SECRET, { expiresIn: "1h" });
+    const userRole = (admin.role || 'admin').toString().toLowerCase();
+    const token = jwt.sign({ id: admin.id, usuario: admin.usuario, role: userRole }, SECRET, { expiresIn: "1h" });
+
+    // incluir foto como base64 para uso imediato no front-end (se existir)
+    const fotoBase64 = admin.foto ? Buffer.from(admin.foto).toString('base64') : null;
+    const fotoMime = admin.foto_mime || null;
 
     res.json({
       sucesso: true,
       mensagem: "Login realizado com sucesso!",
       token,
-      tipoUsuario: "Administrador",
+      role: userRole,
+      tipoUsuario: userRole === 'funcionario' ? 'Funcionario' : 'Administrador',
       nome: admin.nome,
-      sobrenome: admin.sobrenome
+      sobrenome: admin.sobrenome,
+      fotoBase64,
+      fotoMime
     });
   } catch (error) {
     console.error("Erro no login admin:", error.message);

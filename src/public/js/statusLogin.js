@@ -410,6 +410,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const fotoCliente = document.getElementById("fotoCliente");
   const nomeCliente = document.getElementById("nomeCliente");
   const sobrenomeCliente = document.getElementById("sobrenomeCliente");
+  const nomeCompletoEl = document.getElementById('nomeCompleto');
   const logoutCliente = document.getElementById("logoutBtn");
 
   const loginButtons = document.getElementById("loginButtons"); // 🔹 Botões de login
@@ -575,7 +576,9 @@ document.addEventListener("DOMContentLoaded", () => {
     // Esconde botão de logout do cliente se existir (evita duplicidade)
     try { const clientLogout = document.getElementById('logoutBtn'); if (clientLogout) clientLogout.style.display = 'none'; } catch(e){}
     // garante que o widget de cliente não apareça para admin
-    if (clienteStatus) clienteStatus.style.display = 'none';
+    if (clienteStatus) {
+      try { clienteStatus.classList.remove('show'); } catch(e) { clienteStatus.style.display = 'none'; }
+    }
     if (btnMinhaConta) btnMinhaConta.style.display = 'none';
     // Remove eventuais botões de login soltos no header
     try {
@@ -618,16 +621,21 @@ document.addEventListener("DOMContentLoaded", () => {
   } else if (tipoUsuario === "Cliente") {
     // Mostra status cliente
     if (clienteStatus) {
-      clienteStatus.style.display = "flex";
+      try { clienteStatus.classList.add('show'); } catch(e) { clienteStatus.style.display = 'flex'; }
       const nome = localStorage.getItem("nome");
       const sobrenome = localStorage.getItem("sobrenome");
 
-      // Exibe o nome completo (campo `nome` + `sobrenome` do banco) sem truncar
+      // Exibe o nome completo (campo `nome` + `sobrenome` do banco)
       const nomeVal = (nome && nome !== "null") ? nome.trim() : "";
       const sobrenomeVal = (sobrenome && sobrenome !== "null") ? sobrenome.trim() : "";
       const nomeCompleto = [nomeVal, sobrenomeVal].filter(Boolean).join(' ').trim();
-      if (nomeCliente) nomeCliente.textContent = nomeCompleto || '';
-      if (sobrenomeCliente) sobrenomeCliente.textContent = '';
+      // Preenche o novo elemento `#nomeCompleto` se existir, senão mantém compatibilidade com spans antigos
+      if (nomeCompletoEl) {
+        nomeCompletoEl.textContent = nomeCompleto || '';
+      } else {
+        if (nomeCliente) nomeCliente.textContent = nomeCompleto || '';
+        if (sobrenomeCliente) sobrenomeCliente.textContent = '';
+      }
 
       // Preferir foto do servidor quando possível, cair para base64 em localStorage ou para o avatar padrão
       try {
@@ -703,7 +711,7 @@ document.addEventListener("DOMContentLoaded", () => {
   } else {
     // usuário não logado: garantir estado de 'deslogado' visível
     try {
-      if (clienteStatus) clienteStatus.style.display = 'none';
+      if (clienteStatus) { try { clienteStatus.classList.remove('show'); } catch(e) { clienteStatus.style.display = 'none'; } }
       if (statusAdmin) statusAdmin.style.display = 'none';
       if (btnMinhaConta) btnMinhaConta.style.display = 'none';
       if (logoutCliente) logoutCliente.style.display = 'none';

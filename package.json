@@ -29,7 +29,8 @@
   "main": "index.js",
   "scripts": {
     "start": "node src/server.js",
-    "dev": "npx concurrently \"npx kill-port 5501 && npx live-server src/public --port=5501 --open=html/index.html\" \"node src/server.js\"",
+    "dev": "npx concurrently \"npx kill-port 5501 && npx live-server src/public --port=5501 --no-browser\" \"node src/server.js\" \"node scripts/open-browser.js http://127.0.0.1:5501/html/index.html\"",
+    "dev:open": "node scripts/open-browser.js",
     "dev:node5501": "npx cross-env PORT=5501 node src/server.js",
     "start:5501:win": "set PORT=5501&& node src/server.js",
     "start:5501:unix": "PORT=5501 node src/server.js",

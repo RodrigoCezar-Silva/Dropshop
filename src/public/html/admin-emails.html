@@ -96,7 +96,25 @@
         <div class="ia-opcoes">
           <div class="ia-opcao-grupo">
             <label><i class="fa-solid fa-palette"></i> Tom da Promoção</label>
-            <!-- Contato removido conforme solicitado -->
+            <div class="ia-tom-btns" role="list" aria-label="Tom da mensagem">
+              <button type="button" class="ia-tom-btn ativo" data-tom="urgente"> <i class="fa-solid fa-bolt"></i> Urgente</button>
+              <button type="button" class="ia-tom-btn" data-tom="elegante"> <i class="fa-solid fa-gem"></i> Elegante</button>
+              <button type="button" class="ia-tom-btn" data-tom="divertido"> <i class="fa-solid fa-face-laugh"></i> Divertido</button>
+              <button type="button" class="ia-tom-btn" data-tom="exclusivo"> <i class="fa-solid fa-crown"></i> Exclusivo</button>
+            </div>
+
+            <label style="margin-top:12px;"><i class="fa-solid fa-tag"></i> Tipo de Campanha</label>
+            <div class="ia-tom-btns" role="list" aria-label="Tipo de campanha">
+              <button type="button" class="ia-campanha-btn ativo" data-campanha="desconto"><i class="fa-solid fa-percent"></i> Desconto</button>
+              <button type="button" class="ia-campanha-btn" data-campanha="lancamento"><i class="fa-solid fa-rocket"></i> Lançamento</button>
+              <button type="button" class="ia-campanha-btn" data-campanha="frete-gratis"><i class="fa-solid fa-truck"></i> Frete Grátis</button>
+              <button type="button" class="ia-campanha-btn" data-campanha="flash-sale"><i class="fa-solid fa-bolt-lightning"></i> Flash Sale</button>
+            </div>
+
+            <div class="ia-gerar-wrap" style="margin-top:18px;">
+              <button id="btnGerarIA" class="ia-btn-gerar"> <i class="fa-solid fa-magic"></i> Gerar Mensagem com IA</button>
+            </div>
+          </div>
 
         <!-- Loading -->
         <div class="ia-loading" id="iaLoading" style="display:none;">

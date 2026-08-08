@@ -1,0 +1,5 @@
+◇ injected env (11) from .env // tip: ◈ secrets for agents [www.dotenvx.com]
+Servidor rodando em http://localhost:3000
+Ambiente: sandbox
+PagBank API: https://sandbox.api.pagseguro.com
+Webhook: http://localhost:3000/api/pagbank/notificacao

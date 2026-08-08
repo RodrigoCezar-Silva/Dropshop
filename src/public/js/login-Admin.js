@@ -78,13 +78,23 @@ document.addEventListener("DOMContentLoaded", () => {
         if (response.ok && result.sucesso) {
           // guarda dados no navegador
           localStorage.setItem("token", result.token);
-          localStorage.setItem("nome", result.nome);
-          localStorage.setItem("sobrenome", result.sobrenome);
-          localStorage.setItem("tipoUsuario", "Administrador");
-          localStorage.setItem("isAdmin", "true"); // 🔹 garante compatibilidade com comentarios.js
-
-          // redirect to admin area after successful admin login
-          window.location.href = "admin-area.html";
+          localStorage.setItem("nome", result.nome || "");
+          localStorage.setItem("sobrenome", result.sobrenome || "");
+          // salvar foto (base64) se retornada pelo backend
+          if (result.fotoBase64) {
+            localStorage.setItem('foto', result.fotoBase64);
+            if (result.fotoMime) localStorage.setItem('fotoMime', result.fotoMime);
+          }
+          const role = (result.role || 'admin').toString().toLowerCase();
+          if (role === 'funcionario') {
+            localStorage.setItem("tipoUsuario", "Funcionario");
+            localStorage.removeItem("isAdmin");
+            window.location.href = "funcionario-area.html";
+          } else {
+            localStorage.setItem("tipoUsuario", "Administrador");
+            localStorage.setItem("isAdmin", "true"); // 🔹 garante compatibilidade com comentarios.js
+            window.location.href = "admin-area.html";
+          }
         } else {
           if (mensagemErro) {
             mensagemErro.innerText = result.mensagem || "Usuário ou senha inválidos.";

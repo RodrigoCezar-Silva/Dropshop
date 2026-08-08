@@ -334,6 +334,7 @@ header.site-header { position: relative; }
    Usa a classe `is-admin-mode` adicionada por `statusLogin.js` */
 body.is-admin-mode .status-admin,
 body.is-admin-mode #statusLogado,
+body.is-admin-mode #clienteStatus,
 body.is-admin-mode .status-text,
 body.is-admin-mode .admin-label,
 body.is-admin-mode .logo-text.admin-name {

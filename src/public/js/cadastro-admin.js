@@ -1,11 +1,15 @@
+document.removeEventListener && document.removeEventListener('DOMContentLoaded', ()=>{});
+// Restaurando versão anterior a partir de docs/cadastro-admin.js
 document.addEventListener("DOMContentLoaded", () => {
   const formCadastro = document.getElementById("cadastroForm");
   const senhaInput = document.getElementById("senha");
   const confirmarSenhaInput = document.getElementById("confirmarSenha");
   const toggleSenha = document.getElementById("toggleSenha");
-  const toggleConfirmarSenha = document.getElementById("toggleConfirmarSenha");
-  const msgSenha = document.getElementById("mensagemSenha");
-  const strengthDiv = document.getElementById("password-strength");
+  const toggleConfirmarSenha = document.getElementById("toggleConfirm");
+  const msgSenha = document.getElementById("senhaMsg");
+  const strengthDiv = document.getElementById("passwordStrength");
+  const popupSuccess = document.getElementById("popupSuccess");
+  const popupClose = document.getElementById("popupClose");
 
   // Mostrar/ocultar senha principal
   if (toggleSenha && senhaInput) {
@@ -71,6 +75,24 @@ document.addEventListener("DOMContentLoaded", () => {
       const msgCadastro = document.getElementById("mensagemCadastro");
       if (!msgCadastro) return;
 
+      function showPopup() {
+        if (!popupSuccess) return;
+        popupSuccess.classList.remove("hidden");
+        popupSuccess.setAttribute("aria-hidden", "false");
+      }
+
+      function hidePopup() {
+        if (!popupSuccess) return;
+        popupSuccess.classList.add("hidden");
+        popupSuccess.setAttribute("aria-hidden", "true");
+      }
+
+      if (popupClose) {
+        popupClose.addEventListener("click", () => {
+          hidePopup();
+        });
+      }
+
       if (!usuario || !senha || !nome || !sobrenome) {
         msgCadastro.textContent = "❌ Preencha todos os campos!";
         msgCadastro.style.color = "red";
@@ -83,29 +105,56 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      const dados = { usuario, senha, nome, sobrenome };
+      const role = document.getElementById('role')?.value || 'admin';
+      const avatarInput = document.getElementById('inputAvatar');
+      const apiUrl = 'http://localhost:3000/admins';
+      const formData = new FormData();
+      formData.append('usuario', usuario);
+      formData.append('senha', senha);
+      formData.append('nome', nome);
+      formData.append('sobrenome', sobrenome);
+      formData.append('role', role);
+      if (avatarInput?.files?.length) {
+        formData.append('foto', avatarInput.files[0]);
+      }
 
       try {
-        const response = await fetch("http://localhost:3000/admins", {
+        const response = await fetch(apiUrl, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(dados)
+          mode: "cors",
+          body: formData
         });
 
-        const data = await response.json();
+        let data = null;
+        try {
+          data = await response.json();
+        } catch (jsonError) {
+          console.warn('Resposta não é JSON válido:', jsonError);
+        }
 
-        if (response.ok && data.sucesso) {
-          msgCadastro.textContent = "✅ Cadastro realizado com sucesso!";
-          msgCadastro.style.color = "green";
+        if (response.ok && data?.sucesso) {
+          msgCadastro.textContent = "Cadastro realizado com sucesso!";
+          msgCadastro.style.color = "#0f5132";
+          msgCadastro.style.background = "#d1e7dd";
+          msgCadastro.style.border = "1px solid #badbcc";
+          msgCadastro.style.padding = "12px 14px";
+          msgCadastro.style.borderRadius = "12px";
           formCadastro.reset();
           if (strengthDiv) strengthDiv.textContent = "";
           if (msgSenha) msgSenha.textContent = "";
+          showPopup();
           setTimeout(() => {
-            window.location.href = "/html/admin-login.html";
-          }, 1200);
+            hidePopup();
+            window.location.href = "./admin-login.html";
+          }, 2200);
         } else {
-          msgCadastro.textContent = data.mensagem || "Erro ao cadastrar!";
-          msgCadastro.style.color = "red";
+          const errorMessage = data?.mensagem || `Erro ao cadastrar! Status ${response.status}`;
+          msgCadastro.textContent = errorMessage;
+          msgCadastro.style.color = "#842029";
+          msgCadastro.style.background = "#f8d7da";
+          msgCadastro.style.border = "1px solid #f5c2c7";
+          msgCadastro.style.padding = "12px 14px";
+          msgCadastro.style.borderRadius = "12px";
         }
       } catch (error) {
         console.error("Erro no cadastro admin:", error);
