@@ -1,5 +1,5 @@
 ﻿{
-  "authServer": "https://SEU_API_DOMAIN",
+  "authServer": "https://api.github.com/users/RodrigoCezar-Silva/repos",
   "mockAdmin": {
     "enabled": false,
     "user": "AdminMaster",
