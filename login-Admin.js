@@ -23,6 +23,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
       try {
         const base = window.AUTH_SERVER || window.location.origin;
+        const isRunningOnGitHubPages = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
+        if (!window.AUTH_SERVER && isRunningOnGitHubPages) {
+          if (mensagemErro) {
+            mensagemErro.innerText = "Backend não configurado. Atualize docs/auth-config.json com a URL da sua API.";
+            mensagemErro.style.color = "red";
+          }
+          return;
+        }
+
         const response = await fetch(`${base.replace(/\/$/, '')}/login-admin`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },

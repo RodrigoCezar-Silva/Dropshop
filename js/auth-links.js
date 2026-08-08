@@ -36,7 +36,12 @@
     }
 
     if (!cfg) cfg = { authServer: window.location.origin, mockAdmin: { enabled: true, user: 'AdminMaster', pass: 'admin123' } };
-    const authServer = (cfg && cfg.authServer) ? cfg.authServer.replace(/\/$/, '') : window.location.origin;
+    const rawAuthServer = (cfg && cfg.authServer) ? cfg.authServer.replace(/\/$/, '') : window.location.origin;
+    const isValidAuthServer = /^https?:\/\//.test(rawAuthServer)
+      && !/\.html($|\?)/.test(rawAuthServer)
+      && !rawAuthServer.includes('/repos')
+      && !rawAuthServer.includes('/admin-login');
+    const authServer = isValidAuthServer ? rawAuthServer : window.location.origin;
 
     // expose for other scripts (login handlers) to use as API base
     window.AUTH_CONFIG = cfg;
