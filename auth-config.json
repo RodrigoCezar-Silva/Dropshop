@@ -1,9 +1,1 @@
-﻿{
-  "authServer": "https://SEU_API_DOMAIN",
-  "mockAdmin": {
-    "enabled": false,
-    "user": "AdminMaster",
-    "pass": "admin123"
-  }
-}
-
+﻿{authServer:http://localhost:3000,mockAdmin:{enabled:true,user:AdminMaster,pass:admin123}}
