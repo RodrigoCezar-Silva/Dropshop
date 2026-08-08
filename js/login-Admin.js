@@ -78,35 +78,23 @@ document.addEventListener("DOMContentLoaded", () => {
         if (response.ok && result.sucesso) {
           // guarda dados no navegador
           localStorage.setItem("token", result.token);
-          localStorage.setItem("nome", result.nome);
-          localStorage.setItem("sobrenome", result.sobrenome);
-          localStorage.setItem("tipoUsuario", "Administrador");
-          localStorage.setItem("isAdmin", "true"); // 🔹 garante compatibilidade com comentarios.js
-          // redirect to admin area after successful admin login
-          // tenta detectar o caminho correto (pode estar em ./ ou ./html/)
-          async function resolveAndRedirect() {
-            const candidates = [
-              'admin-area.html',
-              'html/admin-area.html',
-              '/admin-area.html',
-              '/html/admin-area.html',
-              `${window.location.pathname.replace(/\/.+$/, '')}/admin-area.html`
-            ];
-            for (const p of candidates) {
-              try {
-                const res = await fetch(p, { method: 'HEAD' });
-                if (res && res.ok) {
-                  window.location.href = p;
-                  return;
-                }
-              } catch (e) {
-                // ignora e tenta próximo
-              }
-            }
-            // fallback simples
-            window.location.href = 'admin-area.html';
+          localStorage.setItem("nome", result.nome || "");
+          localStorage.setItem("sobrenome", result.sobrenome || "");
+          // salvar foto (base64) se retornada pelo backend
+          if (result.fotoBase64) {
+            localStorage.setItem('foto', result.fotoBase64);
+            if (result.fotoMime) localStorage.setItem('fotoMime', result.fotoMime);
           }
-          resolveAndRedirect();
+          const role = (result.role || 'admin').toString().toLowerCase();
+          if (role === 'funcionario') {
+            localStorage.setItem("tipoUsuario", "Funcionario");
+            localStorage.removeItem("isAdmin");
+            window.location.href = "funcionario-area.html";
+          } else {
+            localStorage.setItem("tipoUsuario", "Administrador");
+            localStorage.setItem("isAdmin", "true"); // 🔹 garante compatibilidade com comentarios.js
+            window.location.href = "admin-area.html";
+          }
         } else {
           if (mensagemErro) {
             mensagemErro.innerText = result.mensagem || "Usuário ou senha inválidos.";

@@ -31,9 +31,9 @@
 
 /* Evita quebra de linha especificamente para os links 'Trocas e Devoluções' e 'Nossa Loja' */
 .menu ul li a[href="trocas-devolucoes.html"],
-.menu ul li a[href="./src/public/html/trocas-devolucoes.html"],
+.menu ul li a[href="html/trocas-devolucoes.html"],
 .menu ul li a[href="loja.html"],
-.menu ul li a[href="./src/public/html/loja.html"] {
+.menu ul li a[href="html/loja.html"] {
   white-space: nowrap;
 }
 
@@ -65,6 +65,15 @@
 .menu ul li a:hover::after {
   width: 100%;
 }
+
+/* Destaque quando a página atual corresponder ao link */
+.menu ul li a.menu-active {
+  background: linear-gradient(90deg,#6366f1 0%, #7c3aed 60%);
+  color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(99,102,241,0.22);
+}
+.menu ul li a.menu-active::after { width: 100%; background: rgba(255,255,255,0.18); }
 
 .btn-login {
   display: inline-flex;

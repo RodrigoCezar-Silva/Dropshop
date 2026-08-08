@@ -114,7 +114,7 @@ window.addEventListener("DOMContentLoaded", () => {
       <td><input type="number" class="estoque-pro-qtd" value="${Number(produto.quantidade) || 1}" readonly style="background:#e0e7ef;font-weight:600;"></td>
       <td><span style="background:#6366f120;color:#334155;font-weight:600;padding:6px 14px;border-radius:8px;">${escapeHtml(formatarData(produto))}</span></td>
       <td class="estoque-pro-data-acoes">
-        <a href="./html/produto.html?id=${encodeURIComponent(produto.id)}" class="estoque-pro-btn" target="_blank" style="background:linear-gradient(90deg,#2563eb 60%,#6366f1 100%);font-weight:700;box-shadow:0 2px 8px #2563eb22;">Ver Produto</a>
+        <a href="/html/produto.html?id=${encodeURIComponent(produto.id)}" class="estoque-pro-btn" target="_blank" style="background:linear-gradient(90deg,#2563eb 60%,#6366f1 100%);font-weight:700;box-shadow:0 2px 8px #2563eb22;">Ver Produto</a>
         <button class="estoque-pro-btn estoque-pro-remover" data-id="${escapeHtml(produto.id)}" style="background:linear-gradient(90deg,#ef4444 60%,#f87171 100%);font-weight:700;box-shadow:0 2px 8px #ef444422;">Remover</button>
       </td>
     `;

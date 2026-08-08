@@ -70,7 +70,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let iaCampanhaAtual = "desconto";
 
   // Link padrão da loja
-  const LINK_LOJA_PADRAO = window.location.origin + "./html/loja.html";
+  const LINK_LOJA_PADRAO = window.location.origin + "/html/loja.html";
   linkLojaInput.value = LINK_LOJA_PADRAO;
 
   btnLinkPadrao.addEventListener("click", () => {

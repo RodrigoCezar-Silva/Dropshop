@@ -31,9 +31,9 @@
 
 /* Evita quebra de linha especificamente para os links 'Trocas e Devoluções' e 'Nossa Loja' */
 .menu ul li a[href="trocas-devolucoes.html"],
-.menu ul li a[href="./src/public/html/trocas-devolucoes.html"],
+.menu ul li a[href=".html/trocas-devolucoes.html"],
 .menu ul li a[href="loja.html"],
-.menu ul li a[href="./src/public/html/loja.html"] {
+.menu ul li a[href=".html/loja.html"] {
   white-space: nowrap;
 }
 
