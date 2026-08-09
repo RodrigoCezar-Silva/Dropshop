@@ -74,7 +74,7 @@ const NODE_ENV = (process.env.NODE_ENV || "sandbox").toLowerCase();
 const EM_PRODUCAO = NODE_ENV === "production";
 
 // ---------------- BANCO / AMBIENTE ---------------- //
-const dbConfig = {
+let dbConfig = {
   host: process.env.DB_HOST || "localhost",
   user: process.env.DB_USER || "root",
   password: process.env.DB_PASSWORD || "",
@@ -84,13 +84,42 @@ const dbConfig = {
   queueLimit: 0
 };
 
-const pool = mysql.createPool(dbConfig);
+let pool = null;
 
 async function createDbConnection() {
+  if (!pool) throw new Error('DB pool não inicializado');
   const connection = await pool.getConnection();
   const release = connection.release.bind(connection);
   connection.end = async () => release();
   return connection;
+}
+
+async function tryInitPoolCandidates() {
+  const candidates = [];
+  // primary from env
+  candidates.push({ name: 'env', config: { host: process.env.DB_HOST || 'localhost', port: Number(process.env.DB_PORT || 3306), user: process.env.DB_USER || 'root', password: process.env.DB_PASSWORD || '', database: process.env.DB_NAME || 'mix_promocao', waitForConnections: true, connectionLimit: 10, queueLimit: 0 } });
+  // root without password (common local dev setup)
+  candidates.push({ name: 'root-empty', config: { host: 'localhost', port: 3306, user: 'root', password: '', database: process.env.DB_NAME || 'mix_promocao', waitForConnections: true, connectionLimit: 10, queueLimit: 0 } });
+  // root with env password (in case .env user differs)
+  candidates.push({ name: 'root-with-env-pass', config: { host: 'localhost', port: Number(process.env.DB_PORT || 3306), user: 'root', password: process.env.DB_PASSWORD || '', database: process.env.DB_NAME || 'mix_promocao', waitForConnections: true, connectionLimit: 10, queueLimit: 0 } });
+
+  for (const cand of candidates) {
+    try {
+      const testPool = mysql.createPool(cand.config);
+      const conn = await testPool.getConnection();
+      await conn.ping();
+      conn.release();
+      // success
+      pool = testPool;
+      dbConfig = Object.assign({}, cand.config);
+      console.log(`DB: connected using candidate '${cand.name}' -> ${cand.config.user}@${cand.config.host}:${cand.config.port}`);
+      return true;
+    } catch (e) {
+      console.warn(`DB: candidate '${cand.name}' failed:`, e && e.code ? `${e.code}` : e.message);
+      try { if (testPool && typeof testPool.end === 'function') await testPool.end(); } catch(_){}
+    }
+  }
+  return false;
 }
 
 function extrairPrecoNumero(valor) {
@@ -227,6 +256,16 @@ async function garantirTabelas() {
       url VARCHAR(1000),
       criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       INDEX (reclamacao_id)
+    )
+  `);
+  // Tabela para tokens de redefinição de senha
+  await connection.execute(`
+    CREATE TABLE IF NOT EXISTS redefinicao_senha (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      email VARCHAR(255) NOT NULL,
+      token VARCHAR(255) NOT NULL,
+      criado_em DATETIME DEFAULT CURRENT_TIMESTAMP,
+      usado TINYINT(1) DEFAULT 0
     )
   `);
   // Tabela para comentários/avaliacoes de produtos
@@ -3104,20 +3143,7 @@ app.post("/api/pagbank/notificacao", (req, res) => {
 
 // ---------------- RECUPERAÇÃO E REDEFINIÇÃO DE SENHA ---------------- //
 const nodemailer = require("nodemailer");
-// Criação da tabela de tokens de redefinição, se não existir
-(async () => {
-  const connection = await createDbConnection();
-  await connection.execute(`
-    CREATE TABLE IF NOT EXISTS redefinicao_senha (
-      id INT AUTO_INCREMENT PRIMARY KEY,
-      email VARCHAR(255) NOT NULL,
-      token VARCHAR(255) NOT NULL,
-      criado_em DATETIME DEFAULT CURRENT_TIMESTAMP,
-      usado TINYINT(1) DEFAULT 0
-    )
-  `);
-  await connection.end();
-})();
+// Nota: criação da tabela 'redefinicao_senha' foi movida para garantirTabelas()
 
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST || "smtp.gmail.com",
@@ -3208,7 +3234,17 @@ app.use((req, res, next) => {
 
 (async () => {
   try {
-    await garantirTabelas();
+    const ok = await tryInitPoolCandidates();
+    if (ok) {
+      try {
+        await garantirTabelas();
+      } catch (e) {
+        console.warn('Aviso: falha ao garantir tabelas:', e && e.message);
+      }
+    } else {
+      console.warn('ATENÇÃO: Nenhuma credencial válida encontrada. O servidor iniciará em modo limitado (sem acesso ao DB). Configure suas credenciais em .env ou execute o script de criação de usuário.');
+    }
+
     app.listen(PORT, () => {
       console.log(`Servidor rodando em http://localhost:${PORT}`);
       console.log(`Ambiente: ${NODE_ENV}`);
