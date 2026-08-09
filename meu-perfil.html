@@ -6,20 +6,19 @@
   <meta name="description"
 
   <!-- CSS -->
-  <link rel="stylesheet" href="/css/style-index.css" />
-  <link rel="stylesheet" href="/css/logo.css" />
-  <link rel="stylesheet" href="/css/meu-perfil.css" />
-  <link rel="stylesheet" href="/css/btn-topo.css" />
-  <link rel="stylesheet" href="/css/footer.css" />
+  <link rel="stylesheet" href="./css/style-index.css" />
+  <link rel="stylesheet" href="./css/logo.css" />
+  <link rel="stylesheet" href="./css/meu-perfil.css" />
+  <link rel="stylesheet" href="./css/btn-topo.css" />
+  <link rel="stylesheet" href="./css/footer.css" />
 
   <!-- Ícones Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link rel="stylesheet" href="/css/responsive.css" />
-  <link rel="stylesheet" href="/css/chatbot-widget.css" />
-  <link rel="stylesheet" href="/css/popup.css" />
-  <link rel="stylesheet" href="/css/admin-reclamacoes.css" />
-  <link rel="stylesheet" href="/css/lightbox.css" />
-  <!-- scripts de desenvolvimento removidos para evitar 404/MIME errors -->
+  <link rel="stylesheet" href="./css/chatbot-widget.css" />
+  <link rel="stylesheet" href="./css/responsive.css" />
+  <link rel="stylesheet" href="./css/popup.css" />
+  <link rel="stylesheet" href="./css/admin-reclamacoes.css" />
+  <link rel="stylesheet" href="./css/lightbox.css" />
 </head>
 <body>
   <!-- Cabeçalho -->
@@ -32,16 +31,14 @@
     </div>
   </header>
 
-  <div id="backendStatusBanner" class="backend-banner" style="display:none;padding:12px;background:#fff3cd;border:1px solid #ffeeba;color:#856404;text-align:center;">Servidor backend indisponível. <button id="btnTentarReconectar" style="margin-left:8px;padding:6px 10px;">Tentar reconectar</button></div>
-
   <!-- Banner -->
   <section class="banner-personalizado">
     <div class="conteudo-banner">
       <h1>Área do Cliente</h1>
       <p>Um painel mais prático para acompanhar seus dados, preferências e produtos vinculados à sua conta.</p>
       <div class="banner-acoes">
-        <a href="loja.html" class="banner-link">Continuar comprando</a>
-        <a href="carrinho.html" class="banner-link banner-link-secundario">Ver carrinho</a>
+        <a href="./loja.html" class="banner-link">Continuar comprando</a>
+        <a href="./carrinho.html" class="banner-link banner-link-secundario">Ver carrinho</a>
       </div>
     </div>
   </section>
@@ -54,9 +51,8 @@
         <p>Confira seu cadastro, ajuste preferências e acompanhe tudo em um só lugar.</p>
       </div>
       <div class="cliente-topbar-actions">
-        <a href="index.html" class="cliente-mini-link"><i class="fa-solid fa-house"></i><span>Início</span></a>
-        <button id="btnToggleTheme" type="button" class="cliente-mini-link cliente-mini-link-outline" aria-pressed="false"><i class="fa fa-moon"></i><span id="btnToggleThemeText">Tema escuro</span></button>
-        <a href="contato.html" class="cliente-mini-link cliente-mini-link-outline"><i class="fa-solid fa-headset"></i><span>Suporte</span></a>
+        <a href="./index.html" class="cliente-mini-link"><i class="fa-solid fa-house"></i><span>Início</span></a>
+        <a href="./contato.html" class="cliente-mini-link cliente-mini-link-outline"><i class="fa-solid fa-headset"></i><span>Suporte</span></a>
       </div>
     </section>
 
@@ -80,7 +76,10 @@
               <p class="overview-kicker">Bem-vindo de volta</p>
               <h3 id="resumoNome">Cliente MIX-PROMOÇÃO</h3>
               <p id="resumoEmail" class="overview-muted">Seu e-mail aparecerá aqui.</p>
-              <!-- overview chips removed as requested -->
+              <div class="overview-chips">
+                <span class="overview-chip" id="resumoEstado">Estado não informado</span>
+                <span class="overview-chip" id="resumoBairro">Bairro não informado</span>
+              </div>
               <div class="overview-actions botoes-perfil">
                 <!-- Ações rápidas (mantenha compacto) -->
               </div>
@@ -133,24 +132,25 @@
       <section class="tab-content" id="perfil">
         <div class="perfil-layout">
           <aside class="perfil-sidebar-card">
-            <div class="foto-wrapper">
-              <label for="inputFotoCliente" class="foto-clickable" aria-label="Alterar foto do cliente">
-                <img id="fotoClienteSidebar" class="foto-perfil" src="" alt="Foto Cliente Sidebar">
-                <span class="foto-overlay"><i class="fa-solid fa-camera"></i></span>
-              </label>
-              <input type="file" id="inputFotoCliente" accept="image/*">
-            </div>
-
+            <img id="fotoClienteSidebar" class="foto-perfil" src="" alt="Foto Cliente Sidebar">
             <h3 id="perfilSidebarNome">Cliente</h3>
             <p id="perfilSidebarEmail">email@cliente.com</p>
 
             <div class="campo alterar-foto">
-              <label class="custom-upload" for="inputFotoCliente"><i class="fa-solid fa-upload"></i><span>Alterar foto</span></label>
+              <label class="custom-upload" for="inputFotoCliente"><i class="fa-solid fa-camera"></i><span>Alterar foto</span></label>
+              <input type="file" id="inputFotoCliente" accept="image/*">
             </div>
 
-            
-
-            
+            <div class="perfil-sidebar-info">
+              <div>
+                <span>Telefone</span>
+                <strong id="perfilSidebarTelefone">Não informado</strong>
+              </div>
+              <div>
+                <span>Estado</span>
+                <strong id="perfilSidebarEstado">Não informado</strong>
+              </div>
+            </div>
           </aside>
 
           <div class="perfil-main-card">
@@ -306,7 +306,7 @@
             <h2>Pedidos e itens do cliente</h2>
             <p>Enquanto o histórico completo não vem do servidor, o painel exibe os itens salvos localmente na sua navegação.</p>
           </div>
-          <a href="carrinho.html" class="compras-link"><i class="fa-solid fa-cart-shopping"></i><span>Abrir carrinho</span></a>
+          <a href="./carrinho.html" class="compras-link"><i class="fa-solid fa-cart-shopping"></i><span>Abrir carrinho</span></a>
         </div>
 
         <div class="compras-resumo-cards">
@@ -329,7 +329,7 @@
             <h2>Pedidos cancelados</h2>
             <p>Lista de pedidos que foram cancelados e não serão entregues.</p>
           </div>
-          <a href="carrinho.html" class="compras-link compras-link-muted"><i class="fa-solid fa-ban"></i><span>Ver pedidos</span></a>
+          <a href="./carrinho.html" class="compras-link compras-link-muted"><i class="fa-solid fa-ban"></i><span>Ver pedidos</span></a>
         </div>
 
         <div class="compras-resumo-cards">
@@ -372,16 +372,16 @@
       <div class="footer-links">
         <h4>Navegação</h4>
         <ul>
-          <li><a href="index.html"><i class="fa-solid fa-chevron-right"></i> Início</a></li>
-          <li><a href="loja.html"><i class="fa-solid fa-chevron-right"></i> Nossa Loja</a></li>
-          <li><a href="QuemSomos.html"><i class="fa-solid fa-chevron-right"></i> Sobre Nós</a></li>
+          <li><a href="./index.html"><i class="fa-solid fa-chevron-right"></i> Início</a></li>
+          <li><a href="./loja.html"><i class="fa-solid fa-chevron-right"></i> Nossa Loja</a></li>
+          <li><a href="./QuemSomos.html"><i class="fa-solid fa-chevron-right"></i> Sobre Nós</a></li>
         </ul>
       </div>
       <div class="footer-links suporte">
         <h4>Suporte</h4>
         <ul>
-          <li><a href="trocas-devolucoes.html"><i class="fa-solid fa-chevron-right"></i> Trocas e Devoluções</a></li>
-          <li><a href="carrinho.html"><i class="fa-solid fa-chevron-right"></i> Meu Carrinho</a></li>
+          <li><a href="./trocas-devolucoes.html"><i class="fa-solid fa-chevron-right"></i> Trocas e Devoluções</a></li>
+          <li><a href="./carrinho.html"><i class="fa-solid fa-chevron-right"></i> Meu Carrinho</a></li>
         </ul>
       </div>
       <!-- Contato removido -->
@@ -401,18 +401,18 @@
   </footer>
 
   <!-- Scripts -->
-  <script src="/js/VoltaraoTopo.js"></script>
-  <script src="/js/popup.js"></script>
-  <script src="/js/contatos.js"></script>
+  <script src="./js/VoltaraoTopo.js"></script>
+  <script src="./js/popup.js"></script>
+  <script src="./js/contatos.js"></script>
   
-  <script src="/js/carrinho.js"></script>
-  <script src="/js/meu-perfil.js"></script>
-  <script src="/js/logo.js"></script>
-  <script src="/js/btn-topo.js"></script>
-  <script src="/js/bloquear-copia.js"></script>
-  <script src="/js/lightbox.js"></script>
-  <script src="/js/chatbot-widget.js"></script>
-  <script src="/js/responsive-nav.js"></script>
+  <script src="./js/carrinho.js"></script>
+  <script src="./js/meu-perfil.js"></script>
+  <script src="./js/logo.js"></script>
+  <script src="./js/btn-topo.js"></script>
+  <script src="./js/bloquear-copia.js"></script>
+  <script src="./js/chatbot-widget.js"></script>
+  <script src="./js/lightbox.js"></script>
+  <script src="./js/responsive-nav.js"></script>
 
 </body>
 
