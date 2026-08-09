@@ -799,6 +799,15 @@ body.theme-dark #clienteStatus, body.theme-dark .status-admin { background: line
   background-color: #dc2626;
 }
 
+.btn-login.funcionario {
+  background-color: #16a34a;
+  color: white;
+}
+
+.btn-login.funcionario:hover {
+  background-color: #166534;
+}
+
 /* Efeito de clique */
 .btn-login:active {
   transform: scale(0.97);

@@ -312,6 +312,11 @@ header.site-header { position: relative; }
 }
 
 .admin-badge-exit {
+  position: absolute;
+  right: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1501;
   margin-left: 12px;
   padding: 10px 16px;
   min-width: 86px;
@@ -328,7 +333,17 @@ header.site-header { position: relative; }
   justify-content: center;
   box-shadow: 0 6px 18px rgba(0,0,0,0.14);
 }
-.admin-badge-exit:hover { transform: translateY(-1px); }
+.admin-badge-exit:hover { transform: translateY(-50%) translateY(-1px); }
+
+@media (max-width: 820px) {
+  .admin-badge-exit {
+    right: 12px;
+    padding: 8px 12px;
+    min-width: 74px;
+    height: 38px;
+    font-size: 0.94rem;
+  }
+}
 
 /* Forçar ocultação do bloco de status em páginas onde o usuário é admin
    Usa a classe `is-admin-mode` adicionada por `statusLogin.js` */
@@ -337,6 +352,11 @@ body.is-admin-mode #statusLogado,
 body.is-admin-mode #clienteStatus,
 body.is-admin-mode .status-text,
 body.is-admin-mode .admin-label,
+body.is-funcionario-mode .status-admin,
+body.is-funcionario-mode #statusLogado,
+body.is-funcionario-mode #clienteStatus,
+body.is-funcionario-mode .status-text,
+body.is-funcionario-mode .admin-label,
 body.is-admin-mode .logo-text.admin-name {
   display: none !important;
   visibility: hidden !important;

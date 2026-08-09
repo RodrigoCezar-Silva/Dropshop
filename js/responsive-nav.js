@@ -3,6 +3,22 @@ document.addEventListener('DOMContentLoaded', function () {
   const nav = header ? header.querySelector('nav.menu') : null;
   if (!header || !nav) return;
 
+  const loginButtons = header.querySelector('#loginButtons');
+  if (loginButtons) {
+    const adminButton = loginButtons.querySelector('a.btn-login.admin[href*="admin-login.html"]');
+    const funcionarioButton = loginButtons.querySelector('a.btn-login[href*="login-funcionario.html"]');
+
+    if (adminButton) {
+      adminButton.innerHTML = '👤 Login Admin';
+    }
+
+    if (funcionarioButton) {
+      funcionarioButton.classList.remove('admin');
+      funcionarioButton.classList.add('funcionario');
+      funcionarioButton.innerHTML = '👤 Login Funcionário';
+    }
+  }
+
   // Não duplicar o botão se já existir
   if (!header.querySelector('.menu-toggle')) {
     const btn = document.createElement('button');
