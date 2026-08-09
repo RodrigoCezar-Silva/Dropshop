@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MIX-PROMOÇÃO - WhatsApp Promocional</title>
+  <link rel="stylesheet" href="/css/style-index.css" />
+  <link rel="stylesheet" href="/css/menu.css" />
+  <link rel="stylesheet" href="/css/logo.css" />
+  <link rel="stylesheet" href="/css/statusLogin.css" />
+  <link rel="stylesheet" href="/css/minhaConta.css" />
+  <link rel="stylesheet" href="/css/btn-topo.css" />
+  <link rel="stylesheet" href="/css/footer.css" />
+  <link rel="stylesheet" href="/css/admin-whatsapp.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="/css/responsive.css" />
+</head>
+<body>
+  <header class="site-header"><div class="logo"><span class="logo-icon">🛒</span><span class="logo-text"><span class="mix">MIX</span><span class="promocao">PROMOÇÃO</span></span></div><nav class="menu" aria-label="Menu principal"><ul><li><a href="index.html"><i class="fa-solid fa-house menu-link-icon"></i><span>Início</span></a></li><li><a href="loja.html"><i class="fa-solid fa-store menu-link-icon"></i><span>Nossa Loja</span></a></li><li><a href="QuemSomos.html"><i class="fa-solid fa-circle-info menu-link-icon"></i><span>Sobre</span></a></li><li><a href="trocas-devolucoes.html"><i class="fa-solid fa-right-left menu-link-icon"></i><span>Trocas e Devoluções</span></a></li><li><a href="ajuda.html"><i class="fa-solid fa-circle-question menu-link-icon"></i><span>Ajuda</span></a></li></ul></nav><div id="loginButtons"><a href="login-cliente.html" class="btn-login cliente">👤 Login Cliente</a><a href="admin-login.html" class="btn-login admin">👤 Login Administrativo</a><a href="login-funcionario.html" class="btn-login admin">👤 Login Funcionário</a></div><div id="statusLogado" class="status-admin" style="display:none;"><span class="status-text">👑 Funcionário: <strong id="nomeUsuario"></strong></span><button id="logout" class="btn-logout">Sair</button></div></header>
+  <main class="wpp-main"><section class="wpp-hero"><div class="wpp-eyebrow"><i class="fab fa-whatsapp"></i><span>Marketing via WhatsApp</span></div><h1>WhatsApp Promocional</h1><p>Crie mensagens de promoção e envie diretamente para seus clientes pelo WhatsApp.</p></section><div class="wpp-layout"><aside class="wpp-destinatarios"><div class="wpp-dest-header"><h2><i class="fa-solid fa-users"></i> Destinatários</h2><div class="wpp-dest-acoes"><button class="wpp-btn-selecionar-todos" id="wppBtnSelecionarTodos"><i class="fa-solid fa-check-double"></i> Todos</button><span class="wpp-dest-contagem" id="wppContagemSelecionados">0 selecionados</span></div></div><input type="text" class="wpp-dest-busca" id="wppBuscaCliente" placeholder="🔍 Buscar cliente por nome ou telefone..."><div class="wpp-dest-lista" id="wppListaClientes"><p class="wpp-dest-carregando"><i class="fa-solid fa-spinner fa-spin"></i> Carregando clientes...</p></div></aside><section class="wpp-composer"><h2><i class="fab fa-whatsapp"></i> Compor Mensagem</h2><div class="wpp-campo-grupo"><label for="wppMensagem"><i class="fa-solid fa-comment-dots"></i> Mensagem Promocional</label><textarea id="wppMensagem" rows="10" placeholder="Escreva a mensagem de promoção para enviar via WhatsApp..."></textarea><div class="wpp-char-count"><span id="wppCharCount">0</span> caracteres</div></div><div class="wpp-enviar-grupo"><button class="wpp-btn-enviar" id="wppBtnEnviar"><i class="fab fa-whatsapp"></i> Enviar via WhatsApp</button></div><p class="wpp-status" id="wppStatus"></p></section></div></main>
+  <script src="/js/statusLogin.js"></script><script src="/js/logo.js"></script><script src="/js/btn-topo.js"></script><script src="/js/bloquear-copia.js"></script><script src="/js/admin-whatsapp.js"></script><script src="/js/responsive-nav.js"></script>
+</body>
+</html>

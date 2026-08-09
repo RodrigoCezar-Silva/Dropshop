@@ -65,6 +65,145 @@
   color: rgba(255, 255, 255, 0.9);
 }
 
+.admin-area-hero-layout {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 26px;
+}
+
+.admin-area-hero-copy {
+  flex: 1;
+  min-width: 0;
+}
+
+.admin-area-hero-profile {
+  flex: 0 0 158px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  text-align: center;
+  padding: 4px 14px 4px 0;
+  border-right: 1px solid rgba(159, 243, 234, 0.28);
+}
+
+.admin-area-hero-photo {
+  width: 118px;
+  height: 118px;
+  border-radius: 26px;
+  object-fit: cover;
+  border: 3px solid rgba(159, 243, 234, 0.9);
+  box-shadow: 0 18px 36px rgba(0, 0, 0, 0.22);
+  background: rgba(255,255,255,0.16);
+}
+
+.admin-area-hero-photo-control {
+  position: relative;
+  width: 118px;
+  height: 118px;
+  border-radius: 26px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.admin-area-hero-photo-icon {
+  width: 118px;
+  height: 118px;
+  border-radius: 26px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3.1rem;
+  color: #9ff3ea;
+  border: 3px solid rgba(159, 243, 234, 0.9);
+  background: linear-gradient(135deg, rgba(3,29,50,0.95), rgba(0,208,255,0.2));
+  box-shadow: 0 18px 36px rgba(0, 0, 0, 0.22);
+}
+
+.admin-area-hero-photo-camera {
+  position: absolute;
+  right: -5px;
+  bottom: -5px;
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #052033;
+  background: linear-gradient(135deg, #9ff3ea, #00d0ff);
+  border: 2px solid rgba(3, 29, 50, 0.9);
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.25);
+}
+
+.admin-area-hero-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.admin-area-hero-role {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #9ff3ea;
+}
+
+.admin-area-hero-meta strong {
+  font-size: 1rem;
+  color: #fff;
+}
+
+.admin-area-hero-upload-btn {
+  margin-top: 6px;
+  min-height: 34px;
+  padding: 7px 11px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  color: #052033;
+  background: #9ff3ea;
+  font-size: 0.82rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.18s, filter 0.18s;
+}
+
+.admin-area-hero-upload-btn:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.05);
+}
+
+.admin-area-hero-file {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.admin-area-hero-photo-status {
+  min-height: 14px;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.admin-area-hero-photo-status.is-error {
+  color: #fecaca;
+}
+
+.admin-area-hero-photo-status.is-success {
+  color: #bbf7d0;
+}
+
+
 .admin-area-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -169,6 +308,45 @@
 @media (max-width: 768px) {
   .admin-area-main {
     padding: 20px 14px 34px;
+  }
+
+  .admin-area-hero-layout {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .admin-area-hero-profile {
+    width: 100%;
+    flex-basis: auto;
+    flex-direction: row;
+    justify-content: flex-start;
+    text-align: left;
+    padding: 0 0 16px;
+    border-right: 0;
+    border-bottom: 1px solid rgba(159, 243, 234, 0.24);
+  }
+
+  .admin-area-hero-photo {
+    width: 88px;
+    height: 88px;
+    border-radius: 20px;
+  }
+
+  .admin-area-hero-photo-control,
+  .admin-area-hero-photo-icon {
+    width: 88px;
+    height: 88px;
+    border-radius: 20px;
+  }
+
+  .admin-area-hero-photo-icon {
+    font-size: 2.35rem;
+  }
+
+  .admin-area-hero-photo-camera {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
   }
 
   .admin-area-hero,

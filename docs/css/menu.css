@@ -104,6 +104,11 @@
   background: linear-gradient(135deg, #e74c3c, #c0392b);
 }
 
+/* Botão Funcionário (verde) */
+.btn-login.funcionario {
+  background: linear-gradient(135deg, #16a34a, #15803d);
+}
+
 /* Hover com sombra */
 .btn-login:hover {
   transform: translateY(-3px);
@@ -230,6 +235,15 @@
 }
 .btn-login.admin:hover {
   background-color: #d32f2f;
+}
+
+.btn-login.funcionario {
+  background-color: #16a34a;
+  color: #fff;
+}
+
+.btn-login.funcionario:hover {
+  background-color: #166534;
 }
 
 /* Carrinho à direita */

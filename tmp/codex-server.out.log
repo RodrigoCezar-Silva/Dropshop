@@ -1,0 +1,11 @@
+◇ injected env (25) from .env // tip: ⌘ custom filepath { path: '/custom/path/.env' }
+DB: connected using candidate 'root-empty' -> root@localhost:3306
+Servidor rodando em http://localhost:3000
+Ambiente: sandbox
+PagBank API: https://sandbox.api.pagseguro.com
+Webhook: https://seusite.com/api/pagbank/notificacao
+[login-admin] request body: { usuario: 'AdminMaster06', senha: 'Nioh2@2130' }
+[login-admin] request body: { usuario: 'AdminMaster06', senha: 'Nioh2@2130' }
+[login-admin] request body: { usuario: 'AdminMaster06', senha: 'Nioh2@2130' }
+[login-admin] request body: { usuario: 'AdminMaster', senha: 'Nioh2@2130' }
+[login-admin] request body: { usuario: 'AdminMaster06', senha: 'Nioh2@2130' }

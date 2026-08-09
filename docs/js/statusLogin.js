@@ -136,7 +136,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Garante que o container de botões de login exista e esteja visível
     function ensureLoginButtonsExistAndShow() {
+      const tipoAtual = localStorage.getItem('tipoUsuario');
       let _loginButtons = document.getElementById('loginButtons');
+      if (tipoAtual && tipoAtual !== 'null' && tipoAtual !== '') {
+        if (_loginButtons) {
+          try { _loginButtons.style.display = 'none'; } catch (e) { /* ignore */ }
+        }
+        return _loginButtons;
+      }
       const headerEl = document.querySelector('header.site-header') || document.querySelector('header');
       if (!_loginButtons) {
         const div = document.createElement('div');
@@ -144,6 +151,7 @@ document.addEventListener("DOMContentLoaded", () => {
         div.innerHTML = `
           <a href="login-cliente.html" class="btn-login cliente">👤 Login Cliente</a>
           <a href="admin-login.html" class="btn-login admin">👤 Login Administrativo</a>
+          <a href="login-funcionario.html" class="btn-login admin">👤 Login Funcionário</a>
         `;
         if (headerEl) {
           const anchor = headerEl.querySelector('.cart-icon');
@@ -358,12 +366,7 @@ document.addEventListener("DOMContentLoaded", () => {
   try {
     const btnLogoutHeader = document.getElementById('btnLogoutHeader');
     if (btnLogoutHeader) {
-      // mostrar apenas se houver tipoUsuario válido
-      if (tipoUsuario && tipoUsuario !== 'null') {
-        btnLogoutHeader.style.display = 'inline-flex';
-      } else {
-        btnLogoutHeader.style.display = 'none';
-      }
+      btnLogoutHeader.style.display = 'none';
 
       btnLogoutHeader.addEventListener('click', function () {
         try {
@@ -573,6 +576,7 @@ document.addEventListener("DOMContentLoaded", () => {
       } catch (e) { /* ignore */ }
     }
     if (loginButtons) loginButtons.style.display = "none"; // 🔹 Esconde botões de login
+    try { const headerLogout = document.getElementById('btnLogoutHeader'); if (headerLogout) headerLogout.style.display = 'none'; } catch(e) {}
     // Esconde botão de logout do cliente se existir (evita duplicidade)
     try { const clientLogout = document.getElementById('logoutBtn'); if (clientLogout) clientLogout.style.display = 'none'; } catch(e){}
     // garante que o widget de cliente não apareça para admin
@@ -772,7 +776,7 @@ if (logoutCliente) {
   try {
     const headerEl = document.querySelector('header.site-header') || document.querySelector('header');
     const _login = ensureLoginButtonsExistAndShow();
-    if (headerEl && _login) {
+    if (!tipoUsuario && headerEl && _login) {
       // move #loginButtons imediatamente antes do ícone do carrinho e alinha à direita
       const cart = headerEl.querySelector('.cart-icon');
       if (cart && cart.parentNode) cart.parentNode.insertBefore(_login, cart);
@@ -887,6 +891,7 @@ if (logoutCliente) {
 
   // Retry/enforce login buttons in case other scripts modify header after load
   (function enforceLoginButtonsRetry() {
+    if (tipoUsuario) return;
     let attempts = 0;
     const maxAttempts = 8;
     const interval = 120; // ms

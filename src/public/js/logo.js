@@ -10,15 +10,16 @@ document.addEventListener("DOMContentLoaded", () => {
   try {
     const rawTipo = localStorage.getItem('tipoUsuario');
     const tipo = (rawTipo && rawTipo !== 'null' && rawTipo !== '') ? rawTipo : null;
-    if (tipo === 'Administrador') {
+    if (tipo === 'Administrador' || tipo === 'Funcionario') {
       const nome = (localStorage.getItem('nome') || '').trim();
       const sobrenome = (localStorage.getItem('sobrenome') || '').trim();
-      const displayName = (nome || sobrenome) ? `Administrador: ${[nome, sobrenome].filter(Boolean).join(' ')}` : 'Administrador';
+      const prefixo = tipo === 'Funcionario' ? 'Funcionário' : 'Administrador';
+      const displayName = (nome || sobrenome) ? `${prefixo}: ${[nome, sobrenome].filter(Boolean).join(' ')}` : prefixo;
 
       const logoText = logo.querySelector('.logo-text') || logo;
       try { logoText.textContent = displayName; } catch (e) { /* ignore */ }
 
-      // tornar não interativo quando for admin
+      // tornar não interativo quando for admin ou funcionario
       logo.removeAttribute('role');
       logo.removeAttribute('tabindex');
       logo.style.cursor = 'default';

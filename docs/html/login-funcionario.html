@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login Funcionário - MIX-PROMOÇÃO</title>
+  <link rel="stylesheet" href="/css/login-admin.css">
+  <link rel="stylesheet" href="/css/btn-topo.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="/css/responsive.css" />
+</head>
+<body class="login-bg">
+  <header class="logo-topo">
+    <div class="logo-box">
+      <i class="fas fa-shopping-cart carrinho-icon"></i>
+      <span class="logo-text">MIX-PROMOÇÃO</span>
+    </div>
+  </header>
+  
+  <main class="login-container">
+    <h2>Login Funcionário</h2>
+    <form id="formLogin">
+      <label for="usuario">Usuário:</label>
+      <input type="text" id="usuario" name="usuario" required>
+
+      <label for="senha">Senha:</label>
+
+      <div class="senha-wrapper">
+        <input type="password" id="senha" name="senha" required autocomplete="current-password">
+        <button type="button" id="toggleSenha" class="toggle-senha" tabindex="-1" aria-label="Mostrar ou ocultar senha">
+          <i class="fa-solid fa-eye" id="iconeOlho"></i>
+        </button>
+      </div>
+
+      <button type="submit" id="btnLoginAdmin" class="btn-login-admin estiloso">Entrar</button>
+      <p id="mensagemErro" class="erro"></p>
+    </form>
+
+    <div class="link-cadastro">
+      <a href="cadastro-funcionario.html" target="_blank" rel="noopener noreferrer">
+        ➕ Cadastrar outro usuário
+      </a>
+    </div>
+  </main>
+
+  <style>
+    body.login-bg {
+      min-height: 100vh;
+      background: linear-gradient(270deg, #21cbf3, #2196f3, #ff9800, #ffb347, #21cbf3);
+      background-size: 200% 200%;
+      animation: gradienteAnimado 8s ease-in-out infinite;
+    }
+    @keyframes gradienteAnimado {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+  </style>
+  <script>
+    window.AUTH_SERVER = window.AUTH_SERVER || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? (window.location.protocol + '//localhost:3000') : window.location.origin);
+  </script>
+  <script src="/js/funcionario-login.js" defer></script>
+  <script src="/js/auth-links.js" defer></script>
+  <script src="/js/btn-topo.js" defer></script>
+  <script src="/js/bloquear-copia.js" defer></script>
+  <script src="/js/admin-login.js" defer></script>
+  <script src="/js/responsive-nav.js"></script>
+</body>
+</html>
