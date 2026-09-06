@@ -54,12 +54,18 @@
 .produto-header {
   margin-bottom: 0;
 }
-.produto-header h1 {
-  font-size: 2rem;
+.produto-header h1,
+#detalheTitulo {
+  font-size: 1.8rem;
   font-weight: 800;
   color: #0f172a;
   margin: 8px 0 16px;
-  line-height: 1.2;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+  max-width: 100%;
 }
 .produto-header .precos {
   display: flex;
@@ -86,27 +92,82 @@
   font-weight: 500;
 }
 
-/* Desconto badge */
+/* Badges acima do preço */
+.header-badges-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+/* Desconto badge - estilo pill idêntico ao modelo */
 .desconto-topo {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
-  background: linear-gradient(135deg, #ef4444, #f59e0b);
-  color: #fff;
+  background: linear-gradient(135deg, #ff4757 0%, #ff6b4a 45%, #ffa502 100%);
+  color: #ffffff;
   font-size: 0.85rem;
   font-weight: 800;
-  padding: 6px 16px;
-  border-radius: 20px;
+  padding: 6px 18px;
+  border-radius: 999px;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.35);
-  animation: pulseDesconto 2s infinite;
+  box-shadow: 0 4px 14px rgba(255, 71, 87, 0.35);
+  animation: pulseDesconto 2.5s infinite;
   width: fit-content;
 }
 .desconto-topo::before { display: none; }
 @keyframes pulseDesconto {
   0%, 100% { transform: scale(1); }
-  50%      { transform: scale(1.04); }
+  50%      { transform: scale(1.03); }
+}
+
+/* Badge de Frete Grátis (compras / produtos >= 100 reais) */
+.badge-frete-gratis-produto {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+  color: #ffffff;
+  font-size: 0.82rem;
+  font-weight: 800;
+  padding: 6px 16px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+  width: fit-content;
+}
+.badge-frete-gratis-produto i {
+  font-size: 0.92rem;
+}
+
+/* ── Título do produto no topo de toda a seção com respiro ── */
+.produto-topo-header {
+  width: 100%;
+  padding: 4px 0 16px;
+  margin-bottom: 6px;
+}
+
+.produto-titulo-principal,
+#detalheTitulo {
+  font-size: 1.85rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+  line-height: 1.38;
+  padding-top: 6px;
+  padding-bottom: 4px;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  display: block !important;
+  width: 100% !important;
+  letter-spacing: -0.01em;
 }
 
 /* Garantias */

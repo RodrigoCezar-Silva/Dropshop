@@ -3,95 +3,549 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Central de Conversas - MIXPROMOÇÃO</title>
+  <title>Central de Atendimento - MIX-PROMOÇÃO</title>
 
+  <link rel="stylesheet" href="../css/style-index.css">
   <link rel="stylesheet" href="/css/style-index.css">
+  <link rel="stylesheet" href="../css/menu.css">
   <link rel="stylesheet" href="/css/menu.css">
+  <link rel="stylesheet" href="../css/admin-chat.css">
   <link rel="stylesheet" href="/css/admin-chat.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="stylesheet" href="/css/chatbot-widget.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <style>
+    /* ===================================================
+       CENTRAL DE ATENDIMENTO — PAINEL DO FUNCIONÁRIO
+       Visualizar conversas dos clientes + responder ao vivo
+    =================================================== */
+    :root {
+      --op-bg: #060f1e;
+      --op-surface: #0d1d35;
+      --op-border: rgba(0,198,255,0.13);
+      --op-cyan: #00c6ff;
+      --op-green: #10b981;
+      --op-yellow: #f59e0b;
+      --op-red: #ef4444;
+    }
+
+    body.dark-chat { background: var(--op-bg); }
+
+    /* ── Header ── */
+    .op-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 28px;
+      background: #081226;
+      border-bottom: 1px solid var(--op-border);
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .op-brand { display: flex; align-items: center; gap: 12px; }
+    .op-brand .logo-icon { font-size: 1.6rem; }
+    .op-brand .logo-text { font-weight: 900; font-size: 1.2rem; }
+    .op-brand .logo-text span:first-child { color: #00ff88; }
+    .op-brand .logo-text span:last-child  { color: #fff; }
+
+    .op-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(0,198,255,0.1); border: 1px solid rgba(0,198,255,0.3);
+      color: #38bdf8; padding: 5px 14px; border-radius: 999px;
+      font-size: 0.82rem; font-weight: 700;
+    }
+
+    .op-header-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+    .op-status-tag {
+      display: flex; align-items: center; gap: 6px;
+      background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3);
+      color: #34d399; padding: 5px 14px; border-radius: 999px;
+      font-size: 0.82rem; font-weight: 700;
+    }
+    .dot-online {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: #10b981; animation: pulseGreen 1.4s infinite;
+    }
+
+    .op-nav { display: flex; gap: 8px; }
+    .op-nav a {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 6px 14px; border-radius: 999px; font-size: 0.82rem; font-weight: 700;
+      border: 1px solid rgba(255,255,255,0.12); color: #94a3b8;
+      text-decoration: none; transition: all 0.2s;
+    }
+    .op-nav a:hover { border-color: var(--op-cyan); color: #fff; background: rgba(0,198,255,0.08); }
+    .op-nav a.danger { border-color: rgba(239,68,68,0.35); color: #f87171; }
+    .op-nav a.danger:hover { background: rgba(239,68,68,0.1); }
+
+    /* ── Layout Principal ── */
+    .op-main {
+      display: flex;
+      height: calc(100vh - 61px);
+      overflow: hidden;
+    }
+
+    /* ── PAINEL ESQUERDO: lista de clientes na fila ── */
+    .op-sidebar {
+      width: 300px;
+      min-width: 260px;
+      border-right: 1px solid var(--op-border);
+      background: var(--op-surface);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .op-sidebar-header {
+      padding: 16px 18px 12px;
+      border-bottom: 1px solid var(--op-border);
+    }
+    .op-sidebar-title {
+      font-size: 0.82rem; font-weight: 800; color: #94a3b8;
+      text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .op-sidebar-title i { color: var(--op-cyan); }
+    .op-sidebar-search input {
+      width: 100%; box-sizing: border-box;
+      background: rgba(0,198,255,0.06); border: 1px solid var(--op-border);
+      color: #e2e8f0; padding: 8px 12px; border-radius: 8px; font-size: 0.85rem;
+      outline: none;
+    }
+    .op-sidebar-search input::placeholder { color: #475569; }
+    .op-sidebar-search input:focus { border-color: rgba(0,198,255,0.35); }
+
+    .op-client-list {
+      flex: 1; overflow-y: auto; padding: 8px 0;
+    }
+    .op-client-list::-webkit-scrollbar { width: 4px; }
+    .op-client-list::-webkit-scrollbar-thumb { background: rgba(0,198,255,0.2); border-radius: 4px; }
+
+    .op-client-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 18px; cursor: pointer;
+      border-left: 3px solid transparent;
+      transition: all 0.18s;
+    }
+    .op-client-item:hover { background: rgba(0,198,255,0.05); }
+    .op-client-item.active {
+      background: rgba(0,198,255,0.1);
+      border-left-color: var(--op-cyan);
+    }
+
+    .op-client-avatar {
+      width: 42px; height: 42px; border-radius: 50%;
+      background: linear-gradient(135deg, #0072ff, #00c6ff);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem; color: #fff; font-weight: 900;
+      flex-shrink: 0;
+    }
+
+    .op-client-info { flex: 1; min-width: 0; }
+    .op-client-name {
+      font-size: 0.9rem; font-weight: 800; color: #e2e8f0;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .op-client-meta {
+      font-size: 0.77rem; color: #64748b; margin-top: 2px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .op-client-proto {
+      font-size: 0.7rem; color: var(--op-cyan); font-weight: 700; margin-top: 2px;
+    }
+
+    .op-badge-new {
+      background: var(--op-cyan); color: #000; font-size: 0.7rem; font-weight: 900;
+      padding: 2px 7px; border-radius: 999px; flex-shrink: 0;
+    }
+
+    .op-no-clients {
+      text-align: center; padding: 40px 20px;
+      color: #475569; font-size: 0.88rem;
+    }
+    .op-no-clients i { font-size: 2rem; margin-bottom: 10px; display: block; color: #1e3a5f; }
+
+    /* Botão atualizar fila */
+    .op-sidebar-footer {
+      padding: 12px 18px;
+      border-top: 1px solid var(--op-border);
+      display: flex; gap: 8px;
+    }
+    .op-btn-sm {
+      flex: 1; padding: 8px; border-radius: 8px; font-size: 0.82rem; font-weight: 700;
+      cursor: pointer; border: 1px solid var(--op-border);
+      background: rgba(0,198,255,0.08); color: #38bdf8;
+      transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 5px;
+    }
+    .op-btn-sm:hover { background: rgba(0,198,255,0.18); border-color: var(--op-cyan); }
+
+    /* ── PAINEL CENTRAL: chat ── */
+    .op-chat-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background: var(--op-bg);
+    }
+
+    /* Estado: nenhum cliente selecionado */
+    .op-empty-state {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      color: #1e3a5f; text-align: center; padding: 40px;
+    }
+    .op-empty-state i { font-size: 3.5rem; margin-bottom: 16px; }
+    .op-empty-state h3 { font-size: 1.2rem; color: #334155; margin: 0 0 8px; }
+    .op-empty-state p { font-size: 0.88rem; color: #475569; margin: 0; }
+
+    /* Header do chat do cliente selecionado */
+    .op-chat-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 24px;
+      background: #081226;
+      border-bottom: 1px solid var(--op-border);
+      gap: 12px;
+    }
+    .op-chat-header-left { display: flex; align-items: center; gap: 14px; }
+    .op-client-av {
+      width: 44px; height: 44px; border-radius: 50%;
+      background: linear-gradient(135deg, #0072ff, #00c6ff);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; color: #fff; font-weight: 900; flex-shrink: 0;
+    }
+    .op-chat-name {
+      font-size: 1rem; font-weight: 800; color: #fff; white-space: nowrap;
+    }
+    .op-chat-sub {
+      font-size: 0.8rem; color: #34d399; display: flex; align-items: center; gap: 6px;
+      white-space: nowrap;
+    }
+    .op-chat-header-right { display: flex; align-items: center; gap: 8px; }
+    .op-hdr-btn {
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12);
+      color: #e2e8f0; padding: 7px 14px; border-radius: 999px; cursor: pointer;
+      font-size: 0.82rem; font-weight: 700; display: inline-flex; align-items: center; gap: 5px;
+      transition: all 0.18s;
+    }
+    .op-hdr-btn:hover { background: rgba(0,198,255,0.15); border-color: var(--op-cyan); color: #fff; }
+    .op-hdr-btn.green { border-color: rgba(16,185,129,0.35); color: #34d399; }
+    .op-hdr-btn.green:hover { background: rgba(16,185,129,0.12); border-color: #10b981; }
+
+    /* Área de mensagens */
+    .op-messages {
+      flex: 1; overflow-y: auto; padding: 20px 24px;
+      display: flex; flex-direction: column; gap: 6px;
+    }
+    .op-messages::-webkit-scrollbar { width: 5px; }
+    .op-messages::-webkit-scrollbar-thumb { background: rgba(0,198,255,0.18); border-radius: 4px; }
+
+    .op-msg { display: flex; flex-direction: column; max-width: 72%; }
+    .op-msg.cliente { align-self: flex-start; }
+    .op-msg.atendente { align-self: flex-end; }
+    .op-msg.funcionario { align-self: flex-end; }
+
+    .op-msg-author {
+      font-size: 0.72rem; color: #64748b; margin-bottom: 3px; padding: 0 4px;
+    }
+    .op-msg.atendente .op-msg-author,
+    .op-msg.funcionario .op-msg-author { text-align: right; }
+
+    .op-msg-bubble {
+      padding: 10px 14px; border-radius: 14px;
+      font-size: 0.88rem; line-height: 1.5; word-break: break-word;
+    }
+    .op-msg.cliente .op-msg-bubble {
+      background: rgba(255,255,255,0.06); color: #e2e8f0;
+      border-bottom-left-radius: 4px;
+    }
+    .op-msg.atendente .op-msg-bubble {
+      background: linear-gradient(135deg, #0d3066, #0b4a8c);
+      color: #e2e8f0; border-bottom-right-radius: 4px;
+    }
+    .op-msg.funcionario .op-msg-bubble {
+      background: linear-gradient(135deg, #065f46, #047857);
+      color: #e2e8f0; border-bottom-right-radius: 4px;
+    }
+
+    .op-msg-time {
+      font-size: 0.68rem; color: #475569; padding: 2px 4px; align-self: flex-end;
+    }
+    .op-msg.cliente .op-msg-time { align-self: flex-start; }
+
+    .op-msg-system {
+      align-self: center; background: rgba(0,198,255,0.08); border: 1px solid rgba(0,198,255,0.15);
+      color: #38bdf8; padding: 5px 14px; border-radius: 999px; font-size: 0.75rem;
+      text-align: center; margin: 6px 0; max-width: 90%;
+    }
+
+    /* Compositor de resposta do funcionário */
+    .op-composer {
+      padding: 14px 20px;
+      background: #081226;
+      border-top: 1px solid var(--op-border);
+      display: flex; align-items: flex-end; gap: 10px;
+    }
+    .op-composer-label {
+      font-size: 0.72rem; color: #64748b; margin-bottom: 6px; font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+    .op-composer-inner { flex: 1; display: flex; flex-direction: column; }
+    .op-composer textarea {
+      width: 100%; box-sizing: border-box;
+      background: rgba(0,198,255,0.05); border: 1px solid var(--op-border);
+      color: #e2e8f0; padding: 10px 14px; border-radius: 12px; font-size: 0.88rem;
+      outline: none; resize: none; min-height: 46px; max-height: 120px;
+      font-family: inherit; line-height: 1.5;
+      transition: border-color 0.2s;
+    }
+    .op-composer textarea:focus { border-color: rgba(16,185,129,0.45); }
+    .op-composer textarea::placeholder { color: #334155; }
+
+    .op-send-btn {
+      background: linear-gradient(135deg, #059669, #10b981);
+      border: none; color: #fff; padding: 12px 22px; border-radius: 12px;
+      font-size: 0.88rem; font-weight: 800; cursor: pointer;
+      display: flex; align-items: center; gap: 6px;
+      transition: all 0.2s; white-space: nowrap; align-self: flex-end;
+      min-height: 46px;
+    }
+    .op-send-btn:hover { filter: brightness(1.12); transform: translateY(-1px); }
+    .op-send-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+    /* Painel de resumo do cliente (lado direito) */
+    .op-info-panel {
+      width: 240px;
+      border-left: 1px solid var(--op-border);
+      background: var(--op-surface);
+      display: flex; flex-direction: column;
+      overflow-y: auto; padding: 16px;
+      gap: 16px;
+    }
+    .op-info-panel::-webkit-scrollbar { width: 4px; }
+    .op-info-panel::-webkit-scrollbar-thumb { background: rgba(0,198,255,0.15); border-radius: 4px; }
+
+    .op-info-title {
+      font-size: 0.75rem; font-weight: 800; color: #64748b;
+      text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;
+    }
+    .op-info-card {
+      background: rgba(0,0,0,0.25); border: 1px solid var(--op-border);
+      border-radius: 10px; padding: 12px; font-size: 0.82rem; color: #94a3b8;
+    }
+    .op-info-card strong { color: #e2e8f0; display: block; margin-bottom: 2px; }
+    .op-info-card .op-info-row { margin-bottom: 8px; }
+    .op-info-card .op-info-row:last-child { margin-bottom: 0; }
+
+    .op-proto-code {
+      font-size: 0.78rem; font-weight: 700; color: var(--op-cyan);
+      background: rgba(0,198,255,0.08); border: 1px solid rgba(0,198,255,0.2);
+      padding: 4px 10px; border-radius: 6px; display: block;
+      word-break: break-all;
+    }
+
+    .op-quick-replies { display: flex; flex-direction: column; gap: 6px; }
+    .op-quick-reply-btn {
+      background: rgba(0,198,255,0.06); border: 1px solid rgba(0,198,255,0.18);
+      color: #38bdf8; padding: 7px 10px; border-radius: 8px; cursor: pointer;
+      font-size: 0.78rem; font-weight: 700; text-align: left; line-height: 1.3;
+      transition: all 0.18s;
+    }
+    .op-quick-reply-btn:hover { background: rgba(0,198,255,0.15); border-color: var(--op-cyan); color: #fff; }
+
+    /* Notificação toast de nova mensagem */
+    #opToast {
+      position: fixed; bottom: 24px; right: 24px; z-index: 9999;
+      background: #0d1d35; border: 1px solid var(--op-cyan);
+      color: #e2e8f0; padding: 12px 20px; border-radius: 12px;
+      font-size: 0.88rem; font-weight: 700;
+      display: none; align-items: center; gap: 10px;
+      box-shadow: 0 8px 32px rgba(0,198,255,0.2);
+      animation: slideUp 0.3s ease;
+    }
+    #opToast.show { display: flex; }
+    #opToast i { color: var(--op-cyan); font-size: 1rem; }
+
+    @keyframes slideUp {
+      from { transform: translateY(20px); opacity: 0; }
+      to   { transform: translateY(0);    opacity: 1; }
+    }
+
+    @keyframes pulseGreen {
+      0%   { box-shadow: 0 0 0 0 rgba(16,185,129,0.6); }
+      70%  { box-shadow: 0 0 0 6px rgba(16,185,129,0); }
+      100% { box-shadow: 0 0 0 0 rgba(16,185,129,0); }
+    }
+
+    /* Responsivo */
+    @media (max-width: 900px) {
+      .op-info-panel { display: none; }
+      .op-sidebar { width: 220px; }
+    }
+    @media (max-width: 600px) {
+      .op-sidebar { width: 180px; min-width: 160px; }
+      .op-nav a span { display: none; }
+    }
+  </style>
 </head>
 <body class="dark-chat">
-  <header class="site-header">
-    <div class="logo">
+
+  <!-- ─────────── HEADER ─────────── -->
+  <header class="op-header">
+    <div class="op-brand">
       <span class="logo-icon">🛒</span>
-      <a href="admin-area.html" class="logo-text" aria-label="Área administrativa">MIXPROMOÇÃO</a>
+      <div class="logo-text">
+        <span>MIX</span><span>PROMOÇÃO</span>
+      </div>
+      <div class="op-badge">
+        <i class="fa-solid fa-headset"></i> Central de Atendimento ao Cliente
+      </div>
     </div>
 
-    <nav class="menu" aria-label="Menu principal">
-      <ul>
-        <li><a href="admin-area.html"><i class="fa-solid fa-house menu-link-icon" aria-hidden="true"></i><span>Área Admin</span></a></li>
-        <li><a href="loja.html"><i class="fa-solid fa-store menu-link-icon" aria-hidden="true"></i><span>Loja</span></a></li>
-        <li><a href="admin-reclamacoes.html"><i class="fa-solid fa-envelope menu-link-icon" aria-hidden="true"></i><span>Emails</span></a></li>
-        <li><a href="admin-chat-center.html" class="active"><i class="fa-solid fa-comments menu-link-icon" aria-hidden="true"></i><span>Conversas</span></a></li>
-      </ul>
-    </nav>
-
-    <div style="margin-left:auto; display:flex; gap:12px; align-items:center;">
-      <div id="adminBadge" style="display:none; color:var(--primary); font-weight:700;">Administrador: Rodrigo Cezar</div>
-      <button id="adminBadgeExit" class="admin-badge-exit" style="display:none;">Sair</button>
+    <div class="op-header-right">
+      <div class="op-status-tag">
+        <span class="dot-online"></span>
+        <span id="statusOnlineText">Funcionário Online</span>
+      </div>
+      <nav class="op-nav">
+        <a href="funcionario-area.html"><i class="fa-solid fa-briefcase"></i> <span>Painel</span></a>
+        <a href="funcionario-pedidos.html"><i class="fa-solid fa-clipboard-list"></i> <span>Pedidos</span></a>
+        <a href="funcionario-reclamacoes.html"><i class="fa-solid fa-comments"></i> <span>Reclamações</span></a>
+        <a href="login-funcionario.html" class="danger"><i class="fa-solid fa-right-from-bracket"></i> <span>Sair</span></a>
+      </nav>
     </div>
   </header>
 
-  <main class="chat-main">
-    <div class="chat-wrap">
-      <aside class="chat-sidebar" role="navigation" aria-label="Lista de conversas">
-        <div class="sidebar-top">
-          <div class="sidebar-title">Conversas</div>
-          <div class="sidebar-actions">
-            <button id="newConvBtn" title="Nova conversa"><i class="fa-solid fa-plus"></i></button>
-            <button id="sidebarMenuBtn" title="Menu"><i class="fa-solid fa-ellipsis-vertical"></i></button>
-          </div>
+  <!-- ─────────── CORPO PRINCIPAL ─────────── -->
+  <div class="op-main">
+
+    <!-- SIDEBAR: Fila de Clientes -->
+    <aside class="op-sidebar">
+      <div class="op-sidebar-header">
+        <div class="op-sidebar-title">
+          <i class="fa-solid fa-users-line"></i> Clientes em Atendimento
         </div>
-
-        <div class="sidebar-search">
-          <input id="chatSearch" placeholder="Pesquisar conversas..." aria-label="Pesquisar conversas">
+        <div class="op-sidebar-search">
+          <input id="searchClientes" placeholder="Buscar cliente ou protocolo..." autocomplete="off">
         </div>
+      </div>
 
-        <div id="conversations" class="conversations" role="list"></div>
-
-        <div id="emptyConversations" class="empty-state" role="status" aria-live="polite" style="display:none">
-          <div class="empty-title">Nenhuma conversa</div>
-          <div class="empty-desc">Quando um cliente iniciar um atendimento, a conversa aparecerá aqui.</div>
+      <div id="clientList" class="op-client-list">
+        <!-- Preenchido via JS -->
+        <div class="op-no-clients" id="emptyQueue">
+          <i class="fa-solid fa-inbox"></i>
+          <p>Nenhum cliente na fila no momento</p>
+          <p style="margin-top:6px; font-size:0.75rem;">As conversas aparecem aqui em tempo real</p>
         </div>
-      </aside>
+      </div>
 
-      <section class="chat-area">
-        <div class="chat-panel">
-          <header class="chat-header">
-            <div class="chat-header-left">
-              <div id="chatAvatar" class="chat-avatar">–</div>
-              <div class="chat-meta">
-                <div id="chatHeaderName">Selecione uma conversa</div>
-                <div id="chatHeaderStatus" class="chat-status"> </div>
+      <div class="op-sidebar-footer">
+        <button class="op-btn-sm" id="btnRefreshQueue" title="Atualizar fila de clientes">
+          <i class="fa-solid fa-rotate"></i> Atualizar Fila
+        </button>
+      </div>
+    </aside>
+
+    <!-- ÁREA DE CHAT -->
+    <div class="op-chat-area" id="chatArea">
+
+      <!-- Estado vazio (nenhum cliente selecionado) -->
+      <div class="op-empty-state" id="emptyState">
+        <i class="fa-solid fa-comments"></i>
+        <h3>Selecione um cliente para atender</h3>
+        <p>Escolha uma conversa na lista ao lado para visualizar o histórico e responder ao cliente em tempo real.</p>
+      </div>
+
+      <!-- Painel de Chat (aparece quando um cliente é selecionado) -->
+      <div id="chatPanel" style="display:none; flex-direction:column; flex:1; overflow:hidden; display:none;">
+
+        <!-- Header do Chat -->
+        <div class="op-chat-header">
+          <div class="op-chat-header-left">
+            <div class="op-client-av" id="panelClientAvatar">?</div>
+            <div>
+              <div class="op-chat-name" id="panelClientName">—</div>
+              <div class="op-chat-sub">
+                <span class="pulse-dot" style="width:7px;height:7px;background:#10b981;border-radius:50%;display:inline-block;flex-shrink:0;"></span>
+                <span id="panelClientStatus">Online • Atendimento em andamento</span>
               </div>
             </div>
-            <div class="chat-header-right">
-              <button id="btnSearchConv" title="Pesquisar"><i class="fa-solid fa-magnifying-glass"></i></button>
-              <button id="btnExportDoc" title="Baixar histórico (.doc)" style="margin-left:8px"><i class="fa-solid fa-download"></i></button>
-              <button id="btnMoreConv" title="Mais opções"><i class="fa-solid fa-ellipsis-vertical"></i></button>
-            </div>
-          </header>
-
-          <div id="messages" class="messages-area" role="log" aria-live="polite">
-            <div id="emptyMessages" class="empty-state" style="display:block">
-              <div class="empty-title">Nenhuma conversa selecionada</div>
-              <div class="empty-desc">Clique em uma conversa à esquerda para visualizar mensagens.</div>
-            </div>
           </div>
-
-          <div class="chat-composer" role="region" aria-label="Compor mensagem">
-            <button class="composer-icon" title="Anexar" aria-hidden="true"><i class="fa-solid fa-paperclip"></i></button>
-            <input id="msgInput" placeholder="Digite uma mensagem" autocomplete="off" aria-label="Escreva sua mensagem" disabled>
-            <div class="composer-actions">
-              <button id="sendMsgBtn" class="composer-send" title="Enviar" disabled>Enviar</button>
-            </div>
+          <div class="op-chat-header-right">
+            <span id="panelProtocolo" style="font-size:0.75rem;color:#38bdf8;font-weight:700;"></span>
+            <button class="op-hdr-btn" id="btnExportConv" title="Baixar histórico desta conversa">
+              <i class="fa-solid fa-file-arrow-down"></i> <span>Baixar</span>
+            </button>
           </div>
         </div>
-      </section>
-    </div>
-  </main>
 
-  <script src="/js/admin-chat-center.js" defer></script>
+        <!-- Área de Mensagens -->
+        <div id="panelMessages" class="op-messages">
+          <!-- Renderizado via JS -->
+        </div>
+
+        <!-- Compositor de Resposta -->
+        <div class="op-composer">
+          <div class="op-composer-inner">
+            <div class="op-composer-label">
+              <i class="fa-solid fa-reply" style="color:#10b981;"></i> RESPONDER AO CLIENTE
+            </div>
+            <textarea id="funcReplyInput" placeholder="Digite sua resposta para o cliente..." rows="2"></textarea>
+          </div>
+          <button class="op-send-btn" id="btnFuncSend" disabled>
+            <i class="fa-solid fa-paper-plane"></i> Enviar
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- PAINEL LATERAL: info do cliente -->
+    <aside class="op-info-panel" id="infoPanel" style="display:none;">
+      <div>
+        <div class="op-info-title"><i class="fa-solid fa-circle-info"></i> Dados do Cliente</div>
+        <div class="op-info-card">
+          <div class="op-info-row">
+            <strong id="infoPanelNome">—</strong>
+            <span id="infoPanelEmail" style="font-size:0.75rem;"></span>
+          </div>
+          <div class="op-info-row">
+            <span>Protocolo:</span><br>
+            <code class="op-proto-code" id="infoPanelProto">—</code>
+          </div>
+          <div class="op-info-row">
+            <span>Atendente: <strong id="infoPanelAtendente" style="color:#38bdf8;">—</strong></span>
+          </div>
+          <div class="op-info-row">
+            <span>Início: <strong id="infoPanelHora" style="color:#94a3b8;">—</strong></span>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="op-info-title"><i class="fa-solid fa-bolt"></i> Respostas Rápidas</div>
+        <div class="op-quick-replies">
+          <button class="op-quick-reply-btn" data-reply="Olá! Estamos verificando sua solicitação e retornaremos em instantes. ✅">✅ Estamos verificando</button>
+          <button class="op-quick-reply-btn" data-reply="Seu pedido está em processamento e será despachado em breve! 📦">📦 Pedido em processo</button>
+          <button class="op-quick-reply-btn" data-reply="O código de rastreamento foi enviado para seu e-mail cadastrado. 🚚">🚚 Rastreio enviado</button>
+          <button class="op-quick-reply-btn" data-reply="Seu pagamento foi confirmado com sucesso em nosso sistema. 💳">💳 Pagamento confirmado</button>
+          <button class="op-quick-reply-btn" data-reply="Abrimos um protocolo de troca para você. Nossa equipe entrará em contato em até 48h. 🔄">🔄 Troca registrada</button>
+          <button class="op-quick-reply-btn" data-reply="Obrigado por entrar em contato com a MIX-PROMOÇÃO! Se precisar de mais ajuda, estamos à disposição. 😊">😊 Encerrar com elogio</button>
+        </div>
+      </div>
+    </aside>
+
+  </div>
+
+  <!-- Toast de nova mensagem -->
+  <div id="opToast">
+    <i class="fa-solid fa-bell"></i>
+    <span id="opToastMsg">Nova mensagem de cliente!</span>
+  </div>
+
+  <!-- Scripts -->
+  <script src="../js/funcionario-central.js" defer></script>
+  <script src="/js/funcionario-central.js" defer></script>
+
 </body>
 </html>

@@ -13,48 +13,16 @@
   <body>
     <div class="container">
       <h2>Cadastrar Novo Funcionário</h2>
-      
       <form id="cadastroForm" class="form">
-        <div class="campo">
-          <label for="usuario">Usuário</label>
-          <input type="text" id="usuario" name="usuario" required />
-        </div>
-
-        <div class="campo">
-          <label for="senha">Senha</label>
-          <div class="senha-wrapper">
-            <input type="password" id="senha" name="senha" required />
-            <button type="button" id="toggleSenha" class="toggle-btn" aria-label="Mostrar/ocultar senha">👁️</button>
-          </div>
-          <div id="password-strength"></div>
-        </div>
-
-        <div class="campo">
-          <label for="confirmarSenha">Confirmar Senha</label>
-          <div class="senha-wrapper">
-            <input type="password" id="confirmarSenha" name="confirmarSenha" required />
-            <button type="button" id="toggleConfirmarSenha" class="toggle-btn" aria-label="Mostrar/ocultar confirmação">👁️</button>
-          </div>
-          <div id="password-strength-confirm"></div>
-          <p id="mensagemSenha"></p>
-        </div>
-
-        <div class="campo">
-          <label for="nome">Nome</label>
-          <input type="text" id="nome" name="nome" required />
-        </div>
-
-        <div class="campo">
-          <label for="sobrenome">Sobrenome</label>
-          <input type="text" id="sobrenome" name="sobrenome" required />
-        </div>
-
+        <div class="campo"><label for="usuario">Usuário</label><input type="text" id="usuario" name="usuario" required /></div>
+        <div class="campo"><label for="senha">Senha</label><div class="senha-wrapper"><input type="password" id="senha" name="senha" required /><button type="button" id="toggleSenha" class="toggle-btn" aria-label="Mostrar/ocultar senha">👁️</button></div><div id="password-strength"></div></div>
+        <div class="campo"><label for="confirmarSenha">Confirmar Senha</label><div class="senha-wrapper"><input type="password" id="confirmarSenha" name="confirmarSenha" required /><button type="button" id="toggleConfirmarSenha" class="toggle-btn" aria-label="Mostrar/ocultar confirmação">👁️</button></div><div id="password-strength-confirm"></div><p id="mensagemSenha"></p></div>
+        <div class="campo"><label for="nome">Nome</label><input type="text" id="nome" name="nome" required /></div>
+        <div class="campo"><label for="sobrenome">Sobrenome</label><input type="text" id="sobrenome" name="sobrenome" required /></div>
         <button type="submit" class="btn-submit">Cadastrar</button>
       </form>
-
       <p id="mensagemCadastro" role="alert"></p>
     </div>
-
     <script src="/js/cadastro-admin.js"></script>
     <script src="/js/btn-topo.js"></script>
     <script src="/js/bloquear-copia.js"></script>

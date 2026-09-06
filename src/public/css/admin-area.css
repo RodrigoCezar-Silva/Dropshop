@@ -570,3 +570,52 @@ header.site-header { position: relative; }
   .status-admin .admin-label { display: none; }
   .status-admin #nomeUsuario { font-size: 0.95rem; }
 }
+
+/* Ocultar botões de saída e status no modo funcionário */
+body.is-funcionario-mode .btn-logout-header,
+body.is-funcionario-mode .btn-logout-inline,
+body.is-funcionario-mode .status-admin,
+body.is-funcionario-mode #clienteStatus,
+body.is-funcionario-mode #statusLogado,
+body.is-funcionario-mode #logoutBtn,
+body.is-funcionario-mode .admin-badge-exit,
+body.is-funcionario-mode .header-logout,
+body.is-funcionario-mode .btn-logout-funcionario {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Botão Sair padrão no canto direito do cabeçalho */
+.btn-header-exit,
+#btnExitHeader {
+  margin-left: auto;
+  padding: 8px 18px;
+  font-weight: 700;
+  border-radius: 10px;
+  background: linear-gradient(90deg, #ff5f6d, #ff3366) !important;
+  color: #fff !important;
+  border: none !important;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(255, 51, 102, 0.28) !important;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 0.95rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+  white-space: nowrap;
+  text-decoration: none;
+  z-index: 100;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+.btn-header-exit:hover,
+#btnExitHeader:hover {
+  background: linear-gradient(90deg, #ff5252, #e0245e) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(224, 36, 94, 0.38) !important;
+  filter: brightness(1.05);
+}

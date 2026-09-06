@@ -1,8 +1,27 @@
 document.addEventListener("DOMContentLoaded", () => {
-  // Só permite acesso de administrador
-  if (localStorage.getItem("tipoUsuario") !== "Administrador") {
-    window.location.href = "admin-login.html";
+  // Permite acesso de Administrador e Funcionário
+  const tipoUsuario = localStorage.getItem("tipoUsuario");
+  if (tipoUsuario && tipoUsuario !== "Administrador" && tipoUsuario !== "Funcionario") {
+    const isFuncionario = window.location.pathname.includes("funcionario");
+    window.location.href = isFuncionario ? "login-funcionario.html" : "admin-login.html";
     return;
+  }
+
+  // Configura botão Sair no canto direito do cabeçalho
+  const btnExitHeader = document.getElementById("btnExitHeader");
+  if (btnExitHeader) {
+    btnExitHeader.addEventListener("click", () => {
+      const isFuncionario = window.location.pathname.includes("funcionario") || tipoUsuario === "Funcionario";
+      localStorage.removeItem("tipoUsuario");
+      localStorage.removeItem("token");
+      localStorage.removeItem("nome");
+      localStorage.removeItem("sobrenome");
+      localStorage.removeItem("isAdmin");
+      localStorage.removeItem("foto");
+      localStorage.removeItem("fotoMime");
+      const isHtmlDir = window.location.pathname.includes("/html/");
+      window.location.href = isHtmlDir ? "../index.html" : "./index.html";
+    });
   }
 
   const lista = document.getElementById("listaPedidosAdmin");
@@ -155,5 +174,26 @@ document.addEventListener("DOMContentLoaded", () => {
         </article>
       `;
     }).join("");
+  }
+
+  function fazerLogout() {
+    localStorage.removeItem("tipoUsuario");
+    localStorage.removeItem("token");
+    localStorage.removeItem("nome");
+    localStorage.removeItem("sobrenome");
+    localStorage.removeItem("isAdmin");
+    localStorage.removeItem("foto");
+    localStorage.removeItem("fotoMime");
+    window.location.href = "index.html";
+  }
+
+  const btnSairEsquerda = document.getElementById("btnSairEsquerda");
+  if (btnSairEsquerda) {
+    btnSairEsquerda.addEventListener("click", fazerLogout);
+  }
+
+  const btnLogoutHeader = document.getElementById("logout");
+  if (btnLogoutHeader) {
+    btnLogoutHeader.addEventListener("click", fazerLogout);
   }
 });

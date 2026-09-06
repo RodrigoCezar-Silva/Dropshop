@@ -6,42 +6,31 @@
   <meta name="description"
 
   <!-- CSS -->
-  <link rel="stylesheet" href="/css/style-index.css" />
-  <link rel="stylesheet" href="/css/logo.css" />
-  <link rel="stylesheet" href="/css/meu-perfil.css" />
-  <link rel="stylesheet" href="/css/btn-topo.css" />
-  <link rel="stylesheet" href="/css/footer.css" />
+  <link rel="stylesheet" href="./css/style-index.css" />
+  <link rel="stylesheet" href="./css/logo.css" />
+  <link rel="stylesheet" href="./css/meu-perfil.css" />
+  <link rel="stylesheet" href="./css/statusLogin.css" />
+  <link rel="stylesheet" href="./css/btn-topo.css" />
+  <link rel="stylesheet" href="./css/footer.css" />
 
   <!-- Ícones Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link rel="stylesheet" href="/css/responsive.css" />
-  <link rel="stylesheet" href="/css/chatbot-widget.css" />
-  <link rel="stylesheet" href="/css/popup.css" />
-  <link rel="stylesheet" href="/css/admin-reclamacoes.css" />
-  <link rel="stylesheet" href="/css/lightbox.css" />
-  <!-- scripts de desenvolvimento removidos para evitar 404/MIME errors -->
+  <link rel="stylesheet" href="./css/chatbot-widget.css" />
+  <link rel="stylesheet" href="./css/responsive.css" />
+  <link rel="stylesheet" href="./css/popup.css" />
+  <link rel="stylesheet" href="./css/admin-reclamacoes.css" />
+  <link rel="stylesheet" href="./css/lightbox.css" />
 </head>
 <body>
-  <!-- Cabeçalho -->
-  <header class="site-header">
-    <div class="logo">
-      <span class="logo-icon">🛒</span>
-      <span class="logo-text">
-        <span class="mix">MIX</span><span class="promocao">PROMOÇÃO</span>
-      </span>
-    </div>
-  </header>
-
-  <div id="backendStatusBanner" class="backend-banner" style="display:none;padding:12px;background:#fff3cd;border:1px solid #ffeeba;color:#856404;text-align:center;">Servidor backend indisponível. <button id="btnTentarReconectar" style="margin-left:8px;padding:6px 10px;">Tentar reconectar</button></div>
-
   <!-- Banner -->
   <section class="banner-personalizado">
     <div class="conteudo-banner">
+      <span class="banner-badge"><i class="fa-solid fa-crown"></i> Painel Exclusivo</span>
       <h1>Área do Cliente</h1>
-      <p>Um painel mais prático para acompanhar seus dados, preferências e produtos vinculados à sua conta.</p>
+      <p>Acompanhe seus dados cadastrais, pedidos, preferências e histórico em um só lugar.</p>
       <div class="banner-acoes">
-        <a href="loja.html" class="banner-link">Continuar comprando</a>
-        <a href="carrinho.html" class="banner-link banner-link-secundario">Ver carrinho</a>
+        <a href="./loja.html" class="banner-link"><i class="fa-solid fa-bag-shopping"></i> Continuar comprando</a>
+        <a href="./carrinho.html" class="banner-link banner-link-secundario"><i class="fa-solid fa-cart-shopping"></i> Ver carrinho</a>
       </div>
     </div>
   </section>
@@ -49,24 +38,24 @@
   <main class="cliente-dashboard">
     <section class="cliente-topbar">
       <div>
-        <span class="cliente-topbar-tag">Painel personalizado</span>
+        <span class="cliente-topbar-tag"><i class="fa-solid fa-sparkles"></i> Painel do Cliente</span>
         <h2>Seu espaço na MIX-PROMOÇÃO</h2>
-        <p>Confira seu cadastro, ajuste preferências e acompanhe tudo em um só lugar.</p>
+        <p>Confira seu cadastro, ajuste preferências e acompanhe tudo em tempo real.</p>
       </div>
       <div class="cliente-topbar-actions">
-        <a href="index.html" class="cliente-mini-link"><i class="fa-solid fa-house"></i><span>Início</span></a>
-        <button id="btnToggleTheme" type="button" class="cliente-mini-link cliente-mini-link-outline" aria-pressed="false"><i class="fa fa-moon"></i><span id="btnToggleThemeText">Tema escuro</span></button>
-        <a href="contato.html" class="cliente-mini-link cliente-mini-link-outline"><i class="fa-solid fa-headset"></i><span>Suporte</span></a>
+        <a href="./index.html" class="cliente-mini-link"><i class="fa-solid fa-house"></i><span>Início</span></a>
+        <a href="./atendimento.html?novo=1" id="btnSuporteTopbar" class="cliente-mini-link cliente-mini-link-outline" title="Abrir Canal de Atendimento Online"><i class="fa-solid fa-headset"></i><span>Suporte</span></a>
+        <button id="btnExitTopbar" class="cliente-mini-link cliente-mini-link-logout" type="button" title="Sair da conta"><i class="fa-solid fa-right-from-bracket"></i><span>Sair</span></button>
       </div>
     </section>
 
     <div class="container-conta" id="painelCliente">
       <div class="tabs">
-        <button class="tab-btn active" data-tab="visao-geral">Visão Geral</button>
-        <button class="tab-btn" data-tab="perfil">Dados do Cliente</button>
-        <button class="tab-btn" data-tab="compras">Pedidos e Itens</button>
-        <button class="tab-btn" data-tab="cancelados">Pedidos Cancelados</button>
-        <button class="tab-btn" data-tab="reclamacoes">Reclamações</button>
+        <button class="tab-btn active" data-tab="visao-geral"><i class="fa-solid fa-gauge-high"></i> Visão Geral</button>
+        <button class="tab-btn" data-tab="perfil"><i class="fa-solid fa-id-card"></i> Dados do Cliente</button>
+        <button class="tab-btn" data-tab="compras"><i class="fa-solid fa-boxes-packing"></i> Pedidos e Itens</button>
+        <button class="tab-btn" data-tab="cancelados"><i class="fa-solid fa-ban"></i> Pedidos Cancelados</button>
+        <button class="tab-btn" data-tab="reclamacoes"><i class="fa-solid fa-comments"></i> Reclamações</button>
       </div>
 
       <section class="tab-content active" id="visao-geral">
@@ -74,15 +63,19 @@
           <article class="overview-profile-card">
             <div class="overview-avatar-wrap">
               <img id="fotoClienteResumo" class="overview-avatar" src="" alt="Foto do cliente">
-              <span class="overview-badge" id="resumoStatusConta">Conta ativa</span>
+              <span class="overview-badge" id="resumoStatusConta"><i class="fa-solid fa-circle-check"></i> Conta ativa</span>
             </div>
             <div class="overview-profile-content">
               <p class="overview-kicker">Bem-vindo de volta</p>
               <h3 id="resumoNome">Cliente MIX-PROMOÇÃO</h3>
-              <p id="resumoEmail" class="overview-muted">Seu e-mail aparecerá aqui.</p>
-              <!-- overview chips removed as requested -->
+              <p id="resumoEmail" class="overview-muted"><i class="fa-solid fa-envelope"></i> <span>Seu e-mail aparecerá aqui.</span></p>
+              <div class="overview-chips">
+                <span class="overview-chip" id="resumoEstado"><i class="fa-solid fa-location-dot"></i> Estado não informado</span>
+                <span class="overview-chip" id="resumoBairro"><i class="fa-solid fa-building"></i> Bairro não informado</span>
+              </div>
               <div class="overview-actions botoes-perfil">
-                <!-- Ações rápidas (mantenha compacto) -->
+                <button type="button" class="btn-alterar btn-lg" id="btnIrParaDados" title="Editar dados cadastrais"><i class="fa-solid fa-user-pen"></i> Editar Dados</button>
+                <button type="button" class="btn-senha btn-lg" id="btnIrParaPedidos" title="Ver histórico de pedidos"><i class="fa-solid fa-boxes-packing"></i> Meus Pedidos</button>
               </div>
               <div class="overview-delete">
                 <button type="button" class="btn-excluir btn-sm" id="btnExcluirConta">
@@ -94,25 +87,37 @@
 
           <div class="overview-stats-grid">
             <article class="overview-stat-card accent-cyan">
-              <span class="overview-stat-label">ID do cliente</span>
+              <div class="stat-card-header">
+                <div class="stat-icon-wrap cyan"><i class="fa-solid fa-fingerprint"></i></div>
+                <span class="overview-stat-label">ID do cliente</span>
+              </div>
               <strong id="resumoClienteId">--</strong>
               <p>Identificação da sua conta no sistema.</p>
             </article>
 
             <article class="overview-stat-card accent-blue">
-              <span class="overview-stat-label">Contato principal</span>
+              <div class="stat-card-header">
+                <div class="stat-icon-wrap blue"><i class="fa-solid fa-phone"></i></div>
+                <span class="overview-stat-label">Contato principal</span>
+              </div>
               <strong id="resumoTelefone">Não informado</strong>
               <p>Canal mais rápido para atualizações do pedido.</p>
             </article>
 
             <article class="overview-stat-card accent-green">
-              <span class="overview-stat-label">Itens vinculados</span>
+              <div class="stat-card-header">
+                <div class="stat-icon-wrap green"><i class="fa-solid fa-bag-shopping"></i></div>
+                <span class="overview-stat-label">Itens vinculados</span>
+              </div>
               <strong id="resumoCompras">0 itens</strong>
               <p>Produtos encontrados no seu carrinho ou histórico local.</p>
             </article>
 
             <article class="overview-stat-card accent-dark">
-              <span class="overview-stat-label">Preferência padrão</span>
+              <div class="stat-card-header">
+                <div class="stat-icon-wrap purple"><i class="fa-solid fa-sliders"></i></div>
+                <span class="overview-stat-label">Preferência padrão</span>
+              </div>
               <strong id="resumoAbaPreferida">Visão Geral</strong>
               <p>Aba que abre primeiro no seu painel.</p>
             </article>
@@ -133,24 +138,25 @@
       <section class="tab-content" id="perfil">
         <div class="perfil-layout">
           <aside class="perfil-sidebar-card">
-            <div class="foto-wrapper">
-              <label for="inputFotoCliente" class="foto-clickable" aria-label="Alterar foto do cliente">
-                <img id="fotoClienteSidebar" class="foto-perfil" src="" alt="Foto Cliente Sidebar">
-                <span class="foto-overlay"><i class="fa-solid fa-camera"></i></span>
-              </label>
-              <input type="file" id="inputFotoCliente" accept="image/*">
-            </div>
-
+            <img id="fotoClienteSidebar" class="foto-perfil" src="" alt="Foto Cliente Sidebar">
             <h3 id="perfilSidebarNome">Cliente</h3>
             <p id="perfilSidebarEmail">email@cliente.com</p>
 
             <div class="campo alterar-foto">
-              <label class="custom-upload" for="inputFotoCliente"><i class="fa-solid fa-upload"></i><span>Alterar foto</span></label>
+              <label class="custom-upload" for="inputFotoCliente"><i class="fa-solid fa-camera"></i><span>Alterar foto</span></label>
+              <input type="file" id="inputFotoCliente" accept="image/*">
             </div>
 
-            
-
-            
+            <div class="perfil-sidebar-info">
+              <div>
+                <span>Telefone</span>
+                <strong id="perfilSidebarTelefone">Não informado</strong>
+              </div>
+              <div>
+                <span>Estado</span>
+                <strong id="perfilSidebarEstado">Não informado</strong>
+              </div>
+            </div>
           </aside>
 
           <div class="perfil-main-card">
@@ -306,7 +312,7 @@
             <h2>Pedidos e itens do cliente</h2>
             <p>Enquanto o histórico completo não vem do servidor, o painel exibe os itens salvos localmente na sua navegação.</p>
           </div>
-          <a href="carrinho.html" class="compras-link"><i class="fa-solid fa-cart-shopping"></i><span>Abrir carrinho</span></a>
+          <a href="./carrinho.html" class="compras-link"><i class="fa-solid fa-cart-shopping"></i><span>Abrir carrinho</span></a>
         </div>
 
         <div class="compras-resumo-cards">
@@ -329,7 +335,7 @@
             <h2>Pedidos cancelados</h2>
             <p>Lista de pedidos que foram cancelados e não serão entregues.</p>
           </div>
-          <a href="carrinho.html" class="compras-link compras-link-muted"><i class="fa-solid fa-ban"></i><span>Ver pedidos</span></a>
+          <a href="./carrinho.html" class="compras-link compras-link-muted"><i class="fa-solid fa-ban"></i><span>Ver pedidos</span></a>
         </div>
 
         <div class="compras-resumo-cards">
@@ -344,6 +350,24 @@
         </div>
 
         <ul class="lista-compras lista-cancelados" id="listaCancelados"></ul>
+      </section>
+
+      <!-- Aba Reclamações -->
+      <section class="tab-content" id="reclamacoes">
+        <div class="compras-header">
+          <div>
+            <h2>Reclamações e Protocolos</h2>
+            <p>Acompanhe suas solicitações enviadas e o status de resposta da ouvidoria.</p>
+          </div>
+          <a href="./reclamacoes.html" class="compras-link"><i class="fa-solid fa-plus-circle"></i><span>Nova Reclamação</span></a>
+        </div>
+        <div id="listaReclamacoesCliente" class="lista-reclamacoes-cliente">
+          <div class="empty-state-suporte" style="text-align:center; padding:36px 20px; color:#94a3b8;">
+            <i class="fa-solid fa-clipboard-check" style="font-size:2.4rem; color:#00c6ff; margin-bottom:12px; display:inline-block;"></i>
+            <h3 style="color:#f1f5f9; margin-bottom:6px;">Nenhuma reclamação pendente</h3>
+            <p style="font-size:0.9rem;">Todas as suas interações estão em dia. Se precisar de auxílio imediato, use o Canal de Atendimento!</p>
+          </div>
+        </div>
       </section>
     </div>
   </main>
@@ -372,16 +396,16 @@
       <div class="footer-links">
         <h4>Navegação</h4>
         <ul>
-          <li><a href="index.html"><i class="fa-solid fa-chevron-right"></i> Início</a></li>
-          <li><a href="loja.html"><i class="fa-solid fa-chevron-right"></i> Nossa Loja</a></li>
-          <li><a href="QuemSomos.html"><i class="fa-solid fa-chevron-right"></i> Sobre Nós</a></li>
+          <li><a href="./index.html"><i class="fa-solid fa-chevron-right"></i> Início</a></li>
+          <li><a href="./loja.html"><i class="fa-solid fa-chevron-right"></i> Nossa Loja</a></li>
+          <li><a href="./QuemSomos.html"><i class="fa-solid fa-chevron-right"></i> Sobre Nós</a></li>
         </ul>
       </div>
       <div class="footer-links suporte">
         <h4>Suporte</h4>
         <ul>
-          <li><a href="trocas-devolucoes.html"><i class="fa-solid fa-chevron-right"></i> Trocas e Devoluções</a></li>
-          <li><a href="carrinho.html"><i class="fa-solid fa-chevron-right"></i> Meu Carrinho</a></li>
+          <li><a href="./trocas-devolucoes.html"><i class="fa-solid fa-chevron-right"></i> Trocas e Devoluções</a></li>
+          <li><a href="./carrinho.html"><i class="fa-solid fa-chevron-right"></i> Meu Carrinho</a></li>
         </ul>
       </div>
       <!-- Contato removido -->
@@ -401,18 +425,19 @@
   </footer>
 
   <!-- Scripts -->
-  <script src="/js/VoltaraoTopo.js"></script>
-  <script src="/js/popup.js"></script>
-  <script src="/js/contatos.js"></script>
+  <script src="./js/VoltaraoTopo.js"></script>
+  <script src="./js/popup.js"></script>
+  <script src="./js/contatos.js"></script>
   
-  <script src="/js/carrinho.js"></script>
-  <script src="/js/meu-perfil.js"></script>
-  <script src="/js/logo.js"></script>
-  <script src="/js/btn-topo.js"></script>
-  <script src="/js/bloquear-copia.js"></script>
-  <script src="/js/lightbox.js"></script>
-  <script src="/js/chatbot-widget.js"></script>
-  <script src="/js/responsive-nav.js"></script>
+  <script src="./js/carrinho.js"></script>
+  <script src="./js/meu-perfil.js"></script>
+  <script src="./js/meu-perfil-suporte.js" defer></script>
+  <script src="./js/logo.js"></script>
+  <script src="./js/btn-topo.js"></script>
+  <script src="./js/bloquear-copia.js"></script>
+  <script src="./js/chatbot-widget.js"></script>
+  <script src="./js/lightbox.js"></script>
+  <script src="./js/responsive-nav.js"></script>
 
 </body>
 

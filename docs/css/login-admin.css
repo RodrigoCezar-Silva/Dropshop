@@ -96,9 +96,9 @@ body.login-bg::after {
 }
 
 .login-container {
-  width: min(100%, 470px);
+  width: min(100%, 490px);
   margin: 0 auto;
-  padding: 30px 30px 26px;
+  padding: 30px 28px 26px;
   background: var(--login-card);
   border: 1px solid rgba(255, 255, 255, 0.28);
   backdrop-filter: blur(18px);
@@ -128,14 +128,15 @@ body.login-bg::after {
 
 .login-container h2 {
   margin: 0 0 8px;
-  font-size: clamp(1.9rem, 4vw, 2.35rem);
-  line-height: 1.05;
+  font-size: clamp(1.35rem, 3.8vw, 1.95rem);
+  line-height: 1.15;
   font-weight: 800;
   color: #0f172a;
   background: none;
   -webkit-text-fill-color: initial;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.02em;
   text-transform: uppercase;
+  white-space: nowrap;
 }
 
 .login-subtitle {
@@ -311,7 +312,8 @@ body.login-bg::after {
   }
 
   .login-container h2 {
-    font-size: 1.55rem;
+    font-size: clamp(1.1rem, 5.2vw, 1.45rem);
+    white-space: nowrap;
   }
 
   .login-subtitle {

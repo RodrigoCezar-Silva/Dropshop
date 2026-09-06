@@ -1,0 +1,52 @@
+/* Popup estiloso para bloqueio de acesso */
+#popupBloqueio {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  width: 100vw; height: 100vh;
+  background: rgba(0,0,0,0.45);
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.3s;
+}
+#popupBloqueio .popup-content {
+  background: linear-gradient(135deg, #fff, #e0f7fa 80%);
+  border-radius: 18px;
+  box-shadow: 0 8px 32px #00bcd4cc, 0 2px 16px #2222;
+  padding: 38px 32px 28px 32px;
+  text-align: center;
+  max-width: 350px;
+  min-width: 260px;
+  animation: popupShow 0.4s;
+}
+#popupBloqueio h2 {
+  color: #2196f3;
+  font-size: 1.5em;
+  margin-bottom: 18px;
+}
+#popupBloqueio p {
+  color: #333;
+  font-size: 1.1em;
+  margin-bottom: 24px;
+}
+#popupBloqueio button {
+  background: linear-gradient(90deg, #00bcd4, #43e97b);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 32px;
+  font-size: 1.1em;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 2px 8px #00bcd488;
+  transition: background 0.2s, transform 0.2s;
+}
+#popupBloqueio button:hover {
+  background: linear-gradient(90deg, #43e97b, #00bcd4);
+  transform: scale(1.06);
+}
+@keyframes popupShow {
+  from { opacity: 0; transform: scale(0.8); }
+  to { opacity: 1; transform: scale(1); }
+}

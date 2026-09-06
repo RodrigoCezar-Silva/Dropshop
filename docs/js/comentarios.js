@@ -17,16 +17,24 @@ document.addEventListener("DOMContentLoaded", () => {
   const previewVideo = document.getElementById("previewVideo");
   const formComentario = document.getElementById("formComentario");
 
-  // Garantir que o popup do formulário esteja sempre escondido até verificarmos o login
+  // Se não estiver logado como Cliente ou Administrador, limpa chaves residuais de cliente
+  const tipoAtual = localStorage.getItem("tipoUsuario");
+  if (tipoAtual !== "Cliente" && tipoAtual !== "Administrador") {
+    try {
+      localStorage.removeItem("clienteId");
+      localStorage.removeItem("token");
+      sessionStorage.removeItem("activeClienteSession");
+    } catch (e) {}
+  }
+
+  // Garantir que os popups estejam sempre escondidos inicialmente
   if (popup) popup.style.display = 'none';
+  if (popupLoginObrigatorio) popupLoginObrigatorio.style.display = 'none';
 
-  // Mostrar o botão de avaliar somente se estiver logado como cliente ou admin
-  const clienteLogado = localStorage.getItem("clienteId");
-  const podeAvaliar = (isAdmin || clienteLogado);
-  if (btnComentar) btnComentar.style.display = podeAvaliar ? "inline-block" : "none";
-  if (btnAvaliar) btnAvaliar.style.display = podeAvaliar ? "inline-block" : "none";
+  // Mostrar o botão de avaliar sempre visível para todos os visitantes
+  if (btnComentar) btnComentar.style.display = "inline-block";
+  if (btnAvaliar) btnAvaliar.style.display = "inline-block";
 
-  // Abrir popup de comentário (só se logado)
   // Popup estilizado para login obrigatório
   const popupLoginObrigatorio = document.getElementById("popupLoginObrigatorio");
   const fecharPopupLogin = document.getElementById("fecharPopupLogin");
@@ -35,6 +43,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnCancelarLoginPopup = document.getElementById("btnCancelarLoginPopup");
 
   function mostrarPopupLoginObrigatorio() {
+    if (popup) popup.style.display = "none";
     if (popupLoginObrigatorio) popupLoginObrigatorio.style.display = "flex";
   }
   function fecharPopupLoginObrigatorio() {
@@ -57,43 +66,75 @@ document.addEventListener("DOMContentLoaded", () => {
       // fallback simples
       if (current.indexOf('?') === -1) current += '?openComment=1'; else current += '&openComment=1';
     }
-    const loginUrl = '/html/login-cliente.html?returnTo=' + encodeURIComponent(current);
+    const isHtmlDir = window.location.pathname.includes('/html/');
+    const loginUrl = (isHtmlDir ? 'login-cliente.html' : 'html/login-cliente.html') + '?returnTo=' + encodeURIComponent(current);
     window.location.href = loginUrl;
   });
 
   function usuarioLogado() {
-    return localStorage.getItem("isAdmin") === "true" || localStorage.getItem("clienteId");
+    const tipoUsuario = localStorage.getItem("tipoUsuario");
+    const token = localStorage.getItem("token");
+    const clienteId = localStorage.getItem("clienteId");
+
+    // Validação estrita: somente se for Cliente autenticado com token/id válidos
+    if (tipoUsuario === "Cliente") {
+      const temToken = Boolean(token && token !== "null" && token !== "undefined" && token.trim() !== "");
+      const temId = Boolean(clienteId && clienteId !== "null" && clienteId !== "undefined" && String(clienteId).trim() !== "");
+      return temToken || temId;
+    }
+
+    // Administrador autenticado
+    if (tipoUsuario === "Administrador") {
+      const isAdmin = localStorage.getItem("isAdmin") === "true";
+      const temToken = Boolean(token && token !== "null" && token !== "undefined" && token.trim() !== "");
+      return isAdmin || temToken;
+    }
+
+    // Qualquer outro caso (visitante / não logado)
+    return false;
   }
-  if (btnComentar) btnComentar.addEventListener("click", (e) => {
-    e.preventDefault();
-    e.stopPropagation();
+
+  function abrirPopupComentario() {
     if (usuarioLogado()) {
-      if (popup) popup.style.display = "flex";
+      if (popupLoginObrigatorio) popupLoginObrigatorio.style.display = "none";
+      if (popup) {
+        popup.style.display = "flex";
+        // Preenche o nome do cliente se estiver logado e o campo estiver vazio
+        const autorInput = document.getElementById("autor");
+        if (autorInput && !autorInput.value) {
+          const nome = localStorage.getItem("nome");
+          const sobrenome = localStorage.getItem("sobrenome");
+          if (nome && nome !== "null") autorInput.value = `${nome} ${sobrenome && sobrenome !== 'null' ? sobrenome : ''}`.trim();
+        }
+      }
     } else {
       if (popup) popup.style.display = "none";
       mostrarPopupLoginObrigatorio();
     }
+  }
+
+  if (btnComentar) btnComentar.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    abrirPopupComentario();
   });
   if (btnAvaliar) btnAvaliar.addEventListener("click", (e) => {
     e.preventDefault();
     e.stopPropagation();
-    if (usuarioLogado()) {
-      if (popup) popup.style.display = "flex";
-    } else {
-      if (popup) popup.style.display = "none";
-      mostrarPopupLoginObrigatorio();
-    }
+    abrirPopupComentario();
   });
 
-  // Garante que o popupComentario nunca aparece para não logados
+  // Garante que o popupComentario nunca aparece inicialmente para não logados
   if (!usuarioLogado()) {
     if (popup) popup.style.display = "none";
   }
   // Se a URL contém openComment=1 e o usuário está logado, abre o formulário automaticamente
   try {
     const sp = new URLSearchParams(window.location.search);
-    if (sp.get('openComment') === '1' && usuarioLogado() && popup) {
-      popup.style.display = 'flex';
+    if (sp.get('openComment') === '1') {
+      if (usuarioLogado() && popup) {
+        abrirPopupComentario();
+      }
       // remover o parâmetro da URL sem recarregar
       const url = new URL(window.location.href);
       url.searchParams.delete('openComment');
@@ -103,6 +144,16 @@ document.addEventListener("DOMContentLoaded", () => {
     // ignore
   }
   if (fecharPopup) fecharPopup.addEventListener("click", () => popup.style.display = "none");
+  if (popup) {
+    popup.addEventListener("click", (e) => {
+      if (e.target === popup) popup.style.display = "none";
+    });
+  }
+  if (popupLoginObrigatorio) {
+    popupLoginObrigatorio.addEventListener("click", (e) => {
+      if (e.target === popupLoginObrigatorio) fecharPopupLoginObrigatorio();
+    });
+  }
 
   // Buscar comentários do servidor para este produto
   let comentarios = [];
@@ -207,7 +258,18 @@ document.addEventListener("DOMContentLoaded", () => {
   // Também atualiza a lista de comentários e os gráficos de estrelas.
   formComentario.addEventListener("submit", async (e) => {
     e.preventDefault();
-    const autor = document.getElementById("autor").value.trim();
+    if (!usuarioLogado()) {
+      if (popup) popup.style.display = "none";
+      mostrarPopupLoginObrigatorio();
+      return;
+    }
+
+    let autor = document.getElementById("autor").value.trim();
+    if (!autor) {
+      const nome = localStorage.getItem("nome");
+      const sobrenome = localStorage.getItem("sobrenome");
+      if (nome) autor = `${nome} ${sobrenome || ''}`.trim();
+    }
     const texto = document.getElementById("texto").value.trim();
     const notaProduto = parseInt(document.getElementById("notaProduto").value) || 0;
 

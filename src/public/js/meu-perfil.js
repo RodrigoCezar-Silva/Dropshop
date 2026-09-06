@@ -19,6 +19,34 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch (e) { /* ignore */ }
   })();
 
+  // Verifica se o cliente foi redirecionado do chat por inatividade (3 minutos)
+  try {
+    const alertaInatividade = sessionStorage.getItem('mix_alerta_inatividade');
+    if (alertaInatividade) {
+      sessionStorage.removeItem('mix_alerta_inatividade');
+      setTimeout(() => {
+        if (typeof window.showStyledPopup === 'function') {
+          const isHtmlDir = window.location.pathname.includes('/html/');
+          window.showStyledPopup({
+            title: 'Atendimento Pausado',
+            message: alertaInatividade,
+            small: true,
+            buttons: [
+              {
+                label: 'Voltar ao Suporte',
+                className: 'btn-alterar',
+                onClick: () => {
+                  window.location.href = (isHtmlDir ? "atendimento.html" : "./html/atendimento.html") + "?novo=1";
+                }
+              },
+              { label: 'Fechar', className: 'btn-secondary' }
+            ]
+          });
+        }
+      }, 250);
+    }
+  } catch (e) {}
+
   // Botão Minha Conta disponível em páginas gerais
   const btnMinhaConta = document.getElementById("btnMinhaConta");
   if (btnMinhaConta) {
@@ -26,6 +54,27 @@ document.addEventListener("DOMContentLoaded", () => {
       window.location.href = "/html/meu-perfil.html";
     });
   }
+
+  // Logout da Área do Cliente (botão no cabeçalho e na barra de atalhos)
+  function logoutCliente() {
+    localStorage.removeItem("tipoUsuario");
+    localStorage.removeItem("token");
+    localStorage.removeItem("nome");
+    localStorage.removeItem("sobrenome");
+    localStorage.removeItem("foto");
+    localStorage.removeItem("fotoMime");
+    localStorage.removeItem("clienteCPF");
+    localStorage.removeItem("email");
+    localStorage.removeItem("clienteTelefone");
+    const isHtmlDir = window.location.pathname.includes('/html/');
+    window.location.href = isHtmlDir ? "login-cliente.html" : "./login-cliente.html";
+  }
+
+  const btnExitHeader = document.getElementById("btnExitHeader");
+  if (btnExitHeader) btnExitHeader.addEventListener("click", logoutCliente);
+
+  const btnExitTopbar = document.getElementById("btnExitTopbar");
+  if (btnExitTopbar) btnExitTopbar.addEventListener("click", logoutCliente);
 
   // aplicar imediatamente e ouvir alterações em outras abas
   try { syncHeaderFromLocal(); window.addEventListener('storage', syncHeaderFromLocal); } catch (e) { /* ignore */ }
@@ -257,6 +306,33 @@ document.addEventListener("DOMContentLoaded", () => {
       ativarAba(btn.dataset.tab);
     });
   });
+
+  const btnIrParaDados = document.getElementById("btnIrParaDados");
+  if (btnIrParaDados) {
+    btnIrParaDados.addEventListener("click", () => ativarAba("perfil"));
+  }
+  const btnIrParaPedidos = document.getElementById("btnIrParaPedidos");
+  if (btnIrParaPedidos) {
+    btnIrParaPedidos.addEventListener("click", () => ativarAba("compras"));
+  }
+  function irParaPaginaAtendimento(e) {
+    if (e && e.preventDefault) e.preventDefault();
+    const isHtmlDir = window.location.pathname.includes('/html/');
+    window.location.href = (isHtmlDir ? "atendimento.html" : "./html/atendimento.html") + "?novo=1";
+  }
+
+  const btnIrParaSuporte = document.getElementById("btnIrParaSuporte");
+  if (btnIrParaSuporte) {
+    btnIrParaSuporte.addEventListener("click", irParaPaginaAtendimento);
+  }
+  const btnSuporteTopbar = document.getElementById("btnSuporteTopbar");
+  if (btnSuporteTopbar) {
+    btnSuporteTopbar.addEventListener("click", irParaPaginaAtendimento);
+  }
+  const tabBtnSuporte = document.getElementById("tabBtnSuporte") || document.querySelector('[data-tab="suporte"]');
+  if (tabBtnSuporte) {
+    tabBtnSuporte.addEventListener("click", irParaPaginaAtendimento);
+  }
 
   const preferencias = obterPreferencias();
   const ultimaAba = localStorage.getItem("mixClienteUltimaAba");

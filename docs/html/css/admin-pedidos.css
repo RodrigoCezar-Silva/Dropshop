@@ -1,0 +1,357 @@
+/* ========== Página de Pedidos Admin ========== */
+
+.admin-pedidos-page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 28px 20px 48px;
+}
+
+/* Header da página */
+.admin-pedidos-page-header {
+  background: linear-gradient(135deg, #031d32, #0a3d62 55%, #0d6e6e);
+  color: #fff;
+  border-radius: 18px;
+  padding: 28px 32px;
+  margin-bottom: 24px;
+  box-shadow: 0 18px 40px rgba(3, 29, 50, 0.22);
+}
+
+.admin-pedidos-voltar {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #9ff3ea;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+  transition: color 0.2s;
+}
+
+.admin-pedidos-voltar:hover {
+  color: #fff;
+}
+
+.admin-pedidos-page-header h1 {
+  margin: 0 0 8px;
+  font-size: clamp(1.6rem, 3.2vw, 2.4rem);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  text-shadow: 0 2px 12px rgba(0,0,0,0.35), 0 0 30px rgba(159,243,234,0.25);
+  font-weight: 800;
+  color: #fff;
+}
+
+.admin-pedidos-page-header h1 i {
+  font-size: 1.1em;
+  filter: drop-shadow(0 0 8px rgba(159,243,234,0.5));
+  color: #fff;
+}
+
+.admin-pedidos-page-header p {
+  margin: 0;
+  color: rgba(255,255,255,0.85);
+  line-height: 1.5;
+}
+
+/* Filtros */
+.admin-pedidos-filtros {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 22px;
+  background: #fff;
+  border: 1px solid #dbe6ef;
+  border-radius: 14px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+}
+
+.filtro-grupo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filtro-grupo label {
+  font-weight: 600;
+  color: #0f2740;
+  font-size: 0.9rem;
+}
+
+.filtro-grupo select,
+.filtro-grupo input {
+  padding: 9px 14px;
+  border: 1px solid #ccd8e4;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  background: #f8fbfd;
+  transition: border-color 0.2s;
+}
+
+.filtro-grupo select:focus,
+.filtro-grupo input:focus {
+  outline: none;
+  border-color: #0d5fa8;
+}
+
+.filtro-grupo input {
+  min-width: 240px;
+}
+
+.admin-pedidos-contagem {
+  margin-left: auto;
+  font-weight: 700;
+  color: #0d5fa8;
+  font-size: 0.95rem;
+  background: #e8f0fe;
+  padding: 6px 16px;
+  border-radius: 20px;
+}
+
+/* Lista de pedidos */
+.admin-pedidos-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.admin-pedidos-vazio {
+  text-align: center;
+  color: #8899a6;
+  padding: 60px 20px;
+  font-size: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.admin-pedidos-vazio i {
+  font-size: 2.5rem;
+  color: #c5d3e0;
+}
+
+/* Card de cada pedido */
+.adm-pedido {
+  background: #fff;
+  border: 1px solid #dbe6ef;
+  border-radius: 16px;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.07);
+  overflow: hidden;
+}
+
+/* Topo do pedido */
+.adm-pedido-topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 24px;
+  background: #f0f5fa;
+  border-bottom: 1px solid #dbe6ef;
+}
+
+.adm-pedido-id h2 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #0f2740;
+}
+
+.adm-pedido-id time {
+  display: block;
+  color: #6b8299;
+  font-size: 0.82rem;
+  margin-top: 2px;
+}
+
+/* Badge de status */
+.adm-badge {
+  display: inline-block;
+  padding: 5px 16px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.adm-badge.status-confirmado {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.adm-badge.status-cancelado {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.adm-badge.status-teste {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+/* Seções internas */
+.adm-secao {
+  padding: 18px 24px;
+  border-bottom: 1px solid #eef3f8;
+}
+
+.adm-secao h3 {
+  margin: 0 0 14px;
+  font-size: 0.95rem;
+  color: #0a3d62;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.adm-secao h3 i {
+  color: #0d6e6e;
+}
+
+/* Grid de 2 colunas */
+.adm-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.adm-campo {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.adm-campo label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #6b8299;
+  letter-spacing: 0.04em;
+}
+
+.adm-campo span {
+  font-size: 0.95rem;
+  color: #0f2740;
+  word-break: break-word;
+}
+
+/* Grid de produtos */
+.adm-itens-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.adm-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #f8fbfd;
+  border: 1px solid #e2eaf2;
+  border-radius: 10px;
+  padding: 12px;
+}
+
+.adm-item img {
+  width: 56px;
+  height: 56px;
+  object-fit: cover;
+  border-radius: 8px;
+  background: #eef3f8;
+  flex-shrink: 0;
+}
+
+.adm-item-dados {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow: hidden;
+}
+
+.adm-item-dados strong {
+  font-size: 0.9rem;
+  color: #0f2740;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.adm-item-dados span {
+  font-size: 0.82rem;
+  color: #6b8299;
+}
+
+/* Total do pedido */
+.adm-pedido-total {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 24px;
+  padding: 16px 24px;
+  background: #f8fbfd;
+  font-size: 0.92rem;
+  color: #4f6475;
+}
+
+.adm-pedido-total strong {
+  font-size: 1.15rem;
+  color: #065f46;
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+  .admin-pedidos-page {
+    padding: 16px 12px 34px;
+  }
+
+  .admin-pedidos-page-header {
+    padding: 20px;
+  }
+
+  .admin-pedidos-filtros {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .admin-pedidos-contagem {
+    margin-left: 0;
+    text-align: center;
+  }
+
+  .filtro-grupo input {
+    min-width: 100%;
+  }
+
+  .adm-pedido-topo {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 14px 18px;
+  }
+
+  .adm-secao {
+    padding: 14px 18px;
+  }
+
+  .adm-grid-2 {
+    grid-template-columns: 1fr;
+  }
+
+  .adm-itens-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .adm-pedido-total {
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+    padding: 12px 18px;
+  }
+}

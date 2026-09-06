@@ -1,1 +1,5 @@
 DB: candidate 'env' failed: ER_ACCESS_DENIED_ERROR
+[404] PUT /api/admin/me/foto - Origin: http://127.0.0.1:5501 - Host: localhost:3000
+[404] PUT /api/admin/me/foto - Origin: http://127.0.0.1:5501 - Host: 127.0.0.1:3000
+[404] PUT /api/admin/me/foto - Origin: http://127.0.0.1:5501 - Host: localhost:3000
+[404] PUT /api/admin/me/foto - Origin: http://127.0.0.1:5501 - Host: 127.0.0.1:3000

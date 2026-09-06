@@ -1622,6 +1622,22 @@ app.get("/api/produtos", async (req, res) => {
   }
 });
 
+app.get("/api/produtos/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const connection = await createDbConnection();
+    const [rows] = await connection.execute("SELECT * FROM produtos WHERE id = ?", [id]);
+    await connection.end();
+    if (!rows || !rows.length) {
+      return res.status(404).json({ sucesso: false, mensagem: "Produto não encontrado." });
+    }
+    res.json({ sucesso: true, produto: mapearProdutoBanco(rows[0]) });
+  } catch (error) {
+    console.error("Erro ao buscar produto por ID:", error.message);
+    res.status(500).json({ sucesso: false, mensagem: "Erro ao buscar produto." });
+  }
+});
+
 app.get("/api/produtos/estatisticas", autenticarToken, exigirAdmin, async (req, res) => {
   try {
     const connection = await createDbConnection();

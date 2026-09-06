@@ -107,78 +107,95 @@
 .btn-theme-toggle[aria-pressed="true"] { background: linear-gradient(90deg,#f39c12,#f6b93b); color: #111; }
 
 
-/* 🔹 Status de Cliente */
+/* 🔹 Status de Cliente (Design Moderno & Profissional) */
 #clienteStatus {
-  background: linear-gradient(135deg, #1976d2 60%, #43cea2 100%);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.03));
   color: #fff;
-  padding: 18px 32px;
-  border-radius: 16px;
-  display: flex;
+  padding: 5px 16px 5px 6px;
+  border-radius: 999px;
+  display: inline-flex;
   align-items: center;
-  gap: 22px;
-  max-width: 520px;
-  margin: 28px auto 18px auto;
-  box-shadow: 0 6px 24px rgba(25, 118, 210, 0.18);
-  font-size: 18px;
+  gap: 11px;
+  border: 1px solid rgba(0, 198, 255, 0.3);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   font-family: 'Poppins', Arial, sans-serif;
   position: relative;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  text-decoration: none;
+  vertical-align: middle;
+}
+
+#clienteStatus:hover {
+  background: linear-gradient(135deg, rgba(0, 198, 255, 0.16), rgba(0, 114, 255, 0.1));
+  border-color: rgba(0, 198, 255, 0.6);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 22px rgba(0, 198, 255, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.25);
 }
 
 #clienteStatus .perfil {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 11px;
 }
 
 #fotoCliente {
   border-radius: 50%;
-  border: 3px solid #ffd700;
-  width: 64px;
-  height: 64px;
+  border: 2px solid #00c6ff;
+  width: 38px;
+  height: 38px;
   object-fit: cover;
-  box-shadow: 0 2px 12px #0002;
-  background: #fff;
+  box-shadow: 0 0 10px rgba(0, 198, 255, 0.45);
+  background: #0f172a;
+  flex-shrink: 0;
+  transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+#clienteStatus:hover #fotoCliente {
+  transform: scale(1.06);
+  border-color: #38ef7d;
+  box-shadow: 0 0 12px rgba(56, 239, 125, 0.5);
 }
 
 #clienteStatus .nome-area {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 2px;
+  justify-content: center;
+  line-height: 1.15;
+  gap: 1px;
 }
 
-#clienteStatus .nome-area span {
-  font-size: 1.13em;
+.user-greeting {
+  font-size: 0.68rem;
   font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #94a3b8;
+  display: block;
+}
+
+#clienteStatus .nome-area span.nome-usuario {
+  font-size: 0.93rem;
+  font-weight: 700;
   color: #fff;
   letter-spacing: 0.01em;
-  text-shadow: 0 2px 8px #0002;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
   white-space: nowrap;
 }
 
-.btn-minha-conta {
-  white-space: nowrap;
-  padding: 10px 24px;
-  min-width: 120px;
-  font-weight: 700;
-  font-size: 1em;
-  border-radius: 8px;
-  background: #1976d2;
-  color: #fff;
-  border: none;
-  box-shadow: 0 2px 8px #1976d233;
-  transition: background 0.2s;
-  display: inline-block;
-}
-.btn-minha-conta:hover {
-  background: #2196f3;
+.btn-minha-conta,
+#btnMinhaConta {
+  display: none !important;
 }
 
 .nome-usuario {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 180px;
+  max-width: 170px;
   display: inline-block;
   vertical-align: middle;
 }
@@ -238,54 +255,125 @@
 
 /* Quando o status é exibido no cabeçalho, torne-o inline e compacto */
 header.site-header #clienteStatus {
-  margin: 0 12px;
+  margin: 0 8px 0 12px;
   max-width: none;
-  padding: 8px 14px;
-  border-radius: 12px;
-  box-shadow: 0 6px 18px rgba(25, 118, 210, 0.12);
+  padding: 4px 16px 4px 5px;
+  border-radius: 999px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.15);
   align-items: center;
-  gap: 12px;
-  background: linear-gradient(135deg, #1976d2 50%, #43cea2 100%);
+  gap: 10px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.03));
+  border: 1px solid rgba(0, 198, 255, 0.3);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  cursor: pointer;
+  text-decoration: none;
+}
+
+header.site-header #clienteStatus:hover {
+  background: linear-gradient(135deg, rgba(0, 198, 255, 0.16), rgba(0, 114, 255, 0.1));
+  border-color: rgba(0, 198, 255, 0.6);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 22px rgba(0, 198, 255, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.25);
 }
 
 header.site-header #clienteStatus .nome-area {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  max-width: 260px;
+  justify-content: center;
+  max-width: 220px;
+  line-height: 1.15;
+  gap: 1px;
 }
 
 /* Forçar nome em uma linha, truncando com reticências se necessário */
 header.site-header #clienteStatus .nome-usuario {
-  font-size: 0.98em;
-  font-weight: 600;
+  font-size: 0.93rem;
+  font-weight: 700;
   color: #fff;
-  text-shadow: 0 2px 6px rgba(0,0,0,0.25);
+  text-shadow: 0 1px 4px rgba(0,0,0,0.4);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  line-height: 1.15;
+  max-width: 170px;
+  line-height: 1.2;
 }
 
 header.site-header #clienteStatus #fotoCliente {
-  width: 48px;
-  height: 48px;
-  border-width: 2px;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 2px solid #00c6ff;
+  box-shadow: 0 0 10px rgba(0, 198, 255, 0.45);
 }
 
-/* Posicionamento do botão Sair no header próximo ao Minha Conta */
-.header-logout {
-  margin-left: 12px;
-  padding: 8px 12px;
+/* Posicionamento do botão Sair no header */
+.header-logout,
+.btn-logout-funcionario {
+  margin-left: 8px;
+  padding: 8px 18px;
   font-weight: 700;
-  border-radius: 8px;
-  background: #ff5252;
-  color: #fff;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #ff416c, #ff4b2b);
+  color: #fff !important;
   border: none;
   cursor: pointer;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  box-shadow: 0 4px 14px rgba(255, 65, 108, 0.35);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  font-size: 0.88rem;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+  text-decoration: none;
 }
-.header-logout:hover { background: #d32f2f; transform: translateY(-1px); }
+.header-logout:hover,
+.btn-logout-funcionario:hover {
+  background: linear-gradient(135deg, #ff2a55, #e03010);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(255, 65, 108, 0.5);
+  filter: brightness(1.08);
+}
+
+/* Botão Sair no canto direito do cabeçalho (Painel do Funcionário, Reclamações, Área do Cliente) */
+.btn-header-exit,
+#btnExitHeader {
+  margin-left: auto;
+  padding: 8px 18px;
+  font-weight: 700;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #ff416c, #ff4b2b) !important;
+  color: #fff !important;
+  border: none !important;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(255, 65, 108, 0.35) !important;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 0.88rem;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+  text-decoration: none;
+  z-index: 100;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+.btn-header-exit:hover,
+#btnExitHeader:hover {
+  background: linear-gradient(135deg, #ff2a55, #e03010) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(255, 65, 108, 0.5) !important;
+  filter: brightness(1.08);
+}
+
+body:not(.is-funcionario-mode) #clienteStatus .btn-logout-funcionario,
+body:not(.is-funcionario-mode) header.site-header .btn-logout-funcionario {
+  display: inline-flex !important;
+}
 
 /* Garante que a área do cliente no header não mostre spans vazios */
 header.site-header #clienteStatus span { display: inline-block; vertical-align: middle; }
@@ -355,15 +443,32 @@ body.is-admin-mode .admin-label,
 body.is-funcionario-mode .status-admin,
 body.is-funcionario-mode #statusLogado,
 body.is-funcionario-mode #clienteStatus,
+body.is-funcionario-mode .header-user,
 body.is-funcionario-mode .status-text,
 body.is-funcionario-mode .admin-label,
+body.is-funcionario-mode #logoutBtn,
+body.is-funcionario-mode .header-logout,
+body.is-funcionario-mode .btn-logout-funcionario,
+body.is-funcionario-mode .admin-badge-exit,
+body.is-funcionario-mode #adminBadgeExit,
+body.is-funcionario-mode .btn-logout-header,
+body.is-funcionario-mode #btnLogoutHeader,
+body.is-funcionario-mode .btn-logout-inline,
+body.is-funcionario-mode #btnLogoutInline,
+body.is-funcionario-mode .btn-exit-near,
+body.is-funcionario-mode #btnExitNearStatus,
+body.is-funcionario-mode .btn-exit-right,
+body.is-funcionario-mode #btnExitRight,
+body.is-funcionario-mode #logout,
 body.is-admin-mode .logo-text.admin-name {
   display: none !important;
   visibility: hidden !important;
   opacity: 0 !important;
   height: 0 !important;
+  width: 0 !important;
   margin: 0 !important;
   padding: 0 !important;
+  pointer-events: none !important;
 }
 .btn-exit-admin {
   position: absolute;

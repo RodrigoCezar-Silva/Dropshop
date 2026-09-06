@@ -1,10 +1,27 @@
 document.addEventListener("DOMContentLoaded", async () => {
-  // Verificar se é admin
+  // Permite acesso de Administrador e Funcionário
   const tipoUsuario = localStorage.getItem("tipoUsuario");
-  if (tipoUsuario !== "Administrador") {
-    alert("Acesso restrito a administradores.");
-    window.location.href = "admin-login.html";
+  if (tipoUsuario && tipoUsuario !== "Administrador" && tipoUsuario !== "Funcionario") {
+    const isFuncionario = window.location.pathname.includes("funcionario");
+    window.location.href = isFuncionario ? "login-funcionario.html" : "admin-login.html";
     return;
+  }
+
+  // Configura botão Sair no canto direito do cabeçalho
+  const btnExitHeader = document.getElementById("btnExitHeader");
+  if (btnExitHeader) {
+    btnExitHeader.addEventListener("click", () => {
+      const isFuncionario = window.location.pathname.includes("funcionario") || tipoUsuario === "Funcionario";
+      localStorage.removeItem("tipoUsuario");
+      localStorage.removeItem("token");
+      localStorage.removeItem("nome");
+      localStorage.removeItem("sobrenome");
+      localStorage.removeItem("isAdmin");
+      localStorage.removeItem("foto");
+      localStorage.removeItem("fotoMime");
+      const isHtmlDir = window.location.pathname.includes("/html/");
+      window.location.href = isHtmlDir ? "../index.html" : "./index.html";
+    });
   }
 
   let filtroAtual = "todas";

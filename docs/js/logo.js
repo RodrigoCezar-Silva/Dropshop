@@ -11,6 +11,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const rawTipo = localStorage.getItem('tipoUsuario');
     const tipo = (rawTipo && rawTipo !== 'null' && rawTipo !== '') ? rawTipo : null;
     if (tipo === 'Administrador' || tipo === 'Funcionario') {
+      const path = window.location.pathname.toLowerCase();
+      const isIndex = path.endsWith('index.html') || path === '/' || path === '';
+      if (isIndex) {
+        return; // Na página inicial (index.html), a logo deve ser sempre o logotipo da loja
+      }
+
       const nome = (localStorage.getItem('nome') || '').trim();
       const sobrenome = (localStorage.getItem('sobrenome') || '').trim();
       const prefixo = tipo === 'Funcionario' ? 'Funcionário' : 'Administrador';

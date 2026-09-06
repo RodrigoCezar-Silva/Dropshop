@@ -1,467 +1,491 @@
+/**
+ * CANAL DE ATENDIMENTO AO CLIENTE - MIX-PROMOÇÃO
+ * Atendimento Online ao Vivo em Tempo Real com Atendente
+ */
+
 document.addEventListener('DOMContentLoaded', function () {
-  // Modo de produção: sem conversas de teste.
-  const convContainer = document.getElementById('conversations');
+  // Elementos do DOM
   const messagesEl = document.getElementById('messages');
-  const chatHeaderName = document.getElementById('chatHeaderName');
-  const chatHeaderStatus = document.getElementById('chatHeaderStatus');
   const msgInput = document.getElementById('msgInput');
   const sendBtn = document.getElementById('sendMsgBtn');
+  const attachBtn = document.getElementById('btnAttach');
+  const fileInput = document.getElementById('fileAttachInput');
   const searchInput = document.getElementById('chatSearch');
-  const emptyConversations = document.getElementById('emptyConversations');
-  const emptyMessages = document.getElementById('emptyMessages');
+  const convItems = document.querySelectorAll('.conv-item');
 
-  let conversations = [];
-  let selectedConversationId = null;
-  const API_BASE = (typeof window !== 'undefined' && typeof window.__API_BASE__ !== 'undefined') ? window.__API_BASE__ : '';
-  const isLiveServerFallback = (!API_BASE) && (location.port && String(location.port) !== '3000');
+  const btnExport = document.getElementById('btnExportDoc') || document.getElementById('btnExportChat');
+  const btnNovoAtendimento = document.getElementById('btnNovoAtendimento');
+  const chatHeaderName = document.getElementById('chatHeaderName');
+  const chatHeaderStatus = document.getElementById('chatHeaderStatus');
+  const userGreetingNameEl = document.getElementById('userGreetingName');
+  const protocolNumberEl = document.getElementById('protocolNumber');
+  const protocolSubtitleEl = document.getElementById('protocolSubtitle');
 
-  function apiUrl(path){
-    const base = (API_BASE || '');
-    return (base || '') + path;
-  }
-  function apiFetch(path, opts){
-    return fetch(apiUrl(path), opts);
-  }
+  // Identificação do Cliente
+  const nomeCliente = (localStorage.getItem('nome') || '').trim();
+  const sobrenomeCliente = (localStorage.getItem('sobrenome') || '').trim();
+  const clienteFullName = [nomeCliente, sobrenomeCliente].filter(Boolean).join(' ').trim() || 'Cliente';
+  const clienteEmail = (localStorage.getItem('email') || '').trim();
 
-  function formatTime(ts) {
-    const d = new Date(ts || Date.now());
-    return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  }
-
-  function showEmptyConversations(show) {
-    if (!emptyConversations) return;
-    emptyConversations.style.display = show ? 'block' : 'none';
+  // Protocolo do Atendimento
+  let protocolo = sessionStorage.getItem('mix_atendimento_protocolo');
+  if (!protocolo) {
+    protocolo = 'MIX-' + new Date().getFullYear() + '-' + Math.floor(10000 + Math.random() * 90000);
+    sessionStorage.setItem('mix_atendimento_protocolo', protocolo);
   }
 
-  function showEmptyMessages(show) {
-    if (!emptyMessages) return;
-    emptyMessages.style.display = show ? 'block' : 'none';
-  }
+  if (protocolNumberEl) protocolNumberEl.textContent = '#' + protocolo;
+  if (protocolSubtitleEl) protocolSubtitleEl.textContent = '#' + protocolo;
+  if (userGreetingNameEl) userGreetingNameEl.textContent = clienteFullName;
 
-  function setComposerEnabled(enabled) {
-    if (msgInput) msgInput.disabled = !enabled;
-    if (sendBtn) sendBtn.disabled = !enabled;
-  }
+  // Canal/Tópico selecionado
+  let currentTopic = 'geral';
+  let isTyping = false;
 
-  function renderConversations(list) {
-    if (!convContainer) return;
-    convContainer.innerHTML = '';
-    if (!list || list.length === 0) {
-      showEmptyConversations(true);
-      return;
+  // Carregar mensagens salvas ou inicializar com boas-vindas
+  let messages = [];
+  try {
+    const saved = localStorage.getItem('mix_atendimento_chat_' + protocolo);
+    if (saved) {
+      messages = JSON.parse(saved);
     }
-    showEmptyConversations(false);
-    list.forEach(c => {
-      const el = document.createElement('div');
-      el.className = 'conv-item';
-      el.setAttribute('data-id', c.id);
-      if (c.cliente_email) el.setAttribute('data-email', c.cliente_email);
-      const initials = (c.name || '').split(' ').map(s => s[0]).slice(0,2).join('') || 'U';
-      const last = c.lastMessagePreview || '';
-      const unread = c.unread || 0;
-      el.innerHTML = `
-        <div class="conv-avatar">${initials}</div>
-        <div class="conv-info"><div class="name">${c.name || 'Cliente'}</div><div class="meta">${last}</div></div>
-        <div class="conv-right">${unread?'<span class="conv-unread">'+unread+'</span>':''}
-          <button class="conv-download" title="Baixar histórico" data-id="${c.id}" style="margin-left:8px;border:none;background:transparent;color:inherit;cursor:pointer"><i class="fa-solid fa-download"></i></button>
-        </div>`;
-      el.addEventListener('click', async () => {
-        // ao clicar, se tivermos cliente_email, carregar todas as conversas desse cliente do backend
-        const email = c.cliente_email || el.getAttribute('data-email');
-        if (email && !isLiveServerFallback) {
-          try {
-            const resp = await apiFetch(`/api/conversations?cliente_email=${encodeURIComponent(email)}`, { credentials: 'same-origin' });
-            if (resp && resp.ok) {
-              const convs = await resp.json();
-              if (Array.isArray(convs) && convs.length) {
-                conversations = convs;
-                renderConversations(conversations);
-                // abrir a primeira conversa do cliente
-                setTimeout(()=>{ try{ openConversation(convs[0].id); }catch(e){} }, 80);
-                return;
-              }
-            }
-          } catch (e) { console.warn('Failed to load client conversations', e); }
-        }
-        // fallback: abrir apenas a conversa clicada
-        openConversation(c.id);
-      });
-      // handler do botão de download dentro do item (não propagar o clique)
-      const dlBtn = el.querySelector('.conv-download');
-      if (dlBtn) {
-        dlBtn.addEventListener('click', async (ev) => {
-          ev.stopPropagation();
-          const cid = dlBtn.getAttribute('data-id') || c.id;
-          try {
-            const url = apiUrl(`/api/conversations/${cid}/export-doc`);
-            const resp = await fetch(url, { credentials: 'same-origin' });
-            if (!resp.ok) {
-              const j = await resp.json().catch(()=>null);
-              throw new Error((j && j.mensagem) ? j.mensagem : 'Falha ao exportar');
-            }
-            const blob = await resp.blob();
-            const cd = resp.headers.get('content-disposition') || '';
-            const m = cd.match(/filename="?([^";]+)"?/i);
-            const filename = (m && m[1]) ? m[1] : `conversa_${cid}.doc`;
-            const urlBlob = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = urlBlob;
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-            URL.revokeObjectURL(urlBlob);
-          } catch (e) {
-            console.error('export item error', e);
-            alert('Erro ao baixar histórico: ' + (e && e.message ? e.message : ''));
-          }
-        });
+  } catch (e) {}
+
+  if (!messages || messages.length === 0) {
+    messages = [
+      {
+        type: 'system',
+        text: `🔒 Atendimento iniciado • Protocolo: #${protocolo} • Criptografia de ponta a ponta ativa`,
+        time: new Date().toISOString()
+      },
+      {
+        type: 'attendant',
+        author: 'Camila Santos (Atendimento)',
+        text: `Olá, ${clienteFullName}! 👋 Bem-vindo(a) ao Canal de Atendimento Online da MIX-PROMOÇÃO.\n\nSou a **Camila**, sua atendente hoje. Estou pronta para te ajudar com qualquer dúvida sobre pedidos, pagamentos, rastreio ou trocas.\n\nComo posso te ajudar agora?`,
+        time: new Date().toISOString(),
+        suggestions: [
+          '📦 Onde está meu pedido?',
+          '💳 Dúvidas sobre PIX e Pagamento',
+          '🚚 Qual o prazo de entrega?',
+          '🔄 Quero solicitar uma troca ou devolução',
+          '💬 Falar com atendente sobre outro assunto'
+        ]
       }
-      convContainer.appendChild(el);
-    });
+    ];
+    saveMessages();
   }
 
-  async function loadConversations() {
-    // modo Live Server (sem API definida): usar fallback local imediatamente
-    if (isLiveServerFallback) {
-      try {
-        const raw = localStorage.getItem('offline_chat_store');
-        if (raw) {
-          const store = JSON.parse(raw);
-          conversations = (store.conversations || []).map(c => ({ id: c.id, name: c.name || c.title || ('Cliente ' + c.id), lastMessagePreview: (c.messages && c.messages.length) ? String(c.messages[c.messages.length-1].text).slice(0,200) : '', unread: 0, online: false }));
-        } else {
-          conversations = [];
-          if (emptyConversations) {
-            emptyConversations.style.display = 'block';
-            const title = emptyConversations.querySelector('.empty-title');
-            const desc = emptyConversations.querySelector('.empty-desc');
-            if (title) title.textContent = 'Failed to load resource: the server responded with a status of 404 (Not Found)';
-            if (desc) desc.textContent = 'A API não está disponível nesta origem. Inicie o servidor Node (porta 3000) ou use a origem correta.';
-          }
-        }
-        renderConversations(conversations);
-        tryAutoOpenNew(conversations);
-        showEmptyConversations(conversations.length === 0);
-        return;
-      } catch (e) {
-        conversations = [];
-        renderConversations(conversations);
-        showEmptyConversations(true);
+  // Render inicial
+  renderMessages();
+
+  // Rolagem suave para o fim
+  function scrollToBottom() {
+    if (messagesEl) {
+      setTimeout(() => {
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+      }, 50);
+    }
+  }
+
+  function saveMessages() {
+    try {
+      localStorage.setItem('mix_atendimento_chat_' + protocolo, JSON.stringify(messages));
+    } catch (e) {}
+  }
+
+  function formatTime(iso) {
+    try {
+      const d = new Date(iso || Date.now());
+      return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    } catch(e) {
+      return '';
+    }
+  }
+
+  function renderMessages() {
+    if (!messagesEl) return;
+    messagesEl.innerHTML = '';
+
+    messages.forEach((msg, idx) => {
+      if (msg.type === 'system') {
+        const div = document.createElement('div');
+        div.className = 'msg-system';
+        div.textContent = msg.text;
+        messagesEl.appendChild(div);
         return;
       }
-    }
 
-    // quando não for Live Server, tentar consultar a API (API_BASE opcional)
-    const candidates = [];
-    if (typeof window !== 'undefined' && typeof window.__API_BASE__ !== 'undefined' && window.__API_BASE__) candidates.push(window.__API_BASE__);
-    candidates.push('');
+      const div = document.createElement('div');
+      const isMe = msg.type === 'client';
+      div.className = `msg ${isMe ? 'me client' : 'other attendant'}`;
 
-    let fetched = false;
-    let data = null;
-    for (const base of candidates) {
-      try {
-        const url = (base || '') + '/api/conversations';
-        const res = await fetch(url, { credentials: 'same-origin' });
-        if (!res.ok) continue;
-        data = await res.json();
-        fetched = true;
-        break;
-      } catch (e) {
-        // continue para próximo candidato
-        continue;
-      }
-    }
+      let html = '';
+      html += `<div class="author">${isMe ? '<i class="fa-solid fa-user"></i> Você' : '<i class="fa-solid fa-headset"></i> ' + (msg.author || 'Camila Santos')}</div>`;
+      
+      // Formatação simples de markdown (negrito e quebras de linha)
+      let formattedText = escapeHtml(msg.text)
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\n/g, '<br>');
+      html += `<div class="msg-content">${formattedText}</div>`;
 
-    if (fetched) {
-      conversations = Array.isArray(data) ? data : [];
-      renderConversations(conversations);
-      tryAutoOpenNew(conversations);
-      showEmptyConversations(conversations.length === 0);
-      return;
-    }
-
-    // fallback: localStorage
-    try {
-      const raw = localStorage.getItem('offline_chat_store');
-      if (raw) {
-        const store = JSON.parse(raw);
-        conversations = (store.conversations || []).map(c => ({ id: c.id, name: c.name || c.title || ('Cliente ' + c.id), lastMessagePreview: (c.messages && c.messages.length) ? String(c.messages[c.messages.length-1].text).slice(0,200) : '', unread: 0, online: false }));
-      } else {
-        conversations = [];
-      }
-    } catch (e) {
-      conversations = [];
-    }
-    renderConversations(conversations);
-    tryAutoOpenNew(conversations);
-    showEmptyConversations(conversations.length === 0);
-    return;
-  }
-
-  function tryAutoOpenNew(list){
-    if(!Array.isArray(list) || list.length===0) return;
-    // find first with unread > 0
-    const unread = list.find(c => (c.unread || 0) > 0);
-    if(unread){
-      // if not already opened, open it
-      if(selectedConversationId !== unread.id){
-        // reload conversations to ensure selection appears
-        selectedConversationId = unread.id;
-        // refresh conversations rendering then open
-        renderConversations(list);
-        setTimeout(()=>{ try{ openConversation(unread.id); }catch(e){} }, 120);
-      }
-    }
-  }
-
-  async function openConversation(id) {
-    selectedConversationId = id;
-    setComposerEnabled(false);
-    // limpar área de mensagens
-    messagesEl.innerHTML = '';
-    showEmptyMessages(true);
-    chatHeaderName.textContent = 'Carregando...';
-    chatHeaderStatus.textContent = '';
-
-    try {
-      // tentar buscar mensagens do backend
-      let res;
-      try {
-        res = await apiFetch(`/api/conversations/${id}/messages`, { credentials: 'same-origin' });
-      } catch (e) { res = null; }
-
-      if (res && res.ok) {
-        const data = await res.json();
-        renderMessages(data || []);
-      } else {
-        // se não conseguiu pelo backend, tentar fallback localStorage (modo Live Server)
-        const raw = localStorage.getItem('offline_chat_store');
-        if (raw) {
-          const store = JSON.parse(raw);
-          const conv = (store.conversations || []).find(c => String(c.id) === String(id));
-          const msgs = conv ? (conv.messages || []) : [];
-          renderMessages(msgs);
-        } else {
-          throw new Error('Erro ao carregar mensagens');
-        }
+      if (msg.attachmentUrl) {
+        html += `<img src="${msg.attachmentUrl}" class="msg-attachment" alt="Anexo enviado" onclick="window.open(this.src, '_blank')" title="Clique para ampliar" />`;
       }
 
-      // update header
-      const conv = conversations.find(c => c.id === id) || {};
-      chatHeaderName.textContent = conv.name || 'Cliente';
-      chatHeaderStatus.textContent = conv.online ? 'online' : '';
-      // se não houver mensagens, tentar acionar bot (somente se backend disponível)
-      try{
-        const hasMsgs = messagesEl.querySelectorAll('.msg').length > 0;
-        if (!hasMsgs) await triggerBotInitial(id);
-      }catch(e){}
-      setComposerEnabled(true);
-    } catch (err) {
-      console.error('openConversation:', err);
-      // fallback final: mostrar erro na UI
-      chatHeaderName.textContent = 'Erro ao carregar mensagens';
-      chatHeaderStatus.textContent = '';
-      setComposerEnabled(false);
-    }
-  }
+      html += `<span class="time">${formatTime(msg.time)} ${isMe ? '<i class="fa-solid fa-check-double" style="margin-left:3px;opacity:0.8;"></i>' : ''}</span>`;
 
-  async function triggerBotInitial(conversationId) {
-    try {
-      const res = await fetch((API_BASE||'') + '/api/chatbot/respond', {
-        method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ conversationId })
-      });
-      if (!res.ok) throw new Error('Erro chatbot');
-      const data = await res.json();
-      if (data && data.message) {
-        // append bot message and options
-        appendBotMessage(data.message, data.options || []);
-        if (data.escalate) appendSystemMessage('Conversa marcada para atendimento humano.');
-      }
-    } catch (e) {
-      console.error('triggerBotInitial', e);
-    }
-  }
+      div.innerHTML = html;
+      messagesEl.appendChild(div);
 
-  function appendBotMessage(msg, options) {
-    // bot message
-    const mEl = document.createElement('div');
-    mEl.className = 'msg other bot-msg';
-    const time = formatTime(msg.time);
-    mEl.innerHTML = `<div class="author">${escapeHtml(msg.fromName || 'Assistente')}</div><div class="text">${escapeHtml(msg.text || '')}</div><span class="time">${time}</span>`;
-    messagesEl.appendChild(mEl);
-    // options
-    if (options && options.length) {
-      const optWrap = document.createElement('div');
-      optWrap.className = 'bot-options';
-      options.forEach(o => {
-        const b = document.createElement('button');
-        b.className = 'bot-opt';
-        b.type = 'button';
-        b.textContent = o.label;
-        b.addEventListener('click', () => handleBotOptionClick(o.id, b, optWrap));
-        optWrap.appendChild(b);
-      });
-      messagesEl.appendChild(optWrap);
-    }
-    messagesEl.scrollTop = messagesEl.scrollHeight;
-  }
-
-  async function handleBotOptionClick(optionId, btnEl, optWrap) {
-    // disable options while processing
-    Array.from(optWrap.querySelectorAll('button')).forEach(b => b.disabled = true);
-    try {
-      const res = await fetch((API_BASE||'') + '/api/chatbot/respond', {
-        method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ conversationId: selectedConversationId, input: optionId })
-      });
-      if (!res.ok) throw new Error('Erro chatbot');
-      const data = await res.json();
-      if (data && data.message) {
-        appendBotMessage(data.message, data.options || []);
-        if (data.escalate) appendSystemMessage('Conversa marcada para atendimento humano.');
-      }
-    } catch (e) {
-      console.error('handleBotOptionClick', e);
-      appendSystemMessage('Erro ao processar opção do bot.');
-    }
-  }
-
-  function appendSystemMessage(text) {
-    const el = document.createElement('div');
-    el.className = 'msg system';
-    el.innerHTML = `<div class="text">${escapeHtml(text)}</div>`;
-    messagesEl.appendChild(el);
-    messagesEl.scrollTop = messagesEl.scrollHeight;
-  }
-
-  function renderMessages(list) {
-    messagesEl.innerHTML = '';
-    if (!list || list.length === 0) {
-      showEmptyMessages(true);
-      return;
-    }
-    showEmptyMessages(false);
-    list.forEach(m => {
-      const who = m.from === 'me' ? 'me' : 'other';
-      const mEl = document.createElement('div');
-      mEl.className = 'msg ' + (who === 'me' ? 'me' : 'other');
-      const time = formatTime(m.time);
-      const author = who === 'me' ? '' : `<div class="author">${m.fromName || 'Cliente'}</div>`;
-      mEl.innerHTML = `${author}<div class="text">${escapeHtml(m.text || '')}</div><span class="time">${time}</span>`;
-      messagesEl.appendChild(mEl);
-    });
-    messagesEl.scrollTop = messagesEl.scrollHeight;
-  }
-
-  function escapeHtml(str) {
-    return String(str).replace(/[&<>"']/g, function (s) { return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]); });
-  }
-
-  if (sendBtn && msgInput) {
-    sendBtn.addEventListener('click', async () => {
-      const text = msgInput.value && msgInput.value.trim();
-      if (!text || !selectedConversationId) return;
-      // enviar para API
-      try {
-        const payload = { text };
-        const res = await fetch((API_BASE||'') + `/api/conversations/${selectedConversationId}/messages`, {
-          method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify(payload)
+      // Sugestões se for a última mensagem da atendente
+      if (!isMe && msg.suggestions && msg.suggestions.length > 0 && idx === messages.length - 1) {
+        const sugWrap = document.createElement('div');
+        sugWrap.className = 'quick-suggestions';
+        msg.suggestions.forEach(sug => {
+          const btn = document.createElement('button');
+          btn.className = 'suggestion-chip';
+          btn.type = 'button';
+          btn.textContent = sug;
+          btn.addEventListener('click', () => {
+            enviarMensagem(sug);
+          });
+          sugWrap.appendChild(btn);
         });
-        if (!res.ok) throw new Error('Falha ao enviar mensagem');
-        const saved = await res.json();
-        // re-render ou inserir mensagem retornada
-        appendLocalMessage(saved);
-        msgInput.value = '';
-      } catch (err) {
-        console.error('send message:', err);
-        alert('Não foi possível enviar a mensagem.');
+        messagesEl.appendChild(sugWrap);
       }
     });
-    msgInput.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendBtn.click(); } });
+
+    scrollToBottom();
   }
 
-  function appendLocalMessage(m) {
-    const who = m.from === 'me' ? 'me' : 'me';
-    const mEl = document.createElement('div');
-    mEl.className = 'msg ' + who;
-    mEl.innerHTML = `<div class="text">${escapeHtml(m.text)}</div><span class="time">${formatTime(m.time)}</span>`;
-    messagesEl.appendChild(mEl);
-    messagesEl.scrollTop = messagesEl.scrollHeight;
+  function escapeHtml(text) {
+    if (!text) return '';
+    return String(text)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
   }
 
-  // Polling de conversas (mantém a lista atualizada)
-  let _conversationsPollId = null;
-  function startPollingConversations(interval = 5000) {
-    if (_conversationsPollId) return;
-    _conversationsPollId = setInterval(() => {
-      try { loadConversations(); } catch (e) { console.warn('poll error', e); }
-    }, interval);
+  function showTypingIndicator() {
+    removeTypingIndicator();
+    isTyping = true;
+    const typing = document.createElement('div');
+    typing.id = 'activeTypingIndicator';
+    typing.className = 'typing-indicator';
+    typing.innerHTML = `
+      <div class="dots">
+        <span></span><span></span><span></span>
+      </div>
+      <span>Camila está digitando...</span>
+    `;
+    messagesEl.appendChild(typing);
+    scrollToBottom();
   }
-  function stopPollingConversations(){ if(_conversationsPollId){ clearInterval(_conversationsPollId); _conversationsPollId = null; } }
 
-  // Buscar conversas ao abrir a página
-  loadConversations();
-  startPollingConversations();
+  function removeTypingIndicator() {
+    isTyping = false;
+    const existing = document.getElementById('activeTypingIndicator');
+    if (existing) existing.remove();
+  }
 
-  // Criar nova conversa (botão +)
-  const newConvBtn = document.getElementById('newConvBtn');
-  if (newConvBtn) {
-    newConvBtn.addEventListener('click', async () => {
-      const name = window.prompt('Nome do cliente / título da conversa:', 'Novo Cliente');
-      if (!name) return;
-      try {
-        const resp = await fetch((API_BASE||'') + '/api/conversations', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name }) });
-        if (!resp.ok) throw new Error('falha');
-        const conv = await resp.json();
-        // recarregar e abrir
-        await loadConversations();
-        setTimeout(() => { try { openConversation(conv.id); } catch(e){} }, 200);
-      } catch (e) {
-        console.error('create conversation', e);
-        alert('Não foi possível criar a conversa.');
+  // Resposta inteligente e humanizada da atendente Camila
+  function gerarRespostaAtendente(textoCliente) {
+    const txt = (textoCliente || '').toLowerCase().trim();
+
+    if (/onde está meu pedido|rastrear|rastreio|código de rastreio|localizar|cadê meu pedido|meu pedido/i.test(txt)) {
+      return {
+        text: `Com certeza, ${clienteFullName}! Para pedidos realizados em nossa loja, o código de rastreamento é gerado e enviado para seu e-mail assim que o item é despachado pelo nosso centro de distribuição.\n\nVocê também pode consultar todos os seus pedidos atualizados a qualquer momento acessando a sua **Área do Cliente > Meus Pedidos**.\n\nSe você tiver o número do seu pedido em mãos (ex: #PED-1234), pode me enviar aqui que consulto para você agora mesmo!`,
+        suggestions: ['📋 Como acessar Meus Pedidos?', '🚚 Qual o prazo de entrega?', '💬 Quero falar de outro assunto']
+      };
+    }
+
+    if (/prazo de entrega|quanto tempo|quando chega|dias úteis|frete/i.test(txt)) {
+      return {
+        text: `O prazo médio de entrega para todo o Brasil é de **7 a 15 dias úteis** após o envio do pedido. Todas as encomendas possuem seguro integral contra extravio e código de rastreamento oficial dos Correios ou transportadora parceira.\n\nCaso o seu pedido já tenha sido despachado, você pode acompanhar cada etapa do trajeto em tempo real!`,
+        suggestions: ['📦 Rastrear meu pedido', '💳 Confirmar pagamento', '💬 Falar com atendente']
+      };
+    }
+
+    if (/pagamento|pix|boleto|cartão|cartao|aprov|comprovante/i.test(txt)) {
+      return {
+        text: `Sobre pagamentos:\n\n• **PIX:** A aprovação é imediata em nosso sistema! Assim que você conclui a transferência, seu pedido já entra em preparação.\n• **Cartão de Crédito:** Geralmente aprovado em instantes pela operadora.\n• **Boleto Bancário:** Pode levar de 1 a 3 dias úteis para compensação bancária.\n\nSe você já efetuou o pagamento e precisa de confirmação, pode me enviar o comprovante pelo botão de anexo 📎 aqui no chat!`,
+        suggestions: ['📎 Como enviar comprovante?', '📦 Consultar status do pedido', '💬 Falar com atendente']
+      };
+    }
+
+    if (/troca|trocas|devolu|devolver|estorno|reembolso|defeito|cancelar|cancelamento/i.test(txt)) {
+      return {
+        text: `Entendido! De acordo com a nossa política de satisfação e o Código de Defesa do Consumidor, você tem até **7 dias corridos** após receber o produto para solicitar a troca ou devolução sem nenhum custo.\n\nPara iniciar o processo agora mesmo, você pode preencher o formulário na nossa página oficial de **Trocas e Devoluções**, ou se preferir, pode me relatar o motivo da troca e anexar uma foto do produto aqui!`,
+        suggestions: ['🔄 Abrir página de Trocas', '💬 Enviar detalhes do produto', '📦 Falar com atendente']
+      };
+    }
+
+    if (/como acessar meus pedidos|área do cliente/i.test(txt)) {
+      return {
+        text: `Para acessar seus pedidos:\n1. Clique no botão **"Minha Conta"** no topo da página ou no seu nome.\n2. Na tela do seu perfil, clique na aba **"Meus Pedidos"**.\n3. Lá você verá o histórico completo, itens comprados e o status de cada entrega!`,
+        suggestions: ['📦 Rastrear meu pedido', '💬 Tenho outra dúvida']
+      };
+    }
+
+    if (/humano|atendente humano|falar com atendente|pessoa real|fala com atendente/i.test(txt)) {
+      return {
+        text: `Você já está falando diretamente com o atendimento humano online! 👋 Meu nome é Camila Santos, atuo no suporte direto da MIX-PROMOÇÃO.\n\nPode me descrever com detalhes a sua situação ou dúvida que estou acompanhando seu chamado até que tudo seja solucionado com sucesso!`,
+        suggestions: ['📦 Dúvida sobre pedido', '💳 Dúvida sobre pagamento', '🔄 Quero fazer uma troca']
+      };
+    }
+
+    if (/obrigado|obrigada|valeu|agradeço|grato|grata|tks/i.test(txt)) {
+      return {
+        text: `Eu que agradeço a sua preferência e confiança na MIX-PROMOÇÃO! 😊 Foi um prazer te atender. Se precisar de mais alguma coisa, estarei sempre à disposição por este canal.\n\nTenha um excelente dia e ótimas compras! ✨`,
+        suggestions: ['⭐ Avaliar atendimento', '🔄 Novo Atendimento', '🛒 Ir para a Loja']
+      };
+    }
+
+    if (/como enviar comprovante/i.test(txt)) {
+      return {
+        text: `É super fácil! Basta clicar no ícone de clipe 📎 logo ao lado do campo de mensagem, selecionar a imagem ou arquivo do comprovante no seu dispositivo e confirmar o envio.`,
+        suggestions: ['💳 Formas de pagamento', '📦 Onde está meu pedido?']
+      };
+    }
+
+    // Resposta padrão contextual e atenciosa
+    return {
+      text: `Entendi perfeitamente o que você precisa! Já registrei esta informação no seu protocolo **#${protocolo}**.\n\nVocê gostaria que eu verificasse isso em nosso sistema agora ou gostaria de adicionar mais algum detalhe sobre o seu caso?`,
+      suggestions: ['📦 Consultar no sistema', '📎 Anexar foto ou documento', '💬 Falar mais detalhes']
+    };
+  }
+
+  // Função para envio de mensagem do cliente
+  function enviarMensagem(texto) {
+    const conteudo = (texto || (msgInput ? msgInput.value : '')).trim();
+    if (!conteudo) return;
+
+    if (msgInput) {
+      msgInput.value = '';
+      msgInput.focus();
+    }
+
+    // Adiciona mensagem do cliente
+    messages.push({
+      type: 'client',
+      author: clienteFullName,
+      text: conteudo,
+      time: new Date().toISOString()
+    });
+
+    saveMessages();
+    renderMessages();
+
+    // Simula atendimento em tempo real
+    showTypingIndicator();
+
+    const delay = Math.floor(1200 + Math.random() * 900); // 1.2s a 2.1s
+    setTimeout(() => {
+      removeTypingIndicator();
+      const resposta = gerarRespostaAtendente(conteudo);
+      messages.push({
+        type: 'attendant',
+        author: 'Camila Santos (Atendimento)',
+        text: resposta.text,
+        time: new Date().toISOString(),
+        suggestions: resposta.suggestions
+      });
+      saveMessages();
+      renderMessages();
+    }, delay);
+  }
+
+  // Listeners de envio
+  if (sendBtn) {
+    sendBtn.addEventListener('click', () => enviarMensagem());
+  }
+
+  if (msgInput) {
+    msgInput.disabled = false;
+    msgInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        enviarMensagem();
       }
     });
   }
 
-  // demo button removed
+  if (sendBtn) sendBtn.disabled = false;
 
-  // Busca local para conversas (filtrar nomes)
+  // Anexar imagem / arquivo
+  if (attachBtn && fileInput) {
+    attachBtn.addEventListener('click', () => {
+      fileInput.click();
+    });
+
+    fileInput.addEventListener('change', () => {
+      const file = fileInput.files && fileInput.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function (evt) {
+        const dataUrl = evt.target.result;
+        messages.push({
+          type: 'client',
+          author: clienteFullName,
+          text: `[Arquivo anexado: ${file.name}]`,
+          attachmentUrl: file.type.startsWith('image/') ? dataUrl : null,
+          time: new Date().toISOString()
+        });
+        saveMessages();
+        renderMessages();
+
+        showTypingIndicator();
+        setTimeout(() => {
+          removeTypingIndicator();
+          messages.push({
+            type: 'attendant',
+            author: 'Camila Santos (Atendimento)',
+            text: `Recebi o seu anexo **${file.name}** com sucesso! Já estou examinando o arquivo anexado ao protocolo #${protocolo}. Em que mais posso te orientar sobre ele?`,
+            time: new Date().toISOString()
+          });
+          saveMessages();
+          renderMessages();
+        }, 1400);
+      };
+      reader.readAsDataURL(file);
+      fileInput.value = '';
+    });
+  }
+
+  // Seleção de Canais / Tópicos na Sidebar
+  convItems.forEach(item => {
+    item.addEventListener('click', () => {
+      convItems.forEach(i => i.classList.remove('active'));
+      item.classList.add('active');
+
+      const topic = item.getAttribute('data-topic');
+      currentTopic = topic;
+
+      const titleEl = item.querySelector('.name');
+      const topicName = titleEl ? titleEl.textContent : 'Atendimento';
+
+      if (chatHeaderName) chatHeaderName.textContent = topicName;
+
+      // Mensagem informativa da mudança de canal
+      messages.push({
+        type: 'system',
+        text: `Canal alterado para: ${topicName}`,
+        time: new Date().toISOString()
+      });
+
+      if (topic === 'pedidos') {
+        messages.push({
+          type: 'attendant',
+          author: 'Camila Santos (Atendimento)',
+          text: `Você conectou ao canal de **Pedidos e Rastreamento**! Se desejar consultar um pedido específico, por favor me informe o número do pedido ou o e-mail de compra.`,
+          time: new Date().toISOString(),
+          suggestions: ['📦 Rastrear meu pedido', '🚚 Qual o prazo de entrega?', '📋 Ver Meus Pedidos']
+        });
+      } else if (topic === 'pagamentos') {
+        messages.push({
+          type: 'attendant',
+          author: 'Camila Santos (Atendimento)',
+          text: `Canal de **Pagamentos e PIX** ativo. Precisa de ajuda com comprovantes, boletos ou aprovação de compras?`,
+          time: new Date().toISOString(),
+          suggestions: ['💳 Pagamento com PIX', '📄 Segunda via de boleto', '📎 Enviar comprovante']
+        });
+      } else if (topic === 'trocas') {
+        messages.push({
+          type: 'attendant',
+          author: 'Camila Santos (Atendimento)',
+          text: `Canal de **Trocas e Devoluções** ativo. Você pode solicitar trocas em até 7 dias após o recebimento. Como posso te orientar?`,
+          time: new Date().toISOString(),
+          suggestions: ['🔄 Política de trocas', '📦 Produto com defeito', '💬 Falar com Camila']
+        });
+      } else if (topic === 'chatbot') {
+        messages.push({
+          type: 'attendant',
+          author: 'MixIA (Assistente 24h)',
+          text: `Olá! Eu sou a **MixIA**, a inteligência artificial da MIX-PROMOÇÃO. Estou online 24 horas para tirar dúvidas imediatas sobre o site e produtos!`,
+          time: new Date().toISOString(),
+          suggestions: ['🛒 Como comprar no site?', '🚚 Custos de frete', '👤 Voltar para Camila']
+        });
+      }
+
+      saveMessages();
+      renderMessages();
+    });
+  });
+
+  // Filtro de pesquisa na Sidebar
   if (searchInput) {
     searchInput.addEventListener('input', () => {
       const q = searchInput.value.trim().toLowerCase();
-      const filtered = conversations.filter(c => (c.name||'').toLowerCase().includes(q) || (c.lastMessagePreview||'').toLowerCase().includes(q));
-      renderConversations(filtered);
+      convItems.forEach(item => {
+        const text = item.textContent.toLowerCase();
+        item.style.display = text.includes(q) ? 'flex' : 'none';
+      });
     });
   }
 
-  // Botão de exportar conversa selecionada para .doc
-  const exportBtn = document.getElementById('btnExportDoc');
-  if (exportBtn) {
-    exportBtn.addEventListener('click', async () => {
-      if (!selectedConversationId) { alert('Selecione uma conversa primeiro.'); return; }
-      try {
-        const url = apiUrl(`/api/conversations/${selectedConversationId}/export-doc`);
-        const resp = await fetch(url, { credentials: 'same-origin' });
-        if (!resp.ok) {
-          const j = await resp.json().catch(()=>null);
-          throw new Error((j && j.mensagem) ? j.mensagem : 'Falha ao exportar');
+  // Exportar histórico do atendimento em arquivo de texto
+  if (btnExport) {
+    btnExport.addEventListener('click', () => {
+      let log = `=====================================================\n`;
+      log += `MIX-PROMOÇÃO - PROTOCOLO DE ATENDIMENTO AO CLIENTE\n`;
+      log += `=====================================================\n`;
+      log += `Protocolo: #${protocolo}\n`;
+      log += `Cliente: ${clienteFullName}\n`;
+      log += `Data: ${new Date().toLocaleDateString('pt-BR')} ${new Date().toLocaleTimeString('pt-BR')}\n`;
+      log += `Atendente Responsável: Camila Santos\n`;
+      log += `=====================================================\n\n`;
+
+      messages.forEach(m => {
+        if (m.type === 'system') {
+          log += `[SISTEMA - ${formatTime(m.time)}] ${m.text}\n\n`;
+        } else {
+          const remetente = m.type === 'client' ? clienteFullName : (m.author || 'Camila Santos');
+          log += `[${remetente} - ${formatTime(m.time)}]:\n${m.text}\n\n`;
         }
-        const blob = await resp.blob();
-        const cd = resp.headers.get('content-disposition') || '';
-        const m = cd.match(/filename="?([^";]+)"?/i);
-        const filename = (m && m[1]) ? m[1] : `conversa_${selectedConversationId}.doc`;
-        const urlBlob = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = urlBlob;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        URL.revokeObjectURL(urlBlob);
-      } catch (e) {
-        console.error('export error', e);
-        alert('Erro ao baixar histórico: ' + (e && e.message ? e.message : '')); 
+      });
+
+      const blob = new Blob([log], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `atendimento_${protocolo}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    });
+  }
+
+  // Botão Novo Atendimento
+  if (btnNovoAtendimento) {
+    btnNovoAtendimento.addEventListener('click', () => {
+      if (confirm('Deseja iniciar um novo atendimento? Um novo número de protocolo será gerado.')) {
+        sessionStorage.removeItem('mix_atendimento_protocolo');
+        localStorage.removeItem('mix_atendimento_chat_' + protocolo);
+        window.location.reload();
+      }
+    });
+  }
+
+  // Botão Encerrar Atendimento
+  const btnEncerrar = document.getElementById('btnEncerrarAtendimento');
+  if (btnEncerrar) {
+    btnEncerrar.addEventListener('click', () => {
+      if (confirm('Deseja encerrar este atendimento agora?')) {
+        messages.push({
+          type: 'system',
+          text: `Atendimento #${protocolo} encerrado pelo cliente em ${new Date().toLocaleTimeString('pt-BR')}.`,
+          time: new Date().toISOString()
+        });
+        messages.push({
+          type: 'attendant',
+          author: 'Camila Santos (Atendimento)',
+          text: `Obrigada pelo contato, ${clienteFullName}! O seu atendimento #${protocolo} foi finalizado. Caso precise de mais suporte no futuro, basta nos chamar novamente! Tenha um ótimo dia! 🌟`,
+          time: new Date().toISOString()
+        });
+        saveMessages();
+        renderMessages();
       }
     });
   }

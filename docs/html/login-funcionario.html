@@ -16,33 +16,22 @@
       <span class="logo-text">MIX-PROMOÇÃO</span>
     </div>
   </header>
-  
   <main class="login-container">
     <h2>Login Funcionário</h2>
     <form id="formLogin">
       <label for="usuario">Usuário:</label>
       <input type="text" id="usuario" name="usuario" required>
-
       <label for="senha">Senha:</label>
-
       <div class="senha-wrapper">
         <input type="password" id="senha" name="senha" required autocomplete="current-password">
         <button type="button" id="toggleSenha" class="toggle-senha" tabindex="-1" aria-label="Mostrar ou ocultar senha">
           <i class="fa-solid fa-eye" id="iconeOlho"></i>
         </button>
       </div>
-
       <button type="submit" id="btnLoginAdmin" class="btn-login-admin estiloso">Entrar</button>
       <p id="mensagemErro" class="erro"></p>
     </form>
-
-    <div class="link-cadastro">
-      <a href="cadastro-funcionario.html" target="_blank" rel="noopener noreferrer">
-        ➕ Cadastrar outro usuário
-      </a>
-    </div>
   </main>
-
   <style>
     body.login-bg {
       min-height: 100vh;
