@@ -56,6 +56,7 @@
         <button class="tab-btn" data-tab="compras"><i class="fa-solid fa-boxes-packing"></i> Pedidos e Itens</button>
         <button class="tab-btn" data-tab="cancelados"><i class="fa-solid fa-ban"></i> Pedidos Cancelados</button>
         <button class="tab-btn" data-tab="reclamacoes"><i class="fa-solid fa-comments"></i> Reclamações</button>
+        <button class="tab-btn" data-tab="avaliacoes"><i class="fa-solid fa-star"></i> Produtos Avaliados</button>
       </div>
 
       <section class="tab-content active" id="visao-geral">
@@ -74,8 +75,13 @@
                 <span class="overview-chip" id="resumoBairro"><i class="fa-solid fa-building"></i> Bairro não informado</span>
               </div>
               <div class="overview-actions botoes-perfil">
-                <button type="button" class="btn-alterar btn-lg" id="btnIrParaDados" title="Editar dados cadastrais"><i class="fa-solid fa-user-pen"></i> Editar Dados</button>
-                <button type="button" class="btn-senha btn-lg" id="btnIrParaPedidos" title="Ver histórico de pedidos"><i class="fa-solid fa-boxes-packing"></i> Meus Pedidos</button>
+                <div class="overview-actions-top">
+                  <button type="button" class="btn-alterar btn-lg" id="btnIrParaDados" title="Editar dados cadastrais"><i class="fa-solid fa-user-pen"></i> Editar Dados</button>
+                  <button type="button" class="btn-senha btn-lg" id="btnIrParaPedidos" title="Ver histórico de pedidos"><i class="fa-solid fa-boxes-packing"></i> Meus Pedidos</button>
+                </div>
+                <div class="overview-actions-bottom">
+                  <button type="button" class="btn-avaliacoes btn-lg" id="btnIrParaAvaliacoes" title="Ver produtos avaliados"><i class="fa-solid fa-star"></i> Minhas Avaliações</button>
+                </div>
               </div>
               <div class="overview-delete">
                 <button type="button" class="btn-excluir btn-sm" id="btnExcluirConta">
@@ -122,16 +128,6 @@
               <p>Aba que abre primeiro no seu painel.</p>
             </article>
           </div>
-        </div>
-      </section>
-
-      <section class="tab-content" id="reclamacoes">
-        <div class="reclamacoes-cliente-header">
-          <h2>Minhas Reclamações</h2>
-          <p>Aqui estão as mensagens e anexos que você enviou pelo formulário de contato.</p>
-        </div>
-        <div class="reclamacoes-lista" id="listaReclamacoesCliente">
-          <p class="reclamacoes-vazio">Nenhuma reclamação encontrada.</p>
         </div>
       </section>
 
@@ -366,6 +362,37 @@
             <i class="fa-solid fa-clipboard-check" style="font-size:2.4rem; color:#00c6ff; margin-bottom:12px; display:inline-block;"></i>
             <h3 style="color:#f1f5f9; margin-bottom:6px;">Nenhuma reclamação pendente</h3>
             <p style="font-size:0.9rem;">Todas as suas interações estão em dia. Se precisar de auxílio imediato, use o Canal de Atendimento!</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Aba Produtos Avaliados / Comentários -->
+      <section class="tab-content" id="avaliacoes">
+        <div class="compras-header">
+          <div>
+            <h2>Produtos Avaliados e Comentários</h2>
+            <p>Confira todos os produtos que você avaliou, suas notas, opiniões e mídias enviadas.</p>
+          </div>
+          <a href="./loja.html" class="compras-link"><i class="fa-solid fa-bag-shopping"></i><span>Explorar Loja</span></a>
+        </div>
+
+        <div class="compras-resumo-cards">
+          <article class="compra-mini-card">
+            <span>Avaliações Feitas</span>
+            <strong id="totalAvaliacoesCliente">0</strong>
+          </article>
+          <article class="compra-mini-card">
+            <span>Média das Avaliações</span>
+            <strong id="mediaNotasCliente">--</strong>
+          </article>
+        </div>
+
+        <div id="listaAvaliacoesCliente" class="lista-avaliacoes-cliente">
+          <div class="empty-state-avaliacoes" style="text-align:center; padding:40px 20px; color:#94a3b8;">
+            <i class="fa-regular fa-star" style="font-size:2.8rem; color:#f59e0b; margin-bottom:14px; display:inline-block;"></i>
+            <h3 style="color:#0f172a; margin-bottom:6px;">Nenhum produto avaliado ainda</h3>
+            <p style="font-size:0.92rem; color:#64748b; max-width:440px; margin:0 auto 18px;">Assim que você comentar e avaliar os produtos na loja, eles aparecerão organizados aqui.</p>
+            <a href="./loja.html" class="compras-link"><i class="fa-solid fa-bag-shopping"></i> Ir às compras</a>
           </div>
         </div>
       </section>

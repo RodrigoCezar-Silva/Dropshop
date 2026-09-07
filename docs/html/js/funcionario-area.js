@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
     localStorage.removeItem('foto');
     localStorage.removeItem('fotoMime');
     const isHtmlDir = window.location.pathname.includes('/html/');
-    window.location.href = isHtmlDir ? '../index.html' : './index.html';
+    window.location.href = isHtmlDir ? 'login-funcionario.html' : './login-funcionario.html';
   }
 
   const tipoUsuario = localStorage.getItem('tipoUsuario');

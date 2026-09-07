@@ -4,7 +4,6 @@
 
 /* ========== Layout: Sidebar + Grade de produtos ========== */
 
-/* Wrapper principal da loja: 2 colunas com CSS Grid */
 .loja-layout {
   display: grid;
   grid-template-columns: 220px 1fr;
@@ -13,7 +12,6 @@
   padding: 0 0 40px;
 }
 
-/* ── Sidebar de categorias ── */
 .loja-sidebar {
   position: sticky;
   top: 80px;
@@ -30,7 +28,6 @@
   gap: 6px;
 }
 
-/* Título da sidebar */
 .cat-sidebar-title {
   font-size: 0.75rem;
   font-weight: 800;
@@ -46,7 +43,6 @@
 }
 .cat-sidebar-title i { color: #6366f1; }
 
-/* Botões de categoria */
 .categorias-lateral .categoria-btn {
   width: 100%;
   justify-content: flex-start;
@@ -90,12 +86,10 @@
 }
 .categorias-lateral .categoria-btn.active i { color: #fff; }
 
-/* ── Área de conteúdo (produtos) ── */
 .loja-conteudo {
-  min-width: 0; /* evita overflow no grid */
+  min-width: 0;
 }
 
-/* ── Subcategorias (chips inline no conteúdo) ── */
 #subcategorias-dinamicas {
   display: flex;
   gap: 8px;
@@ -120,42 +114,23 @@
   box-shadow: 0 2px 8px rgba(99,102,241,0.25);
 }
 
-/* ── Responsividade ── */
 @media (max-width: 960px) {
-  .loja-layout {
-    grid-template-columns: 180px 1fr;
-    gap: 18px;
-  }
+  .loja-layout { grid-template-columns: 180px 1fr; gap: 18px; }
 }
 
 @media (max-width: 720px) {
-  /* Mobile: categorias viram barra horizontal */
-  .loja-layout {
-    grid-template-columns: 1fr;
-    gap: 0;
-  }
-  .loja-sidebar {
-    position: static;
-  }
+  .loja-layout { grid-template-columns: 1fr; gap: 0; }
+  .loja-sidebar { position: static; }
   .categorias-lateral {
-    flex-direction: row;
-    overflow-x: auto;
-    flex-wrap: nowrap;
-    gap: 8px;
-    padding: 10px 12px;
-    border-radius: 12px;
-    margin-bottom: 14px;
-    scrollbar-width: none;
+    flex-direction: row; overflow-x: auto; flex-wrap: nowrap;
+    gap: 8px; padding: 10px 12px; border-radius: 12px;
+    margin-bottom: 14px; scrollbar-width: none;
   }
   .categorias-lateral::-webkit-scrollbar { display: none; }
   .cat-sidebar-title { display: none; }
   .categorias-lateral .categoria-btn {
-    white-space: nowrap;
-    flex-shrink: 0;
-    width: auto;
-    padding: 8px 14px;
-    border-radius: 999px;
-    font-size: 0.82rem;
+    white-space: nowrap; flex-shrink: 0; width: auto;
+    padding: 8px 14px; border-radius: 999px; font-size: 0.82rem;
   }
 }
 

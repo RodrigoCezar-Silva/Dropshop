@@ -355,3 +355,58 @@
     padding: 12px 18px;
   }
 }
+
+/* Header sem menus e com botão Sair na esquerda */
+.site-header-pedidos {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 12px 24px !important;
+  gap: 16px;
+}
+
+.header-left-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.btn-sair-topo {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: #ffffff !important;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 18px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.28);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  text-decoration: none;
+}
+
+.btn-sair-topo:hover {
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(220, 38, 38, 0.38);
+}
+
+.btn-sair-topo:active {
+  transform: translateY(0);
+}
+
+.btn-sair-topo i {
+  font-size: 1rem;
+}
+
+/* Ocultar menus e botões de login padrão do topo na página de pedidos */
+.site-header-pedidos nav.menu,
+.site-header-pedidos #loginButtons,
+.site-header-pedidos #menuToggle,
+.site-header-pedidos .menu-toggle {
+  display: none !important;
+}
+

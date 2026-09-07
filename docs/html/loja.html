@@ -225,68 +225,11 @@
           </button>
         </div>
       </div>
-      <div class="loja-layout">
 
-        <!-- SIDEBAR: categorias -->
-        <aside class="loja-sidebar">
-          <div class="categorias-lateral">
-            <div class="cat-sidebar-title">
-              <i class="fa-solid fa-list"></i> Categorias
-            </div>
-            <button class="categoria-btn active" data-categoria="todos">
-              <i class="fa-solid fa-border-all"></i>
-              <span>Todos</span>
-            </button>
-            <button class="categoria-btn" data-categoria="eletronicos">
-              <i class="fa-solid fa-laptop"></i>
-              <span>Eletrônicos</span>
-            </button>
-            <button class="categoria-btn" data-categoria="informatica">
-              <i class="fa-solid fa-computer"></i>
-              <span>Informática</span>
-            </button>
-            <button class="categoria-btn" data-categoria="eletrica">
-              <i class="fa-solid fa-bolt"></i>
-              <span>Elétrica</span>
-            </button>
-            <button class="categoria-btn" data-categoria="moda">
-              <i class="fa-solid fa-shirt"></i>
-              <span>Moda</span>
-            </button>
-            <button class="categoria-btn" data-categoria="moda-infantil">
-              <i class="fa-solid fa-child"></i>
-              <span>Moda Infantil</span>
-            </button>
-            <button class="categoria-btn" data-categoria="casa">
-              <i class="fa-solid fa-house-chimney"></i>
-              <span>Casa &amp; Decoração</span>
-            </button>
-            <button class="categoria-btn" data-categoria="esportes">
-              <i class="fa-solid fa-futbol"></i>
-              <span>Esportes</span>
-            </button>
-            <button class="categoria-btn" data-categoria="beleza">
-              <i class="fa-solid fa-spa"></i>
-              <span>Beleza</span>
-            </button>
-            <button class="categoria-btn" data-categoria="brinquedos">
-              <i class="fa-solid fa-gamepad"></i>
-              <span>Brinquedos</span>
-            </button>
-            <button class="categoria-btn" data-categoria="outros">
-              <i class="fa-solid fa-ellipsis"></i>
-              <span>Outros</span>
-            </button>
-          </div>
-        </aside>
 
-        <!-- CONTEÚDO: subcategorias + produtos -->
-        <div class="loja-conteudo">
 
       <!-- Subcategorias dinâmicas acima do botão -->
       <div id="subcategorias-dinamicas" style="display:none; margin: 18px 0 10px 0; gap: 12px; flex-wrap: wrap; justify-content: flex-start;"></div>
-          <!-- Subcategorias dinâmicas -->
-          <div id="subcategorias-dinamicas" style="display:none; margin: 0 0 14px 0; gap: 10px; flex-wrap: wrap;"></div>
 
       <div class="acoes-vitrine">
         <button id="btnNovaVitrine" class="btn-adicionar" style="display:none;">
@@ -321,20 +264,9 @@
     .categorias-lateral .categoria-btn { width: auto; min-width: 120px; }
   }
 </style>
-          <div class="acoes-vitrine">
-            <button id="btnNovaVitrine" class="btn-adicionar" style="display:none;">
-              ➕ Adicionar Nova Vitrine
-            </button>
-          </div>
 
       <!-- Subcategorias dinâmicas -->
       <div id="subcategorias-dinamicas" style="display:none; margin: 18px 0 10px 0; gap: 12px; flex-wrap: wrap; justify-content: flex-start;"></div>
-          <!-- Mensagem sem resultado -->
-          <div id="semResultados" class="sem-resultados" style="display:none;">
-            <i class="fa-solid fa-face-sad-tear"></i>
-            <h3>Nenhum produto encontrado</h3>
-            <p>Tente buscar com outras palavras ou selecione outra categoria.</p>
-          </div>
 
         <script src="/js/responsive-nav.js"></script>
         <script>
@@ -423,8 +355,6 @@
                   subcatDiv.appendChild(b);
                 });
                 subcatDiv.style.display = 'flex';
-          <div id="vitrine-container" class="vitrine"></div>
-          <div id="paginacao" class="paginacao"></div>
 
                 // Evento de filtro por subcategoria
                 subcatDiv.querySelectorAll('.subcategoria-btn').forEach(btn => {
@@ -457,8 +387,6 @@
           });
         });
       </script>
-        </div><!-- /.loja-conteudo -->
-      </div><!-- /.loja-layout -->
 
       <!-- Mensagem quando não encontra nada -->
       <div id="semResultados" class="sem-resultados" style="display:none;">

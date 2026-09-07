@@ -17,12 +17,7 @@ html, body { overflow-x: hidden; }
   height: 0; /* esconder scrollbar horizontal no WebKit */
 }
 
-/* Garante que o container não exceda a viewport */
-.estoque-pro-container {
-  max-width: 100%;
-  box-sizing: border-box;
-  overflow-x: hidden;
-}
+
 
 /* A tabela pode ter largura mínima para manter legibilidade, mas não força a página a criar scroll */
 .estoque-pro-table {
@@ -127,23 +122,8 @@ html, body { overflow-x: hidden; }
   gap: 8px;
 }
 .estoque-pro-toolbar-btn {
-    padding-right: 12px;
+  background: linear-gradient(90deg, #2563eb 60%, #6366f1 100%);
   color: #fff;
-  .estoque-pro-table .estoque-pro-btn {
-    margin-left: 10px;
-    margin-right: 0;
-  }
-  .estoque-pro-table .estoque-pro-remover {
-    margin-left: 6px;
-  }
-  .estoque-pro-table td.estoque-pro-data-acoes span {
-    font-size: 1.04em;
-    color: #334155;
-    font-weight: 500;
-    margin-right: 2px;
-    min-width: 110px;
-    letter-spacing: 0.01em;
-  }
   border: none;
   border-radius: 8px;
   padding: 10px 22px;
@@ -166,12 +146,13 @@ body {
   background: #f4f6fb;
 }
 .estoque-pro-container {
-  max-width: 1100px;
+  max-width: 1320px;
+  width: 95%;
   margin: 40px auto 0 auto;
   background: #fff;
-  border-radius: 18px;
-  box-shadow: 0 4px 32px #0002;
-  padding: 36px 32px 32px 32px;
+  border-radius: 20px;
+  box-shadow: 0 8px 36px rgba(0, 0, 0, 0.08);
+  padding: 36px 36px 36px 36px;
 }
 .estoque-pro-title {
   font-size: 2.2rem;
@@ -188,31 +169,59 @@ body {
 .estoque-pro-table th {
   text-align: left;
   color: #64748b;
-  font-size: 1.05em;
-  font-weight: 600;
-  padding-bottom: 8px;
+  font-size: 0.95em;
+  font-weight: 700;
+  padding: 10px 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
 }
 .estoque-pro-table td {
   background: #f8fafc;
-  border-radius: 10px;
-  padding: 18px 14px;
+  border-radius: 12px;
+  padding: 16px 18px;
   vertical-align: middle;
-  font-size: 1.08em;
+  font-size: 1.05em;
   color: #1e293b;
   position: relative;
-  height: 90px;
-  /* Garante alinhamento centralizado em todas as células */
+  height: 85px;
+  white-space: nowrap;
 }
 
+/* Coluna de Nome */
+.estoque-pro-table td:nth-child(2) {
+  font-weight: 700;
+  color: #1e293b;
+  white-space: nowrap;
+}
+
+/* Coluna de Preço */
+.estoque-pro-table td:nth-child(3) {
+  color: #2563eb;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* Coluna de Quantidade */
+.estoque-pro-table td:nth-child(4) {
+  white-space: nowrap;
+}
+
+/* Coluna de Data */
+.estoque-pro-table td:nth-child(5) span {
+  white-space: nowrap;
+  display: inline-block;
+}
 
 .estoque-pro-table td.estoque-pro-data-acoes {
   display: flex;
   align-items: center;
   gap: 10px;
   flex-wrap: nowrap;
-  min-width: 220px;
+  min-width: 350px;
   padding-right: 8px;
   justify-content: flex-end;
+  white-space: nowrap;
 }
 .estoque-pro-table td.estoque-pro-data-acoes span {
   font-size: 1.04em;
@@ -244,19 +253,22 @@ body {
   color: #fff;
   border: none;
   border-radius: 8px;
-  padding: 8px 18px;
-  font-size: 1em;
+  padding: 8px 16px;
+  font-size: 0.95em;
+  font-weight: 700;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.2s ease;
   text-decoration: none;
-  display: inline-block;
-  margin-right: 6px;
-}
-.estoque-pro-btn:last-child {
-  margin-right: 0;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  white-space: nowrap !important;
+  flex-shrink: 0;
 }
 .estoque-pro-btn:hover {
-  background: #1e40af;
+  transform: translateY(-2px);
+  filter: brightness(1.08);
 }
 .estoque-pro-remover {
   background: #2563eb;
@@ -268,7 +280,10 @@ body {
   cursor: pointer;
   transition: background 0.2s;
   text-decoration: none;
-  display: inline-block;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap !important;
 }
 .estoque-pro-remover:hover {
   background: #ef4444;
@@ -296,21 +311,7 @@ body {
   background: #f1f5f9;
   text-align: center;
 }
-.estoque-pro-btn {
-  background: #2563eb;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  padding: 8px 18px;
-  font-size: 1em;
-  cursor: pointer;
-  transition: background 0.2s;
-  text-decoration: none;
-  display: inline-block;
-}
-.estoque-pro-btn:hover {
-  background: #1e40af;
-}
+
 @media (max-width: 700px) {
   .estoque-pro-container { padding: 12px 2vw; }
   .estoque-pro-table td, .estoque-pro-table th { font-size: 0.98em; padding: 10px 4px; }
