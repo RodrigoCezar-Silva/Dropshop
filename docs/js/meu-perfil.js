@@ -28,12 +28,12 @@ document.addEventListener("DOMContentLoaded", () => {
         if (typeof window.showStyledPopup === 'function') {
           const isHtmlDir = window.location.pathname.includes('/html/');
           window.showStyledPopup({
-            title: 'Atendimento Pausado',
+            title: 'Atendimento Encerrado',
             message: alertaInatividade,
             small: true,
             buttons: [
               {
-                label: 'Voltar ao Suporte',
+                label: 'Iniciar Novo Atendimento',
                 className: 'btn-alterar',
                 onClick: () => {
                   window.location.href = (isHtmlDir ? "atendimento.html" : "./html/atendimento.html") + "?novo=1";
