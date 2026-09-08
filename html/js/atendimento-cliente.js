@@ -348,15 +348,18 @@
     let timerInatividadeInterval = null;
     let timerPausado = false;
 
+    let atendimentoEncerrado = false;
+
     function formatarTempo(totalSegundos) {
       const m = Math.floor(totalSegundos / 60);
       const s = totalSegundos % 60;
       return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
     }
 
-    function redirecionarPorInatividade() {
+    function encerrarPorInatividade() {
       clearInterval(timerInatividadeInterval);
       if (pollingInterval) clearInterval(pollingInterval);
+      atendimentoEncerrado = true;
 
       // 1. Marca atendimento anterior como finalizado no backend
       if (activeConversationId) {
@@ -367,29 +370,72 @@
             body: JSON.stringify({ status: 'finalizado' })
           });
         } catch (e) {}
+
+        // Envia mensagem do sistema para registrar no histórico do chamado
+        try {
+          fetch(`${apiBase}/api/conversations/${activeConversationId}/messages`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              from: 'system',
+              fromName: 'Sistema',
+              text: '🔒 Atendimento encerrado automaticamente por inatividade (3 minutos sem interação).'
+            })
+          });
+        } catch (e) {}
       }
 
-      // 2. Limpa dados da sessão e define flag para iniciar um novo chamado quando o cliente voltar
+      // 2. Limpa dados da sessão antiga para que o próximo acesso inicie um novo chamado
       try {
         sessionStorage.removeItem('mix_cliente_protocolo');
         sessionStorage.removeItem('mix_active_conv_id');
         sessionStorage.removeItem('mix_atendente_atual');
         sessionStorage.setItem('mix_forcar_novo_atendimento', '1');
-        sessionStorage.setItem('mix_alerta_inatividade', 'Você ficou 3 minutos sem interagir no chat. O atendimento foi encerrado por inatividade e você foi redirecionado para Minha Conta. Ao acessar o suporte novamente, um novo atendimento será iniciado.');
       } catch (e) {}
 
-      // 3. Altera o indicador visual no cabeçalho
+      // 3. Atualiza o indicador visual no cabeçalho
       const badge = document.getElementById('inactivityTimerBadge');
       if (badge) {
-        badge.innerHTML = '<i class="fa-solid fa-hourglass-end"></i> <span>Encerrando...</span>';
+        badge.innerHTML = '<i class="fa-solid fa-lock"></i> <span>Encerrado</span>';
         badge.classList.add('warning');
+        badge.title = 'Atendimento encerrado por inatividade (3 minutos).';
       }
 
-      // 4. Redireciona imediatamente para a página Minha Conta (meu-perfil.html)
-      setTimeout(() => {
-        const isHtmlDir = window.location.pathname.includes('/html/');
-        window.location.href = isHtmlDir ? "meu-perfil.html" : "./meu-perfil.html";
-      }, 350);
+      // 4. Bloqueia a parte de digitar e o botão enviar
+      if (msgInput) {
+        msgInput.value = '';
+        msgInput.disabled = true;
+        msgInput.placeholder = 'Atendimento encerrado por inatividade.';
+        msgInput.style.opacity = '0.6';
+        msgInput.style.cursor = 'not-allowed';
+      }
+      if (sendBtn) {
+        sendBtn.disabled = true;
+        sendBtn.classList.add('disabled');
+        sendBtn.style.opacity = '0.5';
+        sendBtn.style.cursor = 'not-allowed';
+      }
+      if (attachBtn) {
+        attachBtn.disabled = true;
+        attachBtn.style.opacity = '0.5';
+        attachBtn.style.cursor = 'not-allowed';
+      }
+
+      // Desativa todas as opções de sugestão rápidas
+      const allChips = document.querySelectorAll('.suggestion-chip');
+      allChips.forEach(c => {
+        c.disabled = true;
+        c.style.pointerEvents = 'none';
+        c.style.opacity = '0.4';
+      });
+
+      // 5. Exibe a mensagem de encerramento de atendimento no chat
+      messages.push({
+        type: 'closure',
+        time: Date.now(),
+        text: 'Atendimento encerrado por inatividade.'
+      });
+      renderMessages();
     }
 
     function atualizarVisualTimer() {
@@ -408,19 +454,19 @@
     }
 
     function reiniciarTimerInatividade() {
-      if (timerPausado) return;
+      if (timerPausado || atendimentoEncerrado) return;
       segundosRestantes = TEMPO_LIMITE_INATIVIDADE;
       atualizarVisualTimer();
 
       clearInterval(timerInatividadeInterval);
       timerInatividadeInterval = setInterval(() => {
-        if (timerPausado) return;
+        if (timerPausado || atendimentoEncerrado) return;
         segundosRestantes--;
         atualizarVisualTimer();
 
         if (segundosRestantes <= 0) {
           clearInterval(timerInatividadeInterval);
-          redirecionarPorInatividade();
+          encerrarPorInatividade();
         }
       }, 1000);
     }
@@ -506,6 +552,42 @@
       messagesEl.innerHTML = '';
 
       messages.forEach((msg, idx) => {
+        if (msg.type === 'closure') {
+          const div = document.createElement('div');
+          div.className = 'msg-closure-banner';
+          div.style.cssText = 'margin: 22px auto; max-width: 520px; padding: 20px 24px; background: linear-gradient(145deg, rgba(239, 68, 68, 0.15), rgba(15, 23, 42, 0.95)); border: 1px solid rgba(239, 68, 68, 0.4); border-radius: 14px; text-align: center; color: #f1f5f9; box-shadow: 0 4px 20px rgba(0,0,0,0.35);';
+          div.innerHTML = `
+            <div style="font-size: 2rem; color: #ef4444; margin-bottom: 10px;">
+              <i class="fa-solid fa-clock-rotate-left"></i>
+            </div>
+            <h4 style="margin: 0 0 6px 0; color: #f87171; font-size: 1.15rem; font-weight: 700;">Atendimento Encerrado por Inatividade</h4>
+            <p style="margin: 0 0 16px 0; color: #cbd5e1; font-size: 0.92rem; line-height: 1.45;">
+              Este atendimento foi encerrado automaticamente devido a <strong>3 minutos de inatividade</strong>. O envio de novas mensagens neste chamado foi bloqueado.
+            </p>
+            <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+              <button id="btnNovoAtendimentoInativo" type="button" style="background: linear-gradient(135deg, #00c6ff, #0072ff); color: #fff; border: none; border-radius: 8px; padding: 10px 20px; font-weight: 700; font-size: 0.92rem; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 2px 10px rgba(0,198,255,0.3);">
+                <i class="fa-solid fa-rotate-right"></i> Iniciar Novo Atendimento
+              </button>
+              <a href="meu-perfil.html" style="background: rgba(255,255,255,0.08); color: #94a3b8; border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; padding: 10px 18px; font-weight: 600; font-size: 0.92rem; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+                <i class="fa-solid fa-user"></i> Minha Conta
+              </a>
+            </div>
+          `;
+          messagesEl.appendChild(div);
+
+          const btnRestart = div.querySelector('#btnNovoAtendimentoInativo');
+          if (btnRestart) {
+            btnRestart.addEventListener('click', () => {
+              sessionStorage.removeItem('mix_cliente_protocolo');
+              sessionStorage.removeItem('mix_active_conv_id');
+              sessionStorage.removeItem('mix_atendente_atual');
+              sessionStorage.setItem('mix_forcar_novo_atendimento', '1');
+              window.location.reload();
+            });
+          }
+          return;
+        }
+
         if (msg.type === 'system') {
           const div = document.createElement('div');
           div.className = 'msg-system';
@@ -1030,7 +1112,7 @@
     // ENVIO DE MENSAGENS PELO CLIENTE (COM LOCK DE ENVIO ÚNICO & DEBOUNCE)
     // =========================================================================
     async function enviarMensagem(texto = null) {
-      if (isSending) return;
+      if (atendimentoEncerrado || isSending) return;
 
       const conteudo = (texto !== null ? texto : (msgInput ? msgInput.value : '')).trim();
       if (!conteudo) return;
