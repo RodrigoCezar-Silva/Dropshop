@@ -72,6 +72,46 @@
   // Rastreamento para disparo de som de novo chamado
   const knownConversationsMap = new Map();
 
+  // Rastreamento da contagem regressiva de 3 minutos por atendimento
+  const attendanceTimerMap = new Map();
+  const lastKnownMsgCountMap = new Map();
+
+  function obterInicioTimerChamado(convId) {
+    const cid = String(convId);
+    const key = `mix_attendance_timer_${cid}`;
+    if (attendanceTimerMap.has(cid)) {
+      return attendanceTimerMap.get(cid);
+    }
+    const guardado = sessionStorage.getItem(key);
+    if (guardado) {
+      const ts = Number(guardado);
+      if (!isNaN(ts) && ts > 0) {
+        attendanceTimerMap.set(cid, ts);
+        return ts;
+      }
+    }
+    const novoInicio = Date.now();
+    attendanceTimerMap.set(cid, novoInicio);
+    sessionStorage.setItem(key, String(novoInicio));
+    return novoInicio;
+  }
+
+  function reiniciarTimerChamado(convId) {
+    const cid = String(convId);
+    const key = `mix_attendance_timer_${cid}`;
+    const novoInicio = Date.now();
+    attendanceTimerMap.set(cid, novoInicio);
+    sessionStorage.setItem(key, String(novoInicio));
+    verificarInatividadeCliente();
+  }
+
+  function limparTimerChamado(convId) {
+    const cid = String(convId);
+    const key = `mix_attendance_timer_${cid}`;
+    attendanceTimerMap.delete(cid);
+    sessionStorage.removeItem(key);
+  }
+
   // =========================================================================
   // SISTEMA DE SOM DE NOTIFICAÇÃO (Web Audio API Synthesizer)
   // =========================================================================
@@ -438,7 +478,9 @@
       renderizarListaConversas();
     } catch (e) {}
 
-    // Inicia cronômetro de inatividade do cliente (3 minutos para liberar botão de encerramento)
+    // Inicia cronômetro de contagem regressiva ativa (1 segundo por segundo)
+    obterInicioTimerChamado(String(conv.id));
+    verificarInatividadeCliente();
     clearInterval(inactivityTimerInterval);
     inactivityTimerInterval = setInterval(verificarInatividadeCliente, 1000);
 
@@ -484,6 +526,14 @@
       const msgs = await res.json();
       currentLoadedMessages = Array.isArray(msgs) ? msgs : [];
       renderizarMensagens(currentLoadedMessages);
+
+      const cid = String(selectedConversation.id);
+      const prevMsgCount = lastKnownMsgCountMap.get(cid);
+      if (typeof prevMsgCount === 'number' && currentLoadedMessages.length > prevMsgCount) {
+        reiniciarTimerChamado(cid);
+      }
+      lastKnownMsgCountMap.set(cid, currentLoadedMessages.length);
+
       verificarInatividadeCliente();
     } catch (err) {
       console.warn('Erro ao carregar mensagens:', err);
@@ -544,107 +594,39 @@
   }
 
   // =========================================================================
-  // CONTROLE DE INATIVIDADE DO CLIENTE (LIBERA ENCERRAMENTO APÓS 3 MINUTOS)
+  // CONTROLE DE CONTAGEM REGRESSIVA (LIBERA ENCERRAMENTO AO ZERAR 3 MINUTOS)
   // =========================================================================
   function verificarInatividadeCliente() {
-    if (!selectedConversation || selectedConversation.status === 'finalizado') {
+    if (!selectedConversation || selectedConversation.status === 'finalizado' || selectedConversation.status === 'closed') {
       if (btnEncerrarAtendimento) btnEncerrarAtendimento.style.display = 'none';
       if (contadorEncerramento) contadorEncerramento.style.display = 'none';
       return;
     }
 
-    // Filtra mensagens da conversa desconsiderando mensagens automáticas de IA/Bot
-    const msgsHumanas = (Array.isArray(currentLoadedMessages) ? currentLoadedMessages : []).filter(m => {
-      const isBot = m.from === 'bot' || m.from === 'ia' || (m.fromName && /MixIA/i.test(m.fromName));
-      return !isBot;
-    });
-
-    // Se não há mensagens ainda
-    if (msgsHumanas.length === 0) {
-      if (btnEncerrarAtendimento) btnEncerrarAtendimento.style.display = 'none';
-      if (contadorEncerramento) {
-        contadorEncerramento.style.display = 'inline-flex';
-        if (contadorRotulo) contadorRotulo.textContent = 'Aguardando:';
-        if (contadorTexto) contadorTexto.textContent = '03:00';
-        contadorEncerramento.title = 'Aguardando início do atendimento.';
-      }
-      return;
-    }
-
-    // Encontra o índice e a última mensagem enviada pelo atendente/admin
-    let lastAttendantMsg = null;
-    let lastAttendantIdx = -1;
-    for (let i = msgsHumanas.length - 1; i >= 0; i--) {
-      const m = msgsHumanas[i];
-      const isAtendente = m.from === 'attendant' || m.from === 'admin' ||
-                          (m.fromName && (m.fromName.toLowerCase().includes('atendente') || m.fromName === attendantName));
-      if (isAtendente) {
-        lastAttendantMsg = m;
-        lastAttendantIdx = i;
-        break;
-      }
-    }
-
-    // Se o atendente ainda não enviou mensagem nesta conversa:
-    // O contador fica visível em 03:00 no lugar do botão, e o botão de encerrar permanece oculto
-    if (lastAttendantIdx === -1 || !lastAttendantMsg) {
-      if (btnEncerrarAtendimento) btnEncerrarAtendimento.style.display = 'none';
-      if (contadorEncerramento) {
-        contadorEncerramento.style.display = 'inline-flex';
-        if (contadorRotulo) contadorRotulo.textContent = 'Aguardando:';
-        if (contadorTexto) contadorTexto.textContent = '03:00';
-        contadorEncerramento.title = 'Envie uma mensagem para iniciar o atendimento. Se o cliente ficar 3 minutos sem responder, o botão de encerrar aparecerá.';
-      }
-      return;
-    }
-
-    // Verifica se o cliente enviou alguma mensagem posterior à última do atendente
-    let clienteFalouDepois = false;
-    for (let i = lastAttendantIdx + 1; i < msgsHumanas.length; i++) {
-      const m = msgsHumanas[i];
-      const isAtendente = m.from === 'attendant' || m.from === 'admin' ||
-                          (m.fromName && (m.fromName.toLowerCase().includes('atendente') || m.fromName === attendantName));
-      const isSystem = m.from === 'system';
-      if (!isAtendente && !isSystem) {
-        clienteFalouDepois = true;
-        break;
-      }
-    }
-
-    if (clienteFalouDepois) {
-      // Cliente respondeu: o atendente precisa responder de volta
-      if (btnEncerrarAtendimento) btnEncerrarAtendimento.style.display = 'none';
-      if (contadorEncerramento) {
-        contadorEncerramento.style.display = 'inline-flex';
-        if (contadorRotulo) contadorRotulo.textContent = 'Aguardando:';
-        if (contadorTexto) contadorTexto.textContent = '03:00';
-        contadorEncerramento.title = 'Cliente respondeu. Envie sua resposta para dar continuidade ao chamado.';
-      }
-      return;
-    }
-
-    // Atendente foi o último a falar. Calcula tempo decorrido desde a resposta do atendente
-    const msgTime = new Date(lastAttendantMsg.time || Date.now()).getTime();
+    const cid = String(selectedConversation.id);
+    const startTime = obterInicioTimerChamado(cid);
     const agora = Date.now();
-    const decorridoMs = Math.max(0, agora - msgTime);
+    const decorridoMs = Math.max(0, agora - startTime);
+    const restanteMs = Math.max(0, INACTIVITY_TIMEOUT_MS - decorridoMs);
 
-    if (decorridoMs >= INACTIVITY_TIMEOUT_MS) {
-      // Se passar de 3 minutos: o contador some e aparece o botão Encerrar Atendimento!
+    if (restanteMs <= 0) {
+      // 3 minutos esgotados (zerado): o relógio some e o botão Encerrar Atendimento aparece!
       if (contadorEncerramento) contadorEncerramento.style.display = 'none';
-      if (btnEncerrarAtendimento) btnEncerrarAtendimento.style.display = 'inline-flex';
+      if (btnEncerrarAtendimento) {
+        btnEncerrarAtendimento.style.display = 'inline-flex';
+      }
     } else {
-      // Menos de 3 minutos: o contador fica visível e o botão de encerrar oculto
+      // Contagem regressiva ativa (02:59, 02:58... 00:01)
       if (btnEncerrarAtendimento) btnEncerrarAtendimento.style.display = 'none';
       if (contadorEncerramento) {
         contadorEncerramento.style.display = 'inline-flex';
-        const restanteMs = INACTIVITY_TIMEOUT_MS - decorridoMs;
         const totalSegundos = Math.ceil(restanteMs / 1000);
         const minutos = Math.floor(totalSegundos / 60);
         const segundos = totalSegundos % 60;
         const cronometro = `${String(minutos).padStart(2, '0')}:${String(segundos).padStart(2, '0')}`;
         if (contadorRotulo) contadorRotulo.textContent = 'Aguardando:';
         if (contadorTexto) contadorTexto.textContent = cronometro;
-        contadorEncerramento.title = `Aguardando resposta do cliente (${cronometro} restantes para liberar o botão de encerramento).`;
+        contadorEncerramento.title = `Contando tempo para liberação do encerramento (${cronometro} restantes).`;
       }
     }
   }
@@ -700,6 +682,7 @@
 
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       await carregarMensagensConversaAtual();
+      reiniciarTimerChamado(selectedConversation.id);
       await carregarFilaChamados();
 
       // Notifica abas do cliente instantaneamente via BroadcastChannel
@@ -782,6 +765,7 @@
         });
 
         if (res.ok) {
+          limparTimerChamado(selectedConversation.id);
           selectedConversation.status = 'finalizado';
           showToast('✅ Atendimento Concluído', `Chamado ${proto} finalizado com sucesso e arquivado no Histórico.`);
 
