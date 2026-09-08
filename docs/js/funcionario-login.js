@@ -66,7 +66,7 @@ document.addEventListener("DOMContentLoaded", () => {
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ usuario, senha })
             });
-            if (res && res.status !== 404) {
+            if (res && res.status !== 404 && res.status !== 405) {
               response = res;
               break;
             }
@@ -111,21 +111,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       } catch (error) {
         console.error("Erro de conexão:", error);
-        const cfg = window.AUTH_CONFIG || {};
-        if (cfg.mockAdmin && cfg.mockAdmin.enabled) {
-          const mockUser = cfg.mockAdmin.user || 'admin';
-          const mockPass = cfg.mockAdmin.pass || 'admin';
-          if (usuario === mockUser && senha === mockPass) {
-            localStorage.setItem("token", "MOCK_TOKEN");
-            localStorage.setItem("nome", mockUser);
-            localStorage.setItem("sobrenome", "");
-            localStorage.setItem("tipoUsuario", "Funcionario");
-            localStorage.removeItem("isAdmin");
-            await navigateToFuncionario();
-            return;
-          }
-        }
-
         if (mensagemErro) {
           mensagemErro.innerText = "❌ Servidor backend (porta 3000) não está respondendo. Execute 'npm run dev' no terminal.";
           mensagemErro.style.color = "red";

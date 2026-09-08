@@ -134,8 +134,12 @@
             </div>
 
             <div class="chat-header-right">
+              <!-- Contador regressivo exibido no lugar do botão até completar 3 minutos -->
+              <div id="contadorEncerramento" class="chat-timer-badge" style="display:none;" title="Aguardando resposta do cliente para liberação do encerramento (3 minutos)">
+                <i class="fa-regular fa-clock"></i> <span id="contadorRotulo" class="contador-rotulo">Aguardando:</span> <span id="contadorTexto">03:00</span>
+              </div>
               <button id="btnEncerrarAtendimento" class="chat-btn-action danger" type="button" title="Finalizar este atendimento e registrar protocolo" style="display:none;">
-                <i class="fa-solid fa-circle-check"></i> <span>Encerrar Chamado</span>
+                <i class="fa-solid fa-circle-check"></i> <span>Encerrar Atendimento</span>
               </button>
               <button id="btnExportChat" class="chat-btn-action" type="button" title="Baixar histórico completo do atendimento">
                 <i class="fa-solid fa-file-arrow-down"></i> <span>Baixar Histórico</span>

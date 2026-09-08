@@ -1025,11 +1025,8 @@ app.post('/api/conversations/:id/messages', express.json(), (req, res) => {
           [text.slice(0, 200), id]
         );
       } else {
-        // bot ou system: atualiza preview sem incrementar unread para o atendente
         // bot ou system: atualiza timestamp SEM sobrescrever preview com texto da IA
         await conn.execute(
-          `UPDATE chat_conversations SET last_message_preview = ?, updated_at = NOW() WHERE id = ?`,
-          [text.slice(0, 200), id]
           `UPDATE chat_conversations SET updated_at = NOW() WHERE id = ?`,
           [id]
         );

@@ -165,7 +165,6 @@ document.addEventListener('DOMContentLoaded', function () {
       const initials = extrairIniciaisCliente(c.name);
       const proto = c.protocol || `#CLI-${c.id}`;
       const dataHora = formatarDataHora(c.updatedAt || c.createdAt);
-      const preview = c.lastMessagePreview || 'Chamado finalizado sem mensagens';
       let preview = (c.lastMessagePreview || '').trim();
       if (/MixIA|Autoatendimento|Assistente Virtual|Inteligência Artificial|Perfeito.*Identifiquei sua solicitação/i.test(preview) || !preview) {
         preview = 'Atendimento concluído e arquivado';
@@ -252,7 +251,6 @@ document.addEventListener('DOMContentLoaded', function () {
   function renderizarMensagensDetalhe(msgs) {
     if (!historicoMessagesViewer) return;
 
-    if (msgs.length === 0) {
     // Filtra para que as mensagens da IA (MixIA / bot) NÃO apareçam no histórico do funcionário
     const msgsHumanas = (Array.isArray(msgs) ? msgs : []).filter(m => {
       const isBot = m.from === 'bot' || m.from === 'ia' || (m.fromName && /MixIA/i.test(m.fromName));
@@ -263,14 +261,12 @@ document.addEventListener('DOMContentLoaded', function () {
       historicoMessagesViewer.innerHTML = `
         <div class="chat-empty-queue">
           <i class="fa-solid fa-comments"></i>
-          <p>Nenhuma mensagem registrada neste chamado.</p>
           <p>Nenhuma mensagem de atendimento humano registrada neste chamado.</p>
         </div>
       `;
       return;
     }
 
-    const html = msgs.map(m => {
     const html = msgsHumanas.map(m => {
       const isSystem = m.from === 'system';
       if (isSystem) {
@@ -278,14 +274,10 @@ document.addEventListener('DOMContentLoaded', function () {
       }
 
       const isAtendente = m.from === 'attendant' || m.from === 'admin';
-      const isBot = m.from === 'bot' || m.from === 'ia';
-      const className = isAtendente ? 'msg me attendant' : (isBot ? 'msg other bot-msg' : 'msg other client');
       const className = isAtendente ? 'msg me attendant' : 'msg other client';
       let autor = `<i class="fa-solid fa-user"></i> ${escapeHtml(m.fromName || formatarNomeCliente(selectedChamado.name))}`;
       if (isAtendente) {
         autor = `<i class="fa-solid fa-headset"></i> ${escapeHtml(m.fromName || 'Atendente')}`;
-      } else if (isBot) {
-        autor = `<i class="fa-solid fa-robot"></i> ${escapeHtml(m.fromName || 'MixIA (Assistente Virtual)')}`;
       }
 
       const hora = new Date(m.time || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -330,7 +322,6 @@ document.addEventListener('DOMContentLoaded', function () {
         txt += `Status: Concluído e Arquivado\n`;
         txt += `=====================================================\n\n`;
 
-        msgs.forEach(m => {
         const msgsHumanas = (Array.isArray(msgs) ? msgs : []).filter(m => {
           const isBot = m.from === 'bot' || m.from === 'ia' || (m.fromName && /MixIA/i.test(m.fromName));
           return !isBot;

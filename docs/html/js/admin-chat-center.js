@@ -21,6 +21,9 @@ document.addEventListener('DOMContentLoaded', function () {
   const soundStatusText = document.getElementById('soundStatusText');
   const btnEncerrarAtendimento = document.getElementById('btnEncerrarAtendimento');
   const btnExportChat = document.getElementById('btnExportChat');
+  const contadorEncerramento = document.getElementById('contadorEncerramento') || document.getElementById('inactivityNotice');
+  const contadorRotulo = document.getElementById('contadorRotulo');
+  const contadorTexto = document.getElementById('contadorTexto') || document.getElementById('inactivityNoticeText');
   const toastContainer = document.getElementById('toastContainer');
   const quickRepliesWrap = document.getElementById('quickRepliesWrap');
 
@@ -53,10 +56,13 @@ document.addEventListener('DOMContentLoaded', function () {
   // Estado Geral
   let conversations = [];
   let selectedConversation = null;
+  let currentLoadedMessages = [];
   let activeFilter = 'all';
   let searchTerm = '';
   let pollingQueueInterval = null;
   let pollingMessagesInterval = null;
+  let inactivityTimerInterval = null;
+  const INACTIVITY_TIMEOUT_MS = 3 * 60 * 1000; // 3 minutos (180 segundos)
   let isFirstLoad = true;
 
   // Rastreamento para disparo de som de novo chamado
@@ -308,8 +314,6 @@ document.addEventListener('DOMContentLoaded', function () {
       totalConcluidosBadge.textContent = String(totalConcluidos);
     }
 
-    // FILA AO VIVO: remove completamente chamados já concluídos/encerrados desta tela
-    const chamadosAoVivo = conversations.filter(c => c.status !== 'finalizado' && c.status !== 'closed');
     // FILA AO VIVO DO ATENDENTE: Exibe apenas chamados que necessitam de atendimento humano oficial
     // Remove chamados concluídos e chamados em autoatendimento com a IA (ia_atendimento)
     const chamadosAoVivo = conversations.filter(c => 
@@ -320,13 +324,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
     let filtradas = chamadosAoVivo.filter(c => {
       if (activeFilter === 'aguardando') {
-        return c.status === 'aguardando_atendente' || c.status === 'open' || (c.status !== 'ia_atendimento' && c.unread && c.unread > 0);
         return c.status === 'aguardando_atendente' || c.status === 'open' || (c.unread && c.unread > 0);
       }
       if (activeFilter === 'em_atendimento') {
         return c.status === 'em_atendimento' && (!c.unread || c.unread === 0);
       }
-      return true; // 'all' (Todos da fila ao vivo)
       return true; // 'all' (Todos da fila ao vivo de atendimento humano)
     });
 
@@ -353,7 +355,6 @@ document.addEventListener('DOMContentLoaded', function () {
     convListEl.innerHTML = filtradas.map(c => {
       const isSelected = selectedConversation && String(selectedConversation.id) === String(c.id);
       const isAguardando = c.status === 'aguardando_atendente' || c.status === 'open' || (c.status !== 'ia_atendimento' && c.unread && c.unread > 0);
-      const isAguardando = c.status === 'aguardando_atendente' || c.status === 'open' || (c.unread && c.unread > 0);
       const isEmAtendimento = c.status === 'em_atendimento';
       const isIA = c.status === 'ia_atendimento';
 
@@ -368,7 +369,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
       const nomeLimpo = formatarNomeCliente(c.name);
       const initials = extrairIniciaisCliente(c.name);
-      const lastMsg = c.lastMessagePreview || 'Sem mensagens recentes';
       let lastMsg = (c.lastMessagePreview || '').trim();
       if (/MixIA|Autoatendimento|Assistente Virtual|Inteligência Artificial|Perfeito.*Identifiquei sua solicitação/i.test(lastMsg) || !lastMsg) {
         lastMsg = 'Solicitação de atendimento';
@@ -424,7 +424,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     if (sendBtn) sendBtn.disabled = false;
     if (quickRepliesWrap) quickRepliesWrap.style.display = 'flex';
-    if (btnEncerrarAtendimento) btnEncerrarAtendimento.style.display = 'inline-flex';
+    if (btnEncerrarAtendimento) btnEncerrarAtendimento.style.display = 'none';
 
     // Marca como lida no servidor
     try {
@@ -433,6 +433,10 @@ document.addEventListener('DOMContentLoaded', function () {
       knownConversationsMap.set(String(conv.id), { ...knownConversationsMap.get(String(conv.id)), unread: 0 });
       renderizarListaConversas();
     } catch (e) {}
+
+    // Inicia cronômetro de inatividade do cliente (3 minutos para liberar botão de encerramento)
+    clearInterval(inactivityTimerInterval);
+    inactivityTimerInterval = setInterval(verificarInatividadeCliente, 1000);
 
     // Carrega mensagens imediatamente
     await carregarMensagensConversaAtual();
@@ -473,7 +477,9 @@ document.addEventListener('DOMContentLoaded', function () {
       const res = await fetch(`${apiBase}/api/conversations/${selectedConversation.id}/messages`);
       if (!res.ok) return;
       const msgs = await res.json();
-      renderizarMensagens(Array.isArray(msgs) ? msgs : []);
+      currentLoadedMessages = Array.isArray(msgs) ? msgs : [];
+      renderizarMensagens(currentLoadedMessages);
+      verificarInatividadeCliente();
     } catch (err) {
       console.warn('Erro ao carregar mensagens:', err);
     }
@@ -482,7 +488,6 @@ document.addEventListener('DOMContentLoaded', function () {
   function renderizarMensagens(msgs) {
     if (!messagesEl) return;
 
-    if (msgs.length === 0) {
     // Filtra para que as mensagens da IA (MixIA / bot) NÃO apareçam no chat do funcionário
     const msgsHumanas = (Array.isArray(msgs) ? msgs : []).filter(m => {
       const isBot = m.from === 'bot' || m.from === 'ia' || (m.fromName && /MixIA/i.test(m.fromName));
@@ -493,14 +498,12 @@ document.addEventListener('DOMContentLoaded', function () {
       messagesEl.innerHTML = `
         <div class="chat-empty-queue" style="margin-top:40px;">
           <i class="fa-solid fa-comment-dots" style="font-size:2.5rem; color:#334155;"></i>
-          <p>Nenhuma mensagem trocada ainda com este cliente.</p>
           <p>Nenhuma mensagem de atendimento humano trocada ainda com este cliente.</p>
         </div>
       `;
       return;
     }
 
-    const html = msgs.map(m => {
     const html = msgsHumanas.map(m => {
       const isSystem = m.from === 'system';
       if (isSystem) {
@@ -509,14 +512,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
       // Se enviada por atendente ou admin, aparece à direita (me)
       const isAtendente = m.from === 'attendant' || m.from === 'admin';
-      const isBot = m.from === 'bot' || m.from === 'ia';
-      const className = isAtendente ? 'msg me attendant' : (isBot ? 'msg other bot-msg' : 'msg other client');
       const className = isAtendente ? 'msg me attendant' : 'msg other client';
       let autor = `<i class="fa-solid fa-user"></i> ${escapeHtml(m.fromName || selectedConversation.name || 'Cliente')}`;
       if (isAtendente) {
         autor = `<i class="fa-solid fa-headset"></i> ${escapeHtml(m.fromName || attendantName)} (Atendente)`;
-      } else if (isBot) {
-        autor = `<i class="fa-solid fa-robot"></i> ${escapeHtml(m.fromName || 'MixIA (Assistente Virtual)')}`;
       }
 
       const hora = formatTime(m.time);
@@ -535,6 +534,112 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (shouldScroll) {
       messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+  }
+
+  // =========================================================================
+  // CONTROLE DE INATIVIDADE DO CLIENTE (LIBERA ENCERRAMENTO APÓS 3 MINUTOS)
+  // =========================================================================
+  function verificarInatividadeCliente() {
+    if (!selectedConversation || selectedConversation.status === 'finalizado') {
+      if (btnEncerrarAtendimento) btnEncerrarAtendimento.style.display = 'none';
+      if (contadorEncerramento) contadorEncerramento.style.display = 'none';
+      return;
+    }
+
+    // Filtra mensagens da conversa desconsiderando mensagens automáticas de IA/Bot
+    const msgsHumanas = (Array.isArray(currentLoadedMessages) ? currentLoadedMessages : []).filter(m => {
+      const isBot = m.from === 'bot' || m.from === 'ia' || (m.fromName && /MixIA/i.test(m.fromName));
+      return !isBot;
+    });
+
+    // Se não há mensagens ainda
+    if (msgsHumanas.length === 0) {
+      if (btnEncerrarAtendimento) btnEncerrarAtendimento.style.display = 'none';
+      if (contadorEncerramento) {
+        contadorEncerramento.style.display = 'inline-flex';
+        if (contadorRotulo) contadorRotulo.textContent = 'Aguardando:';
+        if (contadorTexto) contadorTexto.textContent = '03:00';
+        contadorEncerramento.title = 'Aguardando início do atendimento.';
+      }
+      return;
+    }
+
+    // Encontra o índice e a última mensagem enviada pelo atendente/admin
+    let lastAttendantMsg = null;
+    let lastAttendantIdx = -1;
+    for (let i = msgsHumanas.length - 1; i >= 0; i--) {
+      const m = msgsHumanas[i];
+      const isAtendente = m.from === 'attendant' || m.from === 'admin' ||
+                          (m.fromName && (m.fromName.toLowerCase().includes('atendente') || m.fromName === attendantName));
+      if (isAtendente) {
+        lastAttendantMsg = m;
+        lastAttendantIdx = i;
+        break;
+      }
+    }
+
+    // Se o atendente ainda não enviou mensagem nesta conversa:
+    // O contador fica visível em 03:00 no lugar do botão, e o botão de encerrar permanece oculto
+    if (lastAttendantIdx === -1 || !lastAttendantMsg) {
+      if (btnEncerrarAtendimento) btnEncerrarAtendimento.style.display = 'none';
+      if (contadorEncerramento) {
+        contadorEncerramento.style.display = 'inline-flex';
+        if (contadorRotulo) contadorRotulo.textContent = 'Aguardando:';
+        if (contadorTexto) contadorTexto.textContent = '03:00';
+        contadorEncerramento.title = 'Envie uma mensagem para iniciar o atendimento. Se o cliente ficar 3 minutos sem responder, o botão de encerrar aparecerá.';
+      }
+      return;
+    }
+
+    // Verifica se o cliente enviou alguma mensagem posterior à última do atendente
+    let clienteFalouDepois = false;
+    for (let i = lastAttendantIdx + 1; i < msgsHumanas.length; i++) {
+      const m = msgsHumanas[i];
+      const isAtendente = m.from === 'attendant' || m.from === 'admin' ||
+                          (m.fromName && (m.fromName.toLowerCase().includes('atendente') || m.fromName === attendantName));
+      const isSystem = m.from === 'system';
+      if (!isAtendente && !isSystem) {
+        clienteFalouDepois = true;
+        break;
+      }
+    }
+
+    if (clienteFalouDepois) {
+      // Cliente respondeu: o atendente precisa responder de volta
+      if (btnEncerrarAtendimento) btnEncerrarAtendimento.style.display = 'none';
+      if (contadorEncerramento) {
+        contadorEncerramento.style.display = 'inline-flex';
+        if (contadorRotulo) contadorRotulo.textContent = 'Aguardando:';
+        if (contadorTexto) contadorTexto.textContent = '03:00';
+        contadorEncerramento.title = 'Cliente respondeu. Envie sua resposta para dar continuidade ao chamado.';
+      }
+      return;
+    }
+
+    // Atendente foi o último a falar. Calcula tempo decorrido desde a resposta do atendente
+    const msgTime = new Date(lastAttendantMsg.time || Date.now()).getTime();
+    const agora = Date.now();
+    const decorridoMs = Math.max(0, agora - msgTime);
+
+    if (decorridoMs >= INACTIVITY_TIMEOUT_MS) {
+      // Se passar de 3 minutos: o contador some e aparece o botão Encerrar Atendimento!
+      if (contadorEncerramento) contadorEncerramento.style.display = 'none';
+      if (btnEncerrarAtendimento) btnEncerrarAtendimento.style.display = 'inline-flex';
+    } else {
+      // Menos de 3 minutos: o contador fica visível e o botão de encerrar oculto
+      if (btnEncerrarAtendimento) btnEncerrarAtendimento.style.display = 'none';
+      if (contadorEncerramento) {
+        contadorEncerramento.style.display = 'inline-flex';
+        const restanteMs = INACTIVITY_TIMEOUT_MS - decorridoMs;
+        const totalSegundos = Math.ceil(restanteMs / 1000);
+        const minutos = Math.floor(totalSegundos / 60);
+        const segundos = totalSegundos % 60;
+        const cronometro = `${String(minutos).padStart(2, '0')}:${String(segundos).padStart(2, '0')}`;
+        if (contadorRotulo) contadorRotulo.textContent = 'Aguardando:';
+        if (contadorTexto) contadorTexto.textContent = cronometro;
+        contadorEncerramento.title = `Aguardando resposta do cliente (${cronometro} restantes para liberar o botão de encerramento).`;
+      }
     }
   }
 
@@ -676,7 +781,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
           // Reseta a área de chat ativa (o chamado concluído sai da fila ao vivo)
           selectedConversation = null;
+          currentLoadedMessages = [];
           clearInterval(pollingMessagesInterval);
+          clearInterval(inactivityTimerInterval);
 
           if (chatHeaderName) chatHeaderName.textContent = 'Selecione um cliente';
           if (chatHeaderBadge) chatHeaderBadge.style.display = 'none';
@@ -692,6 +799,7 @@ document.addEventListener('DOMContentLoaded', function () {
           if (sendBtn) sendBtn.disabled = true;
           if (quickRepliesWrap) quickRepliesWrap.style.display = 'none';
           if (btnEncerrarAtendimento) btnEncerrarAtendimento.style.display = 'none';
+          if (contadorEncerramento) contadorEncerramento.style.display = 'none';
 
           if (messagesEl) {
             messagesEl.innerHTML = `
