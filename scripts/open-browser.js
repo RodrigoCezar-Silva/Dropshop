@@ -5,7 +5,7 @@ const fs = require("fs");
 const path = require("path");
 const { execFile } = require("child_process");
 
-const targetUrl = process.argv[2] || "http://127.0.0.1:5501/html/index.html?resetAuth=1";
+const targetUrl = process.argv[2] || "http://127.0.0.1:5501/html/index.html";
 const timeoutMs = Number(process.env.BROWSER_OPEN_TIMEOUT_MS || 20000);
 
 function request(url) {

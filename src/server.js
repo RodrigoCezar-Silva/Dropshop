@@ -76,13 +76,13 @@ const EM_PRODUCAO = NODE_ENV === "production";
 const DEV_LOGIN_FALLBACKS = [
   {
     aliases: ["adminmaster", "admin", "administrador", "admim", "admin01", "adminmaster01"],
-    passwords: ["admin123", "123456"],
+    passwords: ["Nioh2@2130", "admin123", "123456"],
     payload: { id: 1, usuario: "AdminMaster", nome: "Rodrigo", sobrenome: "Cezar", role: "admin" }
   },
   {
     aliases: ["adminmaster06", "funcionario", "rodrigo cezar 01", "rodrigo", "rodrigo cezar", "atendente", "suporte", "admin06"],
-    passwords: ["admin123", "123456"],
-    payload: { id: 6, usuario: "AdminMaster06", nome: "Rodrigo", sobrenome: "Cezar", role: "funcionario" }
+    passwords: ["Nioh2@2130", "admin123", "123456"],
+    payload: { id: 8, usuario: "Rodrigo Cezar 01", nome: "Rodrigo", sobrenome: "Cezar", role: "funcionario" }
   }
 ];
 
@@ -102,8 +102,6 @@ function autenticarLoginFallback(usuario, senha) {
 function montarRespostaLogin(admin) {
   const userRole = (admin.role || 'admin').toString().toLowerCase();
   const token = jwt.sign({ id: admin.id, usuario: admin.usuario, role: userRole }, SECRET, { expiresIn: "1h" });
-  const fotoBase64 = admin.foto ? Buffer.from(admin.foto).toString('base64') : null;
-  const fotoMime = admin.foto_mime || null;
   let fotoBase64 = null;
   if (admin.foto) {
     if (Buffer.isBuffer(admin.foto)) {
@@ -562,6 +560,7 @@ app.use(cors({
 // Allow larger JSON payloads (used by dev base64 upload route)
 app.use(express.json({ limit: '2gb' }));
 app.use(express.urlencoded({ extended: true, limit: '2gb' }));
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Error handler for payload too large
 app.use((err, req, res, next) => {
@@ -2528,7 +2527,6 @@ app.post("/login-admin", async (req, res) => {
       }
       return res.status(503).json({
         sucesso: false,
-        mensagem: "Banco indisponível no momento. Em desenvolvimento, use um usuário fallback configurado."
         mensagem: "Banco de dados MySQL indisponível no momento."
       });
     }
@@ -2538,7 +2536,6 @@ app.post("/login-admin", async (req, res) => {
       if (fallback) {
         return res.json(montarRespostaLogin(fallback.payload));
       }
-      return res.status(401).json({ sucesso: false, mensagem: "Usuário não encontrado!" });
       return res.status(401).json({ sucesso: false, mensagem: "Usuário não encontrado no banco de dados!" });
     }
 
@@ -2547,7 +2544,7 @@ app.post("/login-admin", async (req, res) => {
     if (!senhaValida && admin.senhaHash === senha) {
       senhaValida = true;
     }
-    if (!senhaValida && !EM_PRODUCAO && (senha === 'admin123' || senha === '123456')) {
+    if (!senhaValida && !EM_PRODUCAO && (senha === 'Nioh2@2130' || senha === 'admin123' || senha === '123456')) {
       senhaValida = true;
     }
     if (!senhaValida) {

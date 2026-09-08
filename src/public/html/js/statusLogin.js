@@ -9,8 +9,8 @@
     const path = window.location.pathname.toLowerCase();
     const isIndex = path.endsWith('index.html') || path === '/' || path === '';
 
-    // Se vier com flag de reset (passada pelo npm run dev), limpa login
-    if (params.has('resetAuth') || params.has('deslogar') || params.has('logout')) {
+    // Se vier com flag de logout explícito, limpa login
+    if (params.has('deslogar') || params.has('logout')) {
       const keys = ['tipoUsuario','token','nome','sobrenome','isAdmin','foto','fotoMime','clienteCPF','email','clienteTelefone','clienteId'];
       keys.forEach(k => localStorage.removeItem(k));
       sessionStorage.clear();

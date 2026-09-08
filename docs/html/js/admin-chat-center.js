@@ -308,6 +308,8 @@ document.addEventListener('DOMContentLoaded', function () {
       totalConcluidosBadge.textContent = String(totalConcluidos);
     }
 
+    // FILA AO VIVO: remove completamente chamados já concluídos/encerrados desta tela
+    const chamadosAoVivo = conversations.filter(c => c.status !== 'finalizado' && c.status !== 'closed');
     // FILA AO VIVO DO ATENDENTE: Exibe apenas chamados que necessitam de atendimento humano oficial
     // Remove chamados concluídos e chamados em autoatendimento com a IA (ia_atendimento)
     const chamadosAoVivo = conversations.filter(c => 
@@ -318,11 +320,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
     let filtradas = chamadosAoVivo.filter(c => {
       if (activeFilter === 'aguardando') {
+        return c.status === 'aguardando_atendente' || c.status === 'open' || (c.status !== 'ia_atendimento' && c.unread && c.unread > 0);
         return c.status === 'aguardando_atendente' || c.status === 'open' || (c.unread && c.unread > 0);
       }
       if (activeFilter === 'em_atendimento') {
         return c.status === 'em_atendimento' && (!c.unread || c.unread === 0);
       }
+      return true; // 'all' (Todos da fila ao vivo)
       return true; // 'all' (Todos da fila ao vivo de atendimento humano)
     });
 
@@ -348,18 +352,23 @@ document.addEventListener('DOMContentLoaded', function () {
 
     convListEl.innerHTML = filtradas.map(c => {
       const isSelected = selectedConversation && String(selectedConversation.id) === String(c.id);
+      const isAguardando = c.status === 'aguardando_atendente' || c.status === 'open' || (c.status !== 'ia_atendimento' && c.unread && c.unread > 0);
       const isAguardando = c.status === 'aguardando_atendente' || c.status === 'open' || (c.unread && c.unread > 0);
       const isEmAtendimento = c.status === 'em_atendimento';
+      const isIA = c.status === 'ia_atendimento';
 
       let statusBadge = '';
       if (isAguardando) {
         statusBadge = `<span class="badge-chamado-aguardando"><i class="fa-solid fa-bell"></i> Aguardando</span>`;
       } else if (isEmAtendimento) {
         statusBadge = `<span class="badge-chamado-ativo"><i class="fa-solid fa-comments"></i> Em curso</span>`;
+      } else if (isIA) {
+        statusBadge = `<span class="badge-chamado-ia" style="background:rgba(56,189,248,0.15);color:#38bdf8;border:1px solid rgba(56,189,248,0.3);padding:2px 8px;border-radius:12px;font-size:0.75rem;font-weight:700;"><i class="fa-solid fa-robot"></i> MixIA</span>`;
       }
 
       const nomeLimpo = formatarNomeCliente(c.name);
       const initials = extrairIniciaisCliente(c.name);
+      const lastMsg = c.lastMessagePreview || 'Sem mensagens recentes';
       let lastMsg = (c.lastMessagePreview || '').trim();
       if (/MixIA|Autoatendimento|Assistente Virtual|Inteligência Artificial|Perfeito.*Identifiquei sua solicitação/i.test(lastMsg) || !lastMsg) {
         lastMsg = 'Solicitação de atendimento';
@@ -473,6 +482,7 @@ document.addEventListener('DOMContentLoaded', function () {
   function renderizarMensagens(msgs) {
     if (!messagesEl) return;
 
+    if (msgs.length === 0) {
     // Filtra para que as mensagens da IA (MixIA / bot) NÃO apareçam no chat do funcionário
     const msgsHumanas = (Array.isArray(msgs) ? msgs : []).filter(m => {
       const isBot = m.from === 'bot' || m.from === 'ia' || (m.fromName && /MixIA/i.test(m.fromName));
@@ -483,12 +493,14 @@ document.addEventListener('DOMContentLoaded', function () {
       messagesEl.innerHTML = `
         <div class="chat-empty-queue" style="margin-top:40px;">
           <i class="fa-solid fa-comment-dots" style="font-size:2.5rem; color:#334155;"></i>
+          <p>Nenhuma mensagem trocada ainda com este cliente.</p>
           <p>Nenhuma mensagem de atendimento humano trocada ainda com este cliente.</p>
         </div>
       `;
       return;
     }
 
+    const html = msgs.map(m => {
     const html = msgsHumanas.map(m => {
       const isSystem = m.from === 'system';
       if (isSystem) {
@@ -497,10 +509,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
       // Se enviada por atendente ou admin, aparece à direita (me)
       const isAtendente = m.from === 'attendant' || m.from === 'admin';
+      const isBot = m.from === 'bot' || m.from === 'ia';
+      const className = isAtendente ? 'msg me attendant' : (isBot ? 'msg other bot-msg' : 'msg other client');
       const className = isAtendente ? 'msg me attendant' : 'msg other client';
       let autor = `<i class="fa-solid fa-user"></i> ${escapeHtml(m.fromName || selectedConversation.name || 'Cliente')}`;
       if (isAtendente) {
         autor = `<i class="fa-solid fa-headset"></i> ${escapeHtml(m.fromName || attendantName)} (Atendente)`;
+      } else if (isBot) {
+        autor = `<i class="fa-solid fa-robot"></i> ${escapeHtml(m.fromName || 'MixIA (Assistente Virtual)')}`;
       }
 
       const hora = formatTime(m.time);
