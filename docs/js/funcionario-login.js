@@ -98,23 +98,8 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       } catch (error) {
         console.error("Erro de conexão:", error);
-        const cfg = window.AUTH_CONFIG || {};
-        if (cfg.mockAdmin && cfg.mockAdmin.enabled) {
-          const mockUser = cfg.mockAdmin.user || 'admin';
-          const mockPass = cfg.mockAdmin.pass || 'admin';
-          if (usuario === mockUser && senha === mockPass) {
-            localStorage.setItem("token", "MOCK_TOKEN");
-            localStorage.setItem("nome", mockUser);
-            localStorage.setItem("sobrenome", "");
-            localStorage.setItem("tipoUsuario", "Funcionario");
-            localStorage.removeItem("isAdmin");
-            await navigateToFuncionario();
-            return;
-          }
-        }
-
         if (mensagemErro) {
-          mensagemErro.innerText = "❌ Erro de conexão com servidor!";
+          mensagemErro.innerText = "❌ Erro ao conectar com o banco de dados/servidor!";
           mensagemErro.style.color = "red";
         }
       }

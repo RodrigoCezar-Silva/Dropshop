@@ -137,6 +137,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (mensagemErro) {
           mensagemErro.innerText = "❌ Erro de conexão com servidor!";
+          mensagemErro.innerText = "❌ Erro ao conectar com o banco de dados/servidor!";
           mensagemErro.style.color = "red";
         }
       }

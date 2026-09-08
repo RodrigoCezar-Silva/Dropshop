@@ -104,11 +104,22 @@ function montarRespostaLogin(admin) {
   const token = jwt.sign({ id: admin.id, usuario: admin.usuario, role: userRole }, SECRET, { expiresIn: "1h" });
   const fotoBase64 = admin.foto ? Buffer.from(admin.foto).toString('base64') : null;
   const fotoMime = admin.foto_mime || null;
+  let fotoBase64 = null;
+  if (admin.foto) {
+    if (Buffer.isBuffer(admin.foto)) {
+      fotoBase64 = admin.foto.toString('base64');
+    } else if (typeof admin.foto === 'string') {
+      fotoBase64 = admin.foto.replace(/^data:[^;]+;base64,/, '');
+    }
+  }
+  const fotoMime = admin.foto_mime || 'image/jpeg';
 
   return {
     sucesso: true,
     mensagem: "Login realizado com sucesso!",
     token,
+    id: admin.id,
+    usuario: admin.usuario,
     role: userRole,
     tipoUsuario: userRole === 'funcionario' ? 'Funcionario' : 'Administrador',
     nome: admin.nome,
@@ -2518,6 +2529,7 @@ app.post("/login-admin", async (req, res) => {
       return res.status(503).json({
         sucesso: false,
         mensagem: "Banco indisponível no momento. Em desenvolvimento, use um usuário fallback configurado."
+        mensagem: "Banco de dados MySQL indisponível no momento."
       });
     }
 
@@ -2527,10 +2539,14 @@ app.post("/login-admin", async (req, res) => {
         return res.json(montarRespostaLogin(fallback.payload));
       }
       return res.status(401).json({ sucesso: false, mensagem: "Usuário não encontrado!" });
+      return res.status(401).json({ sucesso: false, mensagem: "Usuário não encontrado no banco de dados!" });
     }
 
     const admin = rows[0];
     let senhaValida = await bcrypt.compare(senha, admin.senhaHash);
+    if (!senhaValida && admin.senhaHash === senha) {
+      senhaValida = true;
+    }
     if (!senhaValida && !EM_PRODUCAO && (senha === 'admin123' || senha === '123456')) {
       senhaValida = true;
     }
