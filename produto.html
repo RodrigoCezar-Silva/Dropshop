@@ -94,37 +94,53 @@
       <span id="breadcrumbProduto">Produto</span>
     </div>
 
+    <!-- Título do produto acima do carrossel com respiro e sem corte -->
+    <div class="produto-topo-header">
+      <h1 id="detalheTitulo" class="produto-titulo-principal">Nome do Produto</h1>
+    </div>
+
     <div class="produto-detalhes">
       <!-- Coluna esquerda: galeria -->
       <div class="produto-galeria">
         <div id="carrossel-produto">
-          <div class="carrossel-principal">
-            <button class="btn-nav" id="btnPrev"><i class="fa-solid fa-chevron-left"></i></button>
-            <div class="media-wrapper" id="mediaWrapper">
-              <img id="imagemPrincipal" src="./images/sem-imagem.svg" alt="Imagem principal">
-              <video id="videoPrincipal" controls style="display:none;" muted></video>
-              <div class="marca-dagua">MIX-PROMOÇÃO</div>
+
+          <!-- Linha principal: thumbs verticais + imagem grande -->
+          <div class="galeria-flex">
+
+            <!-- Coluna de miniaturas (carrossel pequeno à esquerda) -->
+            <div class="miniaturas-container-lateral">
+              <div class="miniaturas-col" id="miniaturasCol">
+                <!-- Preenchido via JS -->
+              </div>
             </div>
-            <button class="btn-nav" id="btnNext"><i class="fa-solid fa-chevron-right"></i></button>
+
+            <!-- Imagem principal -->
+            <div class="carrossel-principal">
+              <button class="btn-nav" id="btnPrev"><i class="fa-solid fa-chevron-up"></i></button>
+
+              <div class="media-wrapper" id="mediaWrapper">
+                <img id="imagemPrincipal" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'><rect width='100%25' height='100%25' fill='%23f1f5f9'/><text x='50%25' y='50%25' fill='%2394a3b8' font-family='sans-serif' font-size='16' text-anchor='middle' dominant-baseline='middle'>Carregando produto...</text></svg>" alt="Imagem do produto">
+                <video id="videoPrincipal" controls style="display:none;" muted></video>
+                <!-- Badge de zoom -->
+                <span class="zoom-hint"><i class="fa-solid fa-magnifying-glass-plus"></i></span>
+              </div>
+
+              <button class="btn-nav" id="btnNext"><i class="fa-solid fa-chevron-down"></i></button>
+            </div>
           </div>
-          <div class="miniaturas">
-            <div class="produto-vitrine">
-              <img src="./images/sem-imagem.svg" alt="Produto miniatura">
-              <div class="marca-dagua">MIX-PROMOÇÃO</div>
-            </div>
-            <div class="produto-vitrine">
-              <img src="./images/sem-imagem.svg" alt="Produto miniatura">
-              <div class="marca-dagua">MIX-PROMOÇÃO</div>
-            </div>
-          </div>
+
         </div>
       </div>
 
       <!-- Coluna direita: informações -->
       <div class="produto-info-col">
         <div class="produto-header">
-          <span class="desconto-topo" id="detalheDesconto">🔥 -70% Desconto</span>
-          <h1 id="detalheTitulo">Nome do Produto</h1>
+          <div class="header-badges-row">
+            <span class="desconto-topo" id="detalheDesconto" style="display:none;">-50% DESCONTO</span>
+            <span class="badge-frete-gratis-produto" id="badgeFreteGratisProduto" style="display:none;">
+              <i class="fa-solid fa-truck-fast"></i> Frete Grátis
+            </span>
+          </div>
           <div class="precos">
             <span class="preco-antigo" id="detalhePrecoAntigo">R$475,75</span>
             <span class="preco" id="detalhePreco">R$150,00</span>
@@ -263,12 +279,30 @@
 <!-- Popup de alerta para login obrigatório -->
 <div id="popupLoginObrigatorio" style="display:none;">
   <div class="popup-login-content">
-    <span id="fecharPopupLogin">&times;</span>
+    <span id="fecharPopupLogin" title="Fechar">&times;</span>
+    <div class="popup-login-icon"><i class="fa-solid fa-lock"></i></div>
     <h2>Atenção</h2>
-    <p>Você precisa estar <strong>logado</strong> como cliente para comentar ou avaliar este produto.</p>
-    <div style="display:flex;gap:12px;justify-content:center;margin-top:12px;">
-      <button id="btnIrLoginPopup" class="btn-hero-primary">Ir para Login</button>
-      <button id="btnCancelarLoginPopup" class="btn-hero-secondary">Cancelar</button>
+    <p>Você precisa estar <strong>logado</strong> como cliente para avaliar este produto.</p>
+    <div class="popup-login-actions">
+      <button id="btnIrLoginPopup" class="btn-ir-login"><i class="fa-solid fa-right-to-bracket"></i> Fazer Login</button>
+      <button id="btnCancelarLoginPopup" class="btn-cancelar-login">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Popup Estiloso de Sucesso / Feedback para Comentários -->
+<div id="popupSucessoComentario" class="popup-sucesso-overlay modo-criacao" style="display:none;">
+  <div class="popup-sucesso-card">
+    <span id="fecharPopupSucesso" class="popup-sucesso-close" title="Fechar">&times;</span>
+    <div id="popupSucessoIcone" class="popup-sucesso-icon">
+      <i class="fa-solid fa-circle-check"></i>
+    </div>
+    <h2 id="popupSucessoTitulo">Avaliação Enviada!</h2>
+    <p id="popupSucessoMensagem">Sua avaliação foi enviada com sucesso e já está disponível para todos os clientes.</p>
+    <div class="popup-sucesso-acoes">
+      <button id="btnFecharSucessoPopup" class="btn-fechar-sucesso">
+        <i class="fa-solid fa-check"></i> Entendido
+      </button>
     </div>
   </div>
 </div>
@@ -326,7 +360,6 @@
 
   
   
-<script src="./js/carrossel.js"></script>
 <script src="./js/filtro.js"></script>
 <script src="./js/carrinho.js"></script>
 <script src="./js/frete.js"></script>
@@ -339,10 +372,6 @@
 <script src="./js/bloquear-copia.js"></script>
 <script src="./js/chatbot-widget.js"></script>
 <script src="./js/responsive-nav.js"></script>
-  
-  
-  
-</body>
-</body>
 
+</body>
 </html>

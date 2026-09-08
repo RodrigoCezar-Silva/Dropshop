@@ -26,26 +26,11 @@
       </span>
     </div>
 
-    <nav class="menu" aria-label="Menu principal">
-      <ul>
-        <li><a href="./index.html"><i class="fa-solid fa-house menu-link-icon" aria-hidden="true"></i><span>Início</span></a></li>
-        <li><a href="./loja.html"><i class="fa-solid fa-store menu-link-icon" aria-hidden="true"></i><span>Nossa Loja</span></a></li>
-        <li><a href="./QuemSomos.html"><i class="fa-solid fa-circle-info menu-link-icon" aria-hidden="true"></i><span>Sobre</span></a></li>
-        <li><a href="./trocas-devolucoes.html"><i class="fa-solid fa-right-left menu-link-icon" aria-hidden="true"></i><span>Trocas e Devoluções</span></a></li>
-        <li><a href="./ajuda.html"><i class="fa-solid fa-circle-question menu-link-icon" aria-hidden="true"></i><span>Ajuda</span></a></li>
-      </ul>
-    </nav>
-
-    <div id="loginButtons">
-      <a href="./login-cliente.html" class="btn-login cliente">👤 Login Cliente</a>
-      <a href="./admin-login.html" class="btn-login admin">👤 Login Administrativo</a>
-      <a href="./login-funcionario.html" class="btn-login admin">👤 Login Funcionário</a>
-    </div>
-
-    <div id="statusLogado" class="status-admin" style="display:none;">
-      <span class="status-text">👑 Funcionário: <strong id="nomeUsuario"></strong></span>
-      <button id="logout" class="btn-logout">Sair</button>
-    </div>
+    <!-- Botão Sair no canto direito -->
+    <button id="btnExitHeader" class="btn-header-exit" type="button" title="Sair do modo funcionário" aria-label="Sair">
+      <i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i>
+      <span>Sair</span>
+    </button>
   </header>
 
   <main class="admin-area-main">

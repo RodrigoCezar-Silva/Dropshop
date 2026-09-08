@@ -17,16 +17,16 @@ document.addEventListener("DOMContentLoaded", () => {
   const previewVideo = document.getElementById("previewVideo");
   const formComentario = document.getElementById("formComentario");
 
-  // Garantir que o popup do formulário esteja sempre escondido até verificarmos o login
-  if (popup) popup.style.display = 'none';
+  // Se não estiver logado como Cliente ou Administrador, limpa chaves residuais de cliente
+  const tipoAtual = localStorage.getItem("tipoUsuario");
+  if (tipoAtual !== "Cliente" && tipoAtual !== "Administrador") {
+    try {
+      localStorage.removeItem("clienteId");
+      localStorage.removeItem("token");
+      sessionStorage.removeItem("activeClienteSession");
+    } catch (e) {}
+  }
 
-  // Mostrar o botão de avaliar somente se estiver logado como cliente ou admin
-  const clienteLogado = localStorage.getItem("clienteId");
-  const podeAvaliar = (isAdmin || clienteLogado);
-  if (btnComentar) btnComentar.style.display = podeAvaliar ? "inline-block" : "none";
-  if (btnAvaliar) btnAvaliar.style.display = podeAvaliar ? "inline-block" : "none";
-
-  // Abrir popup de comentário (só se logado)
   // Popup estilizado para login obrigatório
   const popupLoginObrigatorio = document.getElementById("popupLoginObrigatorio");
   const fecharPopupLogin = document.getElementById("fecharPopupLogin");
@@ -34,11 +34,85 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnIrLoginPopup = document.getElementById("btnIrLoginPopup");
   const btnCancelarLoginPopup = document.getElementById("btnCancelarLoginPopup");
 
+  // Garantir que os popups estejam sempre escondidos inicialmente
+  if (popup) popup.style.display = 'none';
+  if (popupLoginObrigatorio) popupLoginObrigatorio.style.display = 'none';
+
+  // Mostrar o botão de avaliar sempre visível para todos os visitantes
+  if (btnComentar) btnComentar.style.display = "inline-block";
+  if (btnAvaliar) btnAvaliar.style.display = "inline-block";
+
   function mostrarPopupLoginObrigatorio() {
+    if (popup) popup.style.display = "none";
     if (popupLoginObrigatorio) popupLoginObrigatorio.style.display = "flex";
   }
   function fecharPopupLoginObrigatorio() {
     if (popupLoginObrigatorio) popupLoginObrigatorio.style.display = "none";
+  }
+
+  // Popup Estiloso de Sucesso / Feedback
+  function garantirPopupFeedback() {
+    let popupSucesso = document.getElementById("popupSucessoComentario");
+    if (!popupSucesso) {
+      popupSucesso = document.createElement("div");
+      popupSucesso.id = "popupSucessoComentario";
+      popupSucesso.className = "popup-sucesso-overlay modo-criacao";
+      popupSucesso.innerHTML = `
+        <div class="popup-sucesso-card">
+          <span id="fecharPopupSucesso" class="popup-sucesso-close" title="Fechar">&times;</span>
+          <div id="popupSucessoIcone" class="popup-sucesso-icon">
+            <i class="fa-solid fa-circle-check"></i>
+          </div>
+          <h2 id="popupSucessoTitulo">Avaliação Enviada!</h2>
+          <p id="popupSucessoMensagem">Sua avaliação foi enviada com sucesso e já está disponível para todos os clientes.</p>
+          <div class="popup-sucesso-acoes">
+            <button id="btnFecharSucessoPopup" class="btn-fechar-sucesso">
+              <i class="fa-solid fa-check"></i> Entendido
+            </button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(popupSucesso);
+    }
+    const btnFechar = popupSucesso.querySelector("#fecharPopupSucesso");
+    const btnAcao = popupSucesso.querySelector("#btnFecharSucessoPopup");
+    if (btnFechar) btnFechar.onclick = fecharPopupFeedback;
+    if (btnAcao) btnAcao.onclick = fecharPopupFeedback;
+    popupSucesso.onclick = (e) => {
+      if (e.target === popupSucesso) fecharPopupFeedback();
+    };
+    return popupSucesso;
+  }
+
+  function mostrarPopupFeedback(tipo = 'criacao') {
+    const popupSucesso = garantirPopupFeedback();
+    const icone = popupSucesso.querySelector("#popupSucessoIcone");
+    const titulo = popupSucesso.querySelector("#popupSucessoTitulo");
+    const mensagem = popupSucesso.querySelector("#popupSucessoMensagem");
+    const btnAcao = popupSucesso.querySelector("#btnFecharSucessoPopup");
+
+    if (tipo === 'edicao') {
+      popupSucesso.className = "popup-sucesso-overlay modo-edicao";
+      if (icone) icone.innerHTML = '<i class="fa-solid fa-pen-to-square"></i>';
+      if (titulo) titulo.textContent = "Avaliação Atualizada!";
+      if (mensagem) mensagem.textContent = "Suas alterações foram salvas com sucesso no banco de dados e já estão visíveis na página.";
+      if (btnAcao) btnAcao.innerHTML = '<i class="fa-solid fa-check"></i> Concluído';
+    } else {
+      popupSucesso.className = "popup-sucesso-overlay modo-criacao";
+      if (icone) icone.innerHTML = '<i class="fa-solid fa-circle-check"></i>';
+      if (titulo) titulo.textContent = "Avaliação Enviada!";
+      if (mensagem) mensagem.textContent = "Obrigado por sua opinião! Sua avaliação foi cadastrada com sucesso e já está visível para todos os clientes.";
+      if (btnAcao) btnAcao.innerHTML = '<i class="fa-solid fa-check"></i> Excelente!';
+    }
+
+    if (popup) popup.style.display = "none";
+    if (popupLoginObrigatorio) popupLoginObrigatorio.style.display = "none";
+    popupSucesso.style.display = "flex";
+  }
+
+  function fecharPopupFeedback() {
+    const popupSucesso = document.getElementById("popupSucessoComentario");
+    if (popupSucesso) popupSucesso.style.display = "none";
   }
   if (fecharPopupLogin) fecharPopupLogin.onclick = fecharPopupLoginObrigatorio;
   if (btnFecharLoginPopup) btnFecharLoginPopup.onclick = fecharPopupLoginObrigatorio;
@@ -57,43 +131,123 @@ document.addEventListener("DOMContentLoaded", () => {
       // fallback simples
       if (current.indexOf('?') === -1) current += '?openComment=1'; else current += '&openComment=1';
     }
-    const loginUrl = '/html/login-cliente.html?returnTo=' + encodeURIComponent(current);
+    const isHtmlDir = window.location.pathname.includes('/html/');
+    const loginUrl = (isHtmlDir ? 'login-cliente.html' : 'html/login-cliente.html') + '?returnTo=' + encodeURIComponent(current);
     window.location.href = loginUrl;
   });
 
   function usuarioLogado() {
-    return localStorage.getItem("isAdmin") === "true" || localStorage.getItem("clienteId");
+    const tipoUsuario = localStorage.getItem("tipoUsuario");
+    const token = localStorage.getItem("token");
+    const clienteId = localStorage.getItem("clienteId");
+
+    // Validação estrita: somente se for Cliente autenticado com token/id válidos
+    if (tipoUsuario === "Cliente") {
+      const temToken = Boolean(token && token !== "null" && token !== "undefined" && token.trim() !== "");
+      const temId = Boolean(clienteId && clienteId !== "null" && clienteId !== "undefined" && String(clienteId).trim() !== "");
+      return temToken || temId;
+    }
+
+    // Administrador autenticado
+    if (tipoUsuario === "Administrador") {
+      const isAdmin = localStorage.getItem("isAdmin") === "true";
+      const temToken = Boolean(token && token !== "null" && token !== "undefined" && token.trim() !== "");
+      return isAdmin || temToken;
+    }
+
+    // Qualquer outro caso (visitante / não logado)
+    return false;
   }
-  if (btnComentar) btnComentar.addEventListener("click", (e) => {
-    e.preventDefault();
-    e.stopPropagation();
+
+  function resetarFormComentario() {
+    if (formComentario) {
+      delete formComentario.dataset.editId;
+      formComentario.reset();
+      const tituloPopup = popup ? popup.querySelector("h2") : null;
+      if (tituloPopup) tituloPopup.textContent = "Deixe seu comentário";
+      const btnSubmit = formComentario.querySelector("button[type='submit']");
+      if (btnSubmit) btnSubmit.textContent = "Enviar";
+    }
+    if (previewDiv) previewDiv.innerHTML = "";
+    if (previewVideo) previewVideo.innerHTML = "";
+  }
+
+  function fecharModalComentario() {
+    if (popup) popup.style.display = "none";
+    resetarFormComentario();
+  }
+
+  function abrirPopupComentario() {
     if (usuarioLogado()) {
-      if (popup) popup.style.display = "flex";
+      resetarFormComentario();
+      if (popupLoginObrigatorio) popupLoginObrigatorio.style.display = "none";
+      if (popup) {
+        popup.style.display = "flex";
+        // Preenche o nome do cliente se estiver logado e o campo estiver vazio
+        const autorInput = document.getElementById("autor");
+        if (autorInput && !autorInput.value) {
+          const nome = localStorage.getItem("nome");
+          const sobrenome = localStorage.getItem("sobrenome");
+          if (nome && nome !== "null") autorInput.value = `${nome} ${sobrenome && sobrenome !== 'null' ? sobrenome : ''}`.trim();
+        }
+      }
     } else {
       if (popup) popup.style.display = "none";
       mostrarPopupLoginObrigatorio();
     }
-  });
-  if (btnAvaliar) btnAvaliar.addEventListener("click", (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (usuarioLogado()) {
-      if (popup) popup.style.display = "flex";
-    } else {
-      if (popup) popup.style.display = "none";
+  }
+
+  function iniciarEdicaoComentario(comentario) {
+    if (!usuarioLogado()) {
       mostrarPopupLoginObrigatorio();
+      return;
     }
+
+    if (!formComentario) return;
+    formComentario.dataset.editId = comentario.id || comentario._id;
+
+    const tituloPopup = popup ? popup.querySelector("h2") : null;
+    if (tituloPopup) tituloPopup.textContent = "Editar sua avaliação";
+
+    const textoInput = document.getElementById("texto");
+    const autorInput = document.getElementById("autor");
+    const notaSelect = document.getElementById("notaProduto");
+    const btnSubmit = formComentario.querySelector("button[type='submit']");
+
+    if (textoInput) textoInput.value = comentario.texto || "";
+    if (autorInput) autorInput.value = comentario.autor || "";
+    const notaValor = comentario.nota || comentario.notaProduto || "";
+    if (notaSelect) notaSelect.value = String(notaValor);
+    if (btnSubmit) btnSubmit.textContent = "Salvar alterações";
+
+    if (previewDiv) previewDiv.innerHTML = "";
+    if (previewVideo) previewVideo.innerHTML = "";
+
+    if (popupLoginObrigatorio) popupLoginObrigatorio.style.display = "none";
+    if (popup) popup.style.display = "flex";
+  }
+
+  const botoesAvaliar = document.querySelectorAll("#btnComentar, .btn-avaliar");
+  botoesAvaliar.forEach((btn) => {
+    btn.style.display = "inline-block";
+    btn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      abrirPopupComentario();
+    });
   });
 
-  // Garante que o popupComentario nunca aparece para não logados
+  // Garante que o popupComentario nunca aparece inicialmente para não logados
   if (!usuarioLogado()) {
     if (popup) popup.style.display = "none";
   }
   // Se a URL contém openComment=1 e o usuário está logado, abre o formulário automaticamente
   try {
     const sp = new URLSearchParams(window.location.search);
-    if (sp.get('openComment') === '1' && usuarioLogado() && popup) {
-      popup.style.display = 'flex';
+    if (sp.get('openComment') === '1') {
+      if (usuarioLogado() && popup) {
+        abrirPopupComentario();
+      }
       // remover o parâmetro da URL sem recarregar
       const url = new URL(window.location.href);
       url.searchParams.delete('openComment');
@@ -102,7 +256,17 @@ document.addEventListener("DOMContentLoaded", () => {
   } catch (e) {
     // ignore
   }
-  if (fecharPopup) fecharPopup.addEventListener("click", () => popup.style.display = "none");
+  if (fecharPopup) fecharPopup.addEventListener("click", () => fecharModalComentario());
+  if (popup) {
+    popup.addEventListener("click", (e) => {
+      if (e.target === popup) fecharModalComentario();
+    });
+  }
+  if (popupLoginObrigatorio) {
+    popupLoginObrigatorio.addEventListener("click", (e) => {
+      if (e.target === popupLoginObrigatorio) fecharPopupLoginObrigatorio();
+    });
+  }
 
   // Buscar comentários do servidor para este produto
   let comentarios = [];
@@ -203,11 +367,22 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // Salva uma nova avaliação enviada pelo usuário.
+  // Salva ou atualiza a avaliação enviada pelo usuário.
   // Também atualiza a lista de comentários e os gráficos de estrelas.
   formComentario.addEventListener("submit", async (e) => {
     e.preventDefault();
-    const autor = document.getElementById("autor").value.trim();
+    if (!usuarioLogado()) {
+      if (popup) popup.style.display = "none";
+      mostrarPopupLoginObrigatorio();
+      return;
+    }
+
+    let autor = document.getElementById("autor").value.trim();
+    if (!autor) {
+      const nome = localStorage.getItem("nome");
+      const sobrenome = localStorage.getItem("sobrenome");
+      if (nome) autor = `${nome} ${sobrenome || ''}`.trim();
+    }
     const texto = document.getElementById("texto").value.trim();
     const notaProduto = parseInt(document.getElementById("notaProduto").value) || 0;
 
@@ -215,6 +390,8 @@ document.addEventListener("DOMContentLoaded", () => {
       alert("Preencha comentário e selecione uma nota.");
       return;
     }
+
+    const editId = formComentario.dataset.editId;
 
     // preparar FormData para envio ao servidor
     try {
@@ -240,39 +417,112 @@ document.addEventListener("DOMContentLoaded", () => {
       const proto = window.location.protocol;
       const defaultBase = `${proto}//${host}:3000`;
       const apiBase = (window.AUTH_SERVER && window.AUTH_SERVER.replace(/\/$/, '')) || defaultBase;
+      const endpoint = editId ? `/api/comentarios/${encodeURIComponent(editId)}` : '/api/comentarios';
+      const method = editId ? 'PUT' : 'POST';
+
       let resp = null;
       try {
-        resp = await fetch(apiBase + '/api/comentarios', { method: 'POST', body: fd });
-        if (!resp.ok) throw new Error('API base respondeu ' + resp.status);
+        resp = await fetch(apiBase + endpoint, { method, body: fd });
       } catch (err) {
-        // tentativa fallback relativo
-        resp = await fetch((function(){ try{ const port = location.port; if(port && port !== '3000') return `${location.protocol}//${location.hostname}:3000`; }catch(e){} return ''; })() + '/api/comentarios', { method: 'POST', body: fd });
+        // tentativa fallback
+        const fallbackUrl = (function(){ try{ const port = location.port; if(port && port !== '3000') return `${location.protocol}//${location.hostname}:3000`; }catch(e){} return ''; })() + endpoint;
+        resp = await fetch(fallbackUrl, { method, body: fd });
       }
-      const j = await resp.json();
-      if (!resp.ok || !j.sucesso) {
-        alert(j.mensagem || 'Erro ao enviar comentário');
+
+      let j = {};
+      try {
+        j = await resp.json();
+      } catch (e) {
+        j = { sucesso: false, mensagem: `Erro ${resp ? resp.status : ''}: Não foi possível processar a resposta do servidor.` };
+      }
+
+      if (!resp || !resp.ok || !j.sucesso) {
+        alert(j.mensagem || (editId ? 'Erro ao atualizar comentário' : 'Erro ao enviar comentário'));
         return;
       }
 
+      const ehEdicao = Boolean(editId);
+
       // limpar formulário e recarregar comentários do servidor
-      popup.style.display = 'none';
-      formComentario.reset();
-      previewDiv.innerHTML = '';
-      previewVideo.innerHTML = '';
+      fecharModalComentario();
       await carregarComentariosDoServidor();
+
+      // Exibe o popup estiloso de sucesso
+      mostrarPopupFeedback(ehEdicao ? 'edicao' : 'criacao');
     } catch (err) {
-      console.error('Erro ao enviar comentario:', err && err.message);
-      alert('Erro ao enviar comentário. Tente mais tarde.');
+      console.error('Erro ao enviar/atualizar comentario:', err && err.message);
+      alert(err && err.message ? `Erro ao salvar: ${err.message}` : 'Erro ao salvar comentário. Tente mais tarde.');
     }
   });
 
-  // Renderiza cada comentário na tela e controla o botão de remover.
+  // Função para remover comentário do servidor
+  async function removerComentario(c) {
+    try {
+      const id = c.id || c._id;
+      if (!id) return alert('Comentário sem id.');
+
+      const host = window.location.hostname;
+      const proto = window.location.protocol;
+      const defaultBase = `${proto}//${host}:3000`;
+      const apiBase = (window.AUTH_SERVER && window.AUTH_SERVER.replace(/\/$/, '')) || defaultBase;
+      const clienteId = localStorage.getItem("clienteId");
+      const urlQuery = clienteId ? `?clienteId=${encodeURIComponent(clienteId)}` : '';
+
+      let resp = null;
+      try {
+        resp = await fetch(apiBase + '/api/comentarios/' + encodeURIComponent(id) + urlQuery, {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' }
+        });
+      } catch (err) {
+        const fallbackUrl = (function(){ try{ const port = location.port; if(port && port !== '3000') return `${location.protocol}//${location.hostname}:3000`; }catch(e){} return ''; })() + '/api/comentarios/' + encodeURIComponent(id) + urlQuery;
+        resp = await fetch(fallbackUrl, {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+      let j = {};
+      try {
+        j = await resp.json();
+      } catch (e) {
+        j = { sucesso: false, mensagem: `Erro ${resp ? resp.status : ''}: Resposta inválida do servidor.` };
+      }
+      if (!resp || !resp.ok || !j.sucesso) return alert(j.mensagem || 'Falha ao remover comentário');
+      alert("Comentário removido com sucesso!");
+      await carregarComentariosDoServidor();
+    } catch (err) {
+      console.error('Erro ao remover comentario:', err);
+      alert('Erro ao remover comentário. Tente mais tarde.');
+    }
+  }
+
+  // Renderiza cada comentário na tela e controla botões de editar e remover.
   function atualizarComentarios(listaComentarios) {
     const lista = document.getElementById("lista-comentarios");
+    if (!lista) return;
     lista.innerHTML = "";
     isAdmin = localStorage.getItem("isAdmin") === "true";
 
-    listaComentarios.forEach((c, index) => {
+    function resolverUrlMidia(src) {
+      if (!src || typeof src !== "string") return "";
+      if (src.startsWith("data:") || src.startsWith("blob:") || src.startsWith("http://") || src.startsWith("https://")) {
+        return src;
+      }
+      const host = window.location.hostname;
+      const proto = window.location.protocol;
+      const defaultBase = `${proto}//${host}:3000`;
+      const apiBase = (window.AUTH_SERVER && window.AUTH_SERVER.replace(/\/$/, '')) || defaultBase;
+      return apiBase + (src.startsWith('/') ? src : ('/' + src));
+    }
+
+    const clienteLogadoId = localStorage.getItem("clienteId");
+    const clienteLogadoNome = (localStorage.getItem("nome") || "").trim().toLowerCase();
+    const clienteLogadoSobrenome = (localStorage.getItem("sobrenome") || "").trim().toLowerCase();
+    const clienteLogadoNomeCompleto = [clienteLogadoNome, clienteLogadoSobrenome].filter(Boolean).join(" ").trim();
+    const tipoUsuario = localStorage.getItem("tipoUsuario");
+    const isClienteLogado = tipoUsuario === "Cliente" && Boolean(clienteLogadoId || clienteLogadoNome);
+
+    listaComentarios.forEach((c) => {
       const div = document.createElement("div");
       div.classList.add("comentario");
 
@@ -281,37 +531,82 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const info = document.createElement("div");
       info.classList.add("comentario-info");
+
+      // Avatar do cliente (à esquerda do nome)
+      const avatarDiv = document.createElement("div");
+      avatarDiv.classList.add("comentario-avatar");
+
+      const nomeAutor = (c.autor || 'Anônimo').trim();
+      const inicial = nomeAutor ? nomeAutor.charAt(0).toUpperCase() : 'U';
+
+      // Permissão e verificação de autor
+      const commentAutor = (c.autor || "").trim().toLowerCase();
+      const ehAutor = Boolean(
+        (clienteLogadoId && c.clienteId && String(c.clienteId) === String(clienteLogadoId)) ||
+        (clienteLogadoNomeCompleto && commentAutor === clienteLogadoNomeCompleto) ||
+        (clienteLogadoNome && commentAutor.startsWith(clienteLogadoNome))
+      );
+
+      // Identifica URL da foto do cliente
+      let fotoUrl = null;
+      if (c.clienteFoto) {
+        fotoUrl = resolverUrlMidia(c.clienteFoto);
+      } else if (c.clienteId) {
+        fotoUrl = resolverUrlMidia(`/api/cliente/${c.clienteId}/foto`);
+      } else if (isClienteLogado && ehAutor && localStorage.getItem("foto")) {
+        fotoUrl = resolverUrlMidia(localStorage.getItem("foto"));
+      }
+
+      if (fotoUrl) {
+        const imgAvatar = document.createElement("img");
+        imgAvatar.src = fotoUrl;
+        imgAvatar.alt = nomeAutor;
+        imgAvatar.classList.add("avatar-img");
+        imgAvatar.onerror = () => {
+          imgAvatar.style.display = "none";
+          avatarDiv.textContent = inicial;
+        };
+        avatarDiv.appendChild(imgAvatar);
+      } else {
+        avatarDiv.textContent = inicial;
+      }
+      info.appendChild(avatarDiv);
+
+      const autorDetalhes = document.createElement("div");
+      autorDetalhes.classList.add("comentario-autor-detalhes");
       const notaCur = Number(c.nota || c.notaProduto || 0);
-      info.innerHTML = `<strong>${c.autor || 'Anônimo'}:</strong> <span class="estrelas">${"★".repeat(notaCur)}</span>`;
+      autorDetalhes.innerHTML = `<strong>${nomeAutor}:</strong> <span class="estrelas">${"★".repeat(notaCur)}</span>`;
+      info.appendChild(autorDetalhes);
+
       topo.appendChild(info);
 
-      if (isAdmin) {
+      // Permissão: Administrador ou o próprio Cliente que publicou
+      const podeGerenciar = Boolean(isAdmin || (isClienteLogado && ehAutor));
+
+      if (podeGerenciar) {
+        const acoesDiv = document.createElement("div");
+        acoesDiv.classList.add("comentario-acoes");
+
+        // Botão Editar
+        const btnEditar = document.createElement("button");
+        btnEditar.innerHTML = '<i class="fa-solid fa-pen-to-square"></i> Editar';
+        btnEditar.classList.add("btn-editar-comentario");
+        btnEditar.title = "Editar este comentário";
+        btnEditar.addEventListener("click", () => iniciarEdicaoComentario(c));
+        acoesDiv.appendChild(btnEditar);
+
+        // Botão Remover
         const btnRemover = document.createElement("button");
-        btnRemover.textContent = "Remover comentário";
-        btnRemover.classList.add("btn-remover");
+        btnRemover.innerHTML = '<i class="fa-solid fa-trash"></i> Remover';
+        btnRemover.classList.add("btn-remover-comentario");
+        btnRemover.title = "Remover este comentário";
         btnRemover.addEventListener("click", async () => {
-          // chama API para remover
-          try {
-            const id = c.id || c._id;
-            if (!id) return alert('Comentário sem id.');
-            // delete via API base (AUTH_SERVER) with fallback to relative
-            const host = window.location.hostname;
-            const proto = window.location.protocol;
-            const defaultBase = `${proto}//${host}:3000`;
-            const apiBase = (window.AUTH_SERVER && window.AUTH_SERVER.replace(/\/$/, '')) || defaultBase;
-            let resp = null;
-            try {
-              resp = await fetch(apiBase + '/api/comentarios/' + encodeURIComponent(id), { method: 'DELETE', headers: { 'Content-Type': 'application/json' } });
-              if (!resp.ok) throw new Error('API base respondeu ' + resp.status);
-            } catch (err) {
-              resp = await fetch((function(){ try{ const port = location.port; if(port && port !== '3000') return `${location.protocol}//${location.hostname}:3000`; }catch(e){} return ''; })() + '/api/comentarios/' + encodeURIComponent(id), { method: 'DELETE', headers: { 'Content-Type': 'application/json' } });
-            }
-            const j = await resp.json();
-            if (!resp.ok) return alert(j.mensagem || 'Falha ao remover comentário');
-            await carregarComentariosDoServidor();
-          } catch (err) { console.error('Erro ao remover comentario:', err); alert('Erro ao remover comentário'); }
+          if (!confirm("Deseja realmente remover esta avaliação?")) return;
+          await removerComentario(c);
         });
-        topo.appendChild(btnRemover);
+        acoesDiv.appendChild(btnRemover);
+
+        topo.appendChild(acoesDiv);
       }
 
       div.appendChild(topo);
@@ -326,15 +621,17 @@ document.addEventListener("DOMContentLoaded", () => {
       if (c.fotos && c.fotos.length > 0) {
         c.fotos.forEach(foto => {
           const img = document.createElement("img");
-          img.src = foto;
-          img.addEventListener("click", () => abrirMediaPopup(c, "img", foto));
+          const urlResolvida = resolverUrlMidia(foto);
+          img.src = urlResolvida;
+          img.addEventListener("click", () => abrirMediaPopup(c, "img", urlResolvida));
           midiaDiv.appendChild(img);
         });
       }
 
       if (c.video) {
         const video = document.createElement("video");
-        const videoSrc = typeof c.video === 'string' ? c.video : (c.video.dataUri || (c.video.data && c.video.data));
+        const rawVideoSrc = typeof c.video === 'string' ? c.video : (c.video.dataUri || (c.video.data && c.video.data));
+        const videoSrc = resolverUrlMidia(rawVideoSrc);
         video.src = videoSrc;
         video.controls = true;
         video.addEventListener("click", () => abrirMediaPopup(c, "video", videoSrc));
@@ -353,16 +650,28 @@ document.addEventListener("DOMContentLoaded", () => {
     const mediaContent = document.getElementById("mediaContent");
     mediaContent.innerHTML = "";
 
+    function resolverUrlMidia(src) {
+      if (!src || typeof src !== "string") return "";
+      if (src.startsWith("data:") || src.startsWith("blob:") || src.startsWith("http://") || src.startsWith("https://")) {
+        return src;
+      }
+      const host = window.location.hostname;
+      const proto = window.location.protocol;
+      const defaultBase = `${proto}//${host}:3000`;
+      const apiBase = (window.AUTH_SERVER && window.AUTH_SERVER.replace(/\/$/, '')) || defaultBase;
+      return apiBase + (src.startsWith('/') ? src : ('/' + src));
+    }
+
     const principal = document.createElement("div");
     principal.style.textAlign = "center";
 
     if (tipoInicial === "img") {
       const img = document.createElement("img");
-      img.src = srcInicial;
+      img.src = resolverUrlMidia(srcInicial);
       principal.appendChild(img);
     } else if (tipoInicial === "video") {
       const video = document.createElement("video");
-      video.src = srcInicial;
+      video.src = resolverUrlMidia(srcInicial);
       video.controls = true;
       video.autoplay = true;
       principal.appendChild(video);
@@ -379,7 +688,8 @@ document.addEventListener("DOMContentLoaded", () => {
     if (comentario.fotos && comentario.fotos.length > 0) {
       comentario.fotos.forEach(foto => {
         const thumb = document.createElement("img");
-        thumb.src = foto;
+        const resolved = resolverUrlMidia(foto);
+        thumb.src = resolved;
         thumb.style.width = "60px";
         thumb.style.height = "60px";
         thumb.style.objectFit = "cover";
@@ -388,7 +698,7 @@ document.addEventListener("DOMContentLoaded", () => {
         thumb.addEventListener("click", () => {
           principal.innerHTML = "";
           const img = document.createElement("img");
-          img.src = foto;
+          img.src = resolved;
           principal.appendChild(img);
         });
         miniaturas.appendChild(thumb);
@@ -397,7 +707,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (comentario.video) {
       const thumbVideo = document.createElement("video");
-      thumbVideo.src = comentario.video;
+      const rawV = typeof comentario.video === 'string' ? comentario.video : (comentario.video.dataUri || (comentario.video.data && comentario.video.data));
+      const resolvedV = resolverUrlMidia(rawV);
+      thumbVideo.src = resolvedV;
       thumbVideo.muted = true;
       thumbVideo.loop = true;
       thumbVideo.autoplay = true;
@@ -408,7 +720,7 @@ document.addEventListener("DOMContentLoaded", () => {
       thumbVideo.addEventListener("click", () => {
         principal.innerHTML = "";
         const video = document.createElement("video");
-        video.src = comentario.video;
+        video.src = resolvedV;
         video.controls = true;
         video.autoplay = true;
         principal.appendChild(video);

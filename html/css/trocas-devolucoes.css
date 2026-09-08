@@ -1,0 +1,604 @@
+/* ===== Hero Trocas ===== */
+.trocas-hero {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  padding: 90px 0 70px 0;
+  text-align: center;
+  position: relative;
+  overflow: visible;
+  z-index: 0;
+}
+
+.trocas-hero::before {
+  content: "";
+  position: absolute;
+  top: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 900px;
+  height: 340px;
+  background: radial-gradient(circle, rgba(99,102,241,0.13) 0%, transparent 80%);
+  pointer-events: none;
+  z-index: 0;
+  filter: blur(2px);
+}
+
+.trocas-hero-content {
+  max-width: 720px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 2;
+  background: rgba(26,26,46,0.85);
+  border-radius: 32px;
+  box-shadow: 0 8px 40px 0 rgba(99,102,241,0.10), 0 1.5px 0 0 #6366f1 inset;
+  padding: 40px 32px 44px 32px;
+  text-align: center;
+  border: 1.5px solid rgba(99,102,241,0.10);
+  backdrop-filter: blur(2px);
+}
+
+.trocas-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(90deg, #6366f1 40%, #a78bfa 100%);
+  color: #fff;
+  font-size: 1.08rem;
+  font-weight: 700;
+  padding: 12px 32px;
+  border-radius: 30px;
+  border: none;
+  margin-bottom: 32px;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  box-shadow: 0 2px 16px rgba(99,102,241,0.13);
+  filter: drop-shadow(0 2px 8px #6366f1aa);
+}
+
+.trocas-badge i {
+  font-size: 1.2em;
+  margin-right: 6px;
+}
+
+.trocas-hero h1 {
+  font-size: 3.1rem;
+  font-weight: 900;
+  color: #fff;
+  margin: 0 0 26px;
+  line-height: 1.12;
+  letter-spacing: -1.5px;
+  text-shadow: 0 2px 16px #23284a44;
+}
+
+.trocas-hero h1 .destaque {
+  background: linear-gradient(135deg, #6366f1, #a78bfa 80%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: none;
+}
+
+.trocas-hero p {
+  font-size: 1.28rem;
+  color: #e0e7ef;
+  line-height: 1.85;
+  margin: 0 auto;
+  max-width: 820px;
+  text-shadow: 0 2px 16px #23284a33, 0 1px 0 #fff1;
+  letter-spacing: 0.012em;
+  font-weight: 500;
+  background: linear-gradient(90deg, #6366f1 0%, #a78bfa 100%);
+  background-clip: padding-box;
+  border-radius: 12px;
+  padding: 18px 24px 18px 24px;
+  box-shadow: 0 2px 18px 0 #6366f122;
+  border: 1.5px solid rgba(99,102,241,0.10);
+  backdrop-filter: blur(1.5px);
+  transition: box-shadow 0.3s, background 0.3s;
+}
+
+.trocas-hero p:hover {
+  box-shadow: 0 4px 32px 0 #6366f144;
+  background: linear-gradient(90deg, #6366f1 10%, #a78bfa 90%, #fff0 100%);
+}
+
+/* ===== Seção Introdutória ===== */
+.trocas-intro {
+  max-width: 900px;
+  margin: 60px auto 0;
+  padding: 0 20px;
+  text-align: center;
+}
+
+.trocas-intro p {
+  font-size: 1.05rem;
+  color: #555;
+  line-height: 1.8;
+}
+
+.trocas-intro .info-box {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: linear-gradient(135deg, #eef2ff, #e0e7ff);
+  color: #4338ca;
+  font-weight: 700;
+  font-size: 0.95rem;
+  padding: 14px 28px;
+  border-radius: 14px;
+  margin-top: 20px;
+  border: 1px solid rgba(99, 102, 241, 0.15);
+}
+
+.trocas-intro .info-box i {
+  font-size: 1.2rem;
+}
+
+/* ===== Etapas (Timeline) ===== */
+.trocas-etapas {
+  max-width: 900px;
+  margin: 70px auto 0;
+  padding: 0 20px;
+}
+
+.secao-titulo {
+  text-align: center;
+  font-size: 1.8rem;
+  font-weight: 900;
+  color: #1e293b;
+  margin: 0 0 48px;
+}
+
+.secao-titulo span {
+  background: linear-gradient(135deg, #6366f1, #a78bfa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.timeline {
+  position: relative;
+  padding-left: 40px;
+}
+
+.timeline::before {
+  content: "";
+  position: absolute;
+  left: 15px;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: linear-gradient(180deg, #6366f1, #a855f7, #ec4899);
+  border-radius: 3px;
+}
+
+.timeline-step {
+  position: relative;
+  margin-bottom: 40px;
+  padding: 28px 32px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.timeline-step:hover {
+  transform: translateX(6px);
+  box-shadow: 0 8px 30px rgba(99, 102, 241, 0.1);
+}
+
+.timeline-step::before {
+  content: attr(data-step);
+  position: absolute;
+  left: -40px;
+  top: 28px;
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, #6366f1, #a855f7);
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 800;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.timeline-step h3 {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #1e293b;
+  margin: 0 0 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.timeline-step h3 i {
+  color: #6366f1;
+  font-size: 1rem;
+}
+
+.timeline-step p {
+  font-size: 0.92rem;
+  color: #64748b;
+  line-height: 1.7;
+  margin: 0;
+}
+
+/* ===== Cards de Regras ===== */
+.trocas-regras {
+  max-width: 1100px;
+  margin: 70px auto 0;
+  padding: 0 20px;
+}
+
+.regras-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+}
+
+.regra-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.regra-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  border-radius: 16px 16px 0 0;
+}
+
+.regra-card.pode::before {
+  background: linear-gradient(90deg, #22c55e, #16a34a);
+}
+
+.regra-card.nao-pode::before {
+  background: linear-gradient(90deg, #ef4444, #dc2626);
+}
+
+.regra-card.atencao::before {
+  background: linear-gradient(90deg, #f59e0b, #d97706);
+}
+
+.regra-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+}
+
+.regra-card .regra-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  margin-bottom: 18px;
+}
+
+.regra-card.pode .regra-icon {
+  background: rgba(34, 197, 94, 0.1);
+  color: #16a34a;
+}
+
+.regra-card.nao-pode .regra-icon {
+  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+}
+
+.regra-card.atencao .regra-icon {
+  background: rgba(245, 158, 11, 0.1);
+  color: #d97706;
+}
+
+.regra-card h3 {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #1e293b;
+  margin: 0 0 12px;
+}
+
+.regra-card ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.regra-card ul li {
+  font-size: 0.9rem;
+  color: #64748b;
+  padding: 6px 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  line-height: 1.5;
+}
+
+.regra-card ul li i {
+  margin-top: 3px;
+  font-size: 0.75rem;
+  flex-shrink: 0;
+}
+
+.regra-card.pode ul li i { color: #16a34a; }
+.regra-card.nao-pode ul li i { color: #dc2626; }
+.regra-card.atencao ul li i { color: #d97706; }
+
+/* ===== FAQ Acordeão ===== */
+.trocas-faq {
+  max-width: 800px;
+  margin: 70px auto 0;
+  padding: 0 20px;
+}
+
+.faq-item {
+  background: #fff;
+  border-radius: 14px;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+  transition: box-shadow 0.3s ease;
+}
+
+.faq-item:hover {
+  box-shadow: 0 4px 20px rgba(99, 102, 241, 0.08);
+}
+
+.faq-pergunta {
+  width: 100%;
+  padding: 20px 24px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #1e293b;
+  text-align: left;
+  font-family: inherit;
+  transition: color 0.3s;
+}
+
+.faq-pergunta:hover {
+  color: #6366f1;
+}
+
+.faq-pergunta i {
+  font-size: 0.8rem;
+  color: #6366f1;
+  transition: transform 0.3s ease;
+  flex-shrink: 0;
+}
+
+.faq-item.ativo .faq-pergunta i {
+  transform: rotate(180deg);
+}
+
+.faq-resposta {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease, padding 0.3s ease;
+  padding: 0 24px;
+}
+
+.faq-item.ativo .faq-resposta {
+  max-height: 300px;
+  padding: 0 24px 20px;
+}
+
+.faq-resposta p {
+  font-size: 0.9rem;
+  color: #64748b;
+  line-height: 1.7;
+  margin: 0;
+}
+
+/* FAQ animado e cards com efeito moderno */
+.trocas-faq .faq-item {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 4px 24px #6366f122;
+  margin-bottom: 22px;
+  overflow: hidden;
+  border: 1.5px solid #a78bfa22;
+  transition: box-shadow 0.3s, border 0.3s;
+}
+.trocas-faq .faq-item .faq-pergunta {
+  width: 100%;
+  background: linear-gradient(90deg, #6366f1 0%, #a78bfa 100%);
+  color: #fff;
+  font-size: 1.13rem;
+  font-weight: 700;
+  border: none;
+  outline: none;
+  padding: 22px 32px;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: background 0.3s, color 0.3s;
+}
+.trocas-faq .faq-item .faq-pergunta.aberto {
+  background: linear-gradient(90deg, #a78bfa 0%, #6366f1 100%);
+  color: #fff;
+}
+.trocas-faq .faq-item .faq-pergunta i {
+  margin-left: 18px;
+  font-size: 1.2em;
+  transition: transform 0.3s;
+}
+.trocas-faq .faq-item .faq-pergunta.aberto i {
+  transform: rotate(180deg);
+}
+.trocas-faq .faq-item .faq-resposta {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  background: #f3f4f6;
+  color: #23284a;
+  font-size: 1.05rem;
+  padding: 0 32px;
+  transition: max-height 0.6s cubic-bezier(.4,2,.6,1), opacity 0.4s, padding 0.3s;
+}
+.trocas-faq .faq-item .faq-pergunta.aberto + .faq-resposta {
+  padding: 18px 32px 24px 32px;
+}
+.trocas-faq .faq-item .faq-pergunta.aberto + .faq-resposta {
+  opacity: 1;
+}
+
+/* Cards de regra com efeito */
+.regra-card {
+  transition: transform 0.25s, box-shadow 0.25s, border 0.25s;
+}
+.regra-card.hover {
+  transform: translateY(-6px) scale(1.03);
+  box-shadow: 0 8px 32px #6366f144;
+  border: 2px solid #6366f1;
+  z-index: 2;
+}
+
+/* ===== CTA Final ===== */
+.trocas-cta {
+  max-width: 700px;
+  margin: 70px auto 0;
+  padding: 48px 32px;
+  text-align: center;
+  background: linear-gradient(135deg, #1e1b4b, #312e81);
+  border-radius: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.trocas-cta::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -30%;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.trocas-cta h2 {
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: #fff;
+  margin: 0 0 12px;
+  position: relative;
+}
+
+.trocas-cta p {
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0 0 28px;
+  position: relative;
+}
+
+.trocas-cta .btn-contato {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 36px;
+  background: linear-gradient(135deg, #6366f1, #a855f7);
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 700;
+  border: none;
+  border-radius: 12px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  position: relative;
+  cursor: pointer;
+}
+
+.trocas-cta .btn-contato:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 32px rgba(99, 102, 241, 0.35);
+  filter: brightness(1.1);
+}
+
+/* ===== Responsividade ===== */
+@media (max-width: 768px) {
+  .trocas-hero h1 {
+    font-size: 2rem;
+  }
+
+  .timeline {
+    padding-left: 32px;
+  }
+
+  .timeline-step::before {
+    left: -32px;
+    width: 26px;
+    height: 26px;
+    font-size: 0.7rem;
+  }
+
+  .timeline-step {
+    padding: 22px 20px;
+  }
+
+  .regras-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .trocas-cta {
+    margin-left: 16px;
+    margin-right: 16px;
+    padding: 36px 20px;
+  }
+
+  .secao-titulo {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .trocas-hero {
+    padding: 60px 16px;
+  }
+
+  .trocas-hero h1 {
+    font-size: 1.7rem;
+  }
+}
+
+/* Fade-in animado nos blocos */
+.trocas-hero-content, .trocas-intro, .trocas-etapas, .trocas-regras, .trocas-faq, .trocas-cta {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.8s cubic-bezier(.4,2,.6,1), transform 0.8s cubic-bezier(.4,2,.6,1);
+}
+.fade-in {
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+/* Pulse animado nos botões de contato e CTA */
+.pulse-anim {
+  animation: pulseBtn 1.6s infinite cubic-bezier(.4,2,.6,1);
+}
+@keyframes pulseBtn {
+  0%, 100% { box-shadow: 0 0 0 0 #6366f155; }
+  50% { box-shadow: 0 0 0 10px #a78bfa33; }
+}

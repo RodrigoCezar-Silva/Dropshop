@@ -1,147 +1,163 @@
 <!doctype html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Atendimento - MIX-PROMOÇÃO</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Canal de Atendimento ao Cliente - MIX-PROMOÇÃO</title>
 
-  <!-- CSS (mesmo do index) -->
-  <link rel="stylesheet" href="/css/style-index.css" />
-  <link rel="stylesheet" href="/css/style-vitrine.css">
-  <link rel="stylesheet" href="/css/carrossel.css" />
-  <link rel="stylesheet" href="/css/bannerpromo.css" />
-  <link rel="stylesheet" href="/css/carrinho.css" />
-  <link rel="stylesheet" href="/css/menu.css" />
-  <link rel="stylesheet" href="/css/logo.css" />
-  <link rel="stylesheet" href="/css/statusLogin.css" />
-  <link rel="stylesheet" href="/css/desconto.css" />
-  <link rel="stylesheet" href="/css/minhaConta.css" />
-  <link rel="stylesheet" href="/css/btn-topo.css" />
-  <link rel="stylesheet" href="/css/footer.css" />
-  <link rel="stylesheet" href="/css/loja.css" />
-
-  <!-- Ícones Font Awesome -->
-  <link rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
-  <link rel="stylesheet" href="/css/responsive.css" />
-  <link rel="stylesheet" href="/css/chatbot-widget.css" />
-  <link rel="stylesheet" href="/css/atendimento.css" />
-  
+  <!-- CSS Principal & FontAwesome -->
+  <link rel="stylesheet" href="../css/style-index.css">
+  <link rel="stylesheet" href="/css/style-index.css">
+  <link rel="stylesheet" href="../css/menu.css">
+  <link rel="stylesheet" href="/css/menu.css">
+  <link rel="stylesheet" href="../css/admin-chat.css">
+  <link rel="stylesheet" href="/css/admin-chat.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
-<body>
-  <!-- Cabeçalho (igual ao index) -->
-  <header class="site-header">
-    <div class="logo">
-      <span class="logo-icon">🛒</span>
-      <span class="logo-text">
-        <span class="mix">MIX</span><span class="promocao">PROMOÇÃO</span>
-      </span>
+<body class="dark-chat">
+
+  <!-- Header Exclusivo do Canal de Atendimento ao Cliente -->
+  <header class="atendimento-header">
+    <div class="atendimento-brand">
+      <a href="index.html" class="logo-link" style="display:flex; align-items:center; gap:8px; text-decoration:none;">
+        <span class="logo-icon" style="font-size:1.6rem;">🛒</span>
+        <div class="logo-text" style="font-weight:900; font-size:1.25rem; letter-spacing:0.5px;">
+          <span style="color:#00ff88;">MIX</span><span style="color:#ffffff;">PROMOÇÃO</span>
+        </div>
+      </a>
+      <div class="atendimento-badge">
+        <i class="fa-solid fa-headset"></i> Canal de Atendimento ao Cliente
+      </div>
     </div>
 
-    <!-- Menu -->
-    <nav class="menu" aria-label="Menu principal">
-      <ul>
-        <li><a href="index.html" class="active"><i class="fa-solid fa-house menu-link-icon" aria-hidden="true"></i><span>Início</span></a></li>
-        <li><a href="loja.html"><i class="fa-solid fa-store menu-link-icon" aria-hidden="true"></i><span>Nossa Loja</span></a></li>
-        <li><a href="QuemSomos.html"><i class="fa-solid fa-circle-info menu-link-icon" aria-hidden="true"></i><span>Sobre</span></a></li>
-        <li><a href="trocas-devolucoes.html"><i class="fa-solid fa-right-left menu-link-icon" aria-hidden="true"></i><span>Trocas e Devoluções</span></a></li>
-      </ul>
-    </nav>
+    <div class="atendimento-header-right">
+      <div class="status-online-tag">
+        <span class="dot-online"></span>
+        <span>Atendente Online</span>
+      </div>
 
-    <!-- Botões de login -->
-    <div id="loginButtons">
-      <a href="login-cliente.html" class="btn-login cliente">👤 Login Cliente</a>
-      <a href="admin-login.html" class="btn-login admin">👤 Login Administrativo</a>
-      <a href="login-funcionario.html" class="btn-login admin">👤 Login Funcionário</a>
+      <nav class="atendimento-nav">
+        <a href="index.html" class="nav-pill"><i class="fa-solid fa-house"></i> Início</a>
+        <a href="loja.html" class="nav-pill"><i class="fa-solid fa-store"></i> Loja</a>
+        <a href="meu-perfil.html" class="nav-pill"><i class="fa-solid fa-user"></i> Minha Conta</a>
+        <a href="reclamacoes.html" class="nav-pill"><i class="fa-solid fa-circle-exclamation"></i> Reclamações</a>
+      </nav>
     </div>
-
-    <!-- Status de login administrador -->
-    <div id="statusLogado" class="status-admin" style="display:none;">
-      <span class="status-text">👑 Logado como administrador: <strong id="nomeUsuario"></strong></span>
-      <button id="logout" class="btn-logout">Sair</button>
-    </div>
-
-    <!-- Status de login cliente -->
-    <div id="clienteStatus" style="display:none;">
-      <img id="fotoCliente" class="foto-perfil" src="" alt="Foto Cliente">
-      <span id="nomeCliente"></span>
-      <span id="sobrenomeCliente"></span>
-      <button id="btnMinhaConta" class="btn-minha-conta">Minha Conta</button>
-      <button id="logoutBtn" class="btn-logout">Sair</button>
-    </div>
-
-    <!-- Ícone do carrinho -->
-    <a href="carrinho.html" class="cart-icon" aria-label="Carrinho de Compras">
-      <i class="fas fa-shopping-cart"></i>
-      <span id="cart-count">0</span>
-    </a>
   </header>
 
-  <main class="atendimento-page">
-    <div class="atendimento-app">
-      <aside class="conversations" aria-label="Conversas">
-        <div class="conversations-header">
-          <h3>Conversas</h3>
-          <div class="conv-actions">
-            <button id="newConv" title="Nova conversa">+</button>
+  <!-- Corpo Principal do Chat de Atendimento -->
+  <main class="chat-main">
+    <div class="chat-wrap">
+      
+      <!-- Barra Lateral: Tópicos e Protocolo -->
+      <aside class="chat-sidebar" role="navigation" aria-label="Canais de Atendimento">
+        
+        <!-- Cartão de Protocolo e Identificação -->
+        <div class="protocol-badge-card">
+          <div class="protocol-label">PROTOCOLO ATIVO</div>
+          <div class="protocol-num" id="protocolNumber">#MIX-2026-84920</div>
+          <div class="customer-name-tag">
+            <i class="fa-solid fa-user-check"></i>
+            <span>Cliente: <strong id="userGreetingName">Rodrigo Cezar</strong></span>
           </div>
         </div>
-        <div class="conv-search">
-          <input id="searchConv" placeholder="Pesquisar conversas..." aria-label="Pesquisar conversas" />
+
+        <!-- Painel de Informações do Autoatendimento IA -->
+        <div class="sidebar-ai-card">
+          <div class="ai-card-header">
+            <div class="ai-avatar-icon"><i class="fa-solid fa-robot"></i></div>
+            <div class="ai-info-meta">
+              <strong>MixIA 24h Ativa</strong>
+              <span class="ai-status-pulse"><span class="pulse-dot"></span> Autoatendimento</span>
+            </div>
+          </div>
+          <p class="ai-card-text">
+            Nossa Inteligência Artificial está pronta para responder suas dúvidas sobre pedidos, frete, pagamentos e trocas no chat ao lado.
+          </p>
+          <div class="ai-features-list">
+            <div class="ai-feature-pill"><i class="fa-solid fa-bolt" style="color:#38bdf8;"></i> Resposta Instantânea</div>
+            <div class="ai-feature-pill"><i class="fa-solid fa-shield-halved" style="color:#10b981;"></i> Compra Garantida</div>
+            <div class="ai-feature-pill"><i class="fa-solid fa-clock-rotate-left" style="color:#fbbf24;"></i> 7 Dias de Troca CDC</div>
+            <div class="ai-feature-pill"><i class="fa-solid fa-headset" style="color:#a78bfa;"></i> Suporte Humano via Chat</div>
+          </div>
         </div>
-        <div id="listaConversas" class="lista-conversas">
-          <div class="empty">Nenhuma conversa<br><span>Quando um cliente iniciar um atendimento, a conversa aparecerá aqui.</span></div>
+
+        <!-- Rodapé da Sidebar com Botões de Ação -->
+        <div class="sidebar-footer-actions">
+          <button id="btnNovoAtendimento" class="btn-side-action" type="button" title="Iniciar um novo protocolo">
+            <i class="fa-solid fa-plus-circle"></i> Novo Atendimento
+          </button>
+          <button id="btnEncerrarAtendimento" class="btn-side-action danger" type="button" title="Finalizar atendimento atual">
+            <i class="fa-solid fa-power-off"></i> Encerrar
+          </button>
         </div>
+
       </aside>
 
-      <section class="chat-panel" role="region" aria-label="Painel de mensagens">
-        <div class="chat-panel-header">
-          <div id="currentConvName" class="conv-name">Selecione uma conversa</div>
-        </div>
+      <!-- Área de Chat Principal com Atendente / MixIA -->
+      <section class="chat-area">
+        <div class="chat-panel">
+          
+          <!-- Cabeçalho do Chat -->
+          <header class="chat-header">
+            <div class="chat-header-left">
+              <div class="attendant-avatar-wrap">
+                <div class="attendant-avatar" style="background:linear-gradient(135deg,#0072ff,#00c6ff);">
+                  <i class="fa-solid fa-robot"></i>
+                </div>
+                <span class="avatar-status-dot"></span>
+              </div>
+              
+              <div class="chat-meta">
+                <div class="chat-title-row">
+                  <span id="chatHeaderName" class="chat-name">MixIA — Inteligência Artificial 24h</span>
+                  <span id="chatHeaderBadge" class="verified-badge" title="Inteligência Artificial Oficial"><i class="fa-solid fa-wand-magic-sparkles"></i> IA Oficial</span>
+                </div>
+                <div id="chatHeaderStatus" class="chat-status">
+                  <span class="pulse-dot"></span> Online agora • Autoatendimento Inteligente • Protocolo <span id="protocolSubtitle">#MIX-2026</span>
+                </div>
+              </div>
+            </div>
 
-        <div id="mensagens" class="mensagens" role="log" aria-live="polite" aria-atomic="false"></div>
+            <div class="chat-header-right">
+              <div id="inactivityTimerBadge" class="inactivity-timer-badge" title="Responda em até 3 minutos para manter o atendimento aberto">
+                <i class="fa-solid fa-clock"></i> <span>Resposta: <strong id="segundosRestantes">03:00</strong></span>
+              </div>
+              <button id="btnExportChat" class="chat-btn-action" title="Baixar histórico da conversa">
+                <i class="fa-solid fa-file-arrow-down"></i> <span>Baixar Histórico</span>
+              </button>
+            </div>
+          </header>
 
-        <div class="chat-input-bar">
-          <button id="attachBtn" class="attach" title="Anexar"><i class="fa-regular fa-paperclip"></i></button>
-          <input id="inputMsg" type="text" placeholder="Digite uma mensagem" autocomplete="off" maxlength="800" aria-label="Mensagem" />
-          <button id="btnEnviar" class="send" type="button">Enviar</button>
+          <!-- Área de Rolagem das Mensagens -->
+          <div id="messages" class="messages-area" role="log" aria-live="polite">
+            <!-- As mensagens e sugestões serão renderizadas dinamicamente aqui -->
+          </div>
+
+          <!-- Compositor de Mensagens com Envio e Anexos -->
+          <div class="chat-composer" role="region" aria-label="Enviar mensagem">
+            <input type="file" id="fileAttachInput" accept="image/*,.pdf,.txt" style="display:none" />
+            
+            <button id="btnAttach" class="composer-icon" type="button" title="Anexar comprovante ou foto">
+              <i class="fa-solid fa-paperclip"></i>
+            </button>
+            
+            <input id="msgInput" placeholder="Tire sua dúvida com a MixIA ou peça um atendente..." autocomplete="off" aria-label="Mensagem">
+            
+            <div class="composer-actions">
+              <button id="sendMsgBtn" class="composer-send" type="button" title="Enviar mensagem">
+                <span>Enviar</span> <i class="fa-solid fa-paper-plane" style="margin-left:4px;"></i>
+              </button>
+            </div>
+          </div>
+
         </div>
       </section>
+
     </div>
   </main>
 
-  <!-- footer removido para página de atendimento -->
-
-  <!-- Scripts (mesmos do index) -->
-  <script src="/js/carrossel.js"></script>
-  <script src="/js/carrinho.js"></script>
-  <script src="/js/VoltaraoTopo.js"></script>
-  <script src="/js/script-vitrine.js"></script>
-  <script src="/js/statusLogin.js"></script>
-  <script src="/js/meu-perfil.js"></script>
-  <script src="/js/login-cliente.js"></script>
-  <script src="/js/logo.js"></script>
-  <script src="/js/theme-toggle.js"></script>
-  <script src="/js/btn-topo.js"></script>
-  <script src="/js/bloquear-copia.js"></script>
-  <script src="/js/promo-carousel.js"></script>
-  <script src="/js/responsive-nav.js"></script>
-  <script src="/js/fit-hero.js"></script>
-  <script src="/js/chatbot-widget.js"></script>
-  <!-- For development: when page is served by Live Server, force API to localhost:3000 so chats persist to DB -->
-  <script>
-    (function(){
-      try{
-        if(!window.__API_BASE__){
-          // if current origin is not the Node server, point API to Node
-          const port = location.port || '';
-          if(port && String(port) !== '3000'){
-            window.__API_BASE__ = 'http://localhost:3000';
-          }
-        }
-      }catch(e){}
-    })();
-  </script>
-  <script src="/js/atendimento.js"></script>
+  <!-- Scripts -->
+  <script src="../js/atendimento-cliente.js" defer></script>
 </body>
 </html>

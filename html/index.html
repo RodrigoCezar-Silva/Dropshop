@@ -7,6 +7,27 @@
         content="MIX-PROMOÇÃO - Produtos exclusivos com qualidade e preço justo. Promoções todos os dias!" />
   <title>MIX-PROMOÇÃO</title>
 
+  <script>
+    // Garante que a página inicial nunca inicie logada ao rodar npm run dev ou abrir sem login ativo nesta aba
+    (function() {
+      try {
+        var p = new URLSearchParams(window.location.search);
+        var isReset = p.has('resetAuth') || p.has('deslogar') || p.has('logout');
+        var active = sessionStorage.getItem('activeClienteSession') === '1';
+        var tipo = localStorage.getItem('tipoUsuario');
+        if (isReset || tipo === 'Funcionario' || tipo === 'Administrador' || !active) {
+          ['tipoUsuario','token','nome','sobrenome','isAdmin','foto','fotoMime','clienteCPF','email','clienteTelefone'].forEach(function(k) {
+            localStorage.removeItem(k);
+          });
+          if (isReset) {
+            sessionStorage.clear();
+            try { window.history.replaceState(null, '', window.location.pathname + window.location.hash); } catch(e){}
+          }
+        }
+      } catch(e){}
+    })();
+  </script>
+
   <!-- CSS -->
   <link rel="stylesheet" href="/css/style-index.css" />
   <link rel="stylesheet" href="/css/style-vitrine.css">
@@ -62,17 +83,15 @@
     </div>
 
     <!-- Status de login cliente -->
-    <div id="clienteStatus" style="display:none;">
-  <img id="fotoCliente" class="foto-perfil" src="" alt="Foto Cliente">
-  <span id="nomeCliente"></span>
-  <span id="sobrenomeCliente"></span>
-  
-  <!-- Botão Minha Conta -->
-  <button id="btnMinhaConta" class="btn-minha-conta">Minha Conta</button>
-
-  <!-- Botão Sair -->
-  <button id="logoutBtn" class="btn-logout">Sair</button>
-</div>
+    <div id="clienteStatus" class="header-user" style="display:none;" title="Acessar Meu Perfil">
+      <img id="fotoCliente" class="header-avatar" src="" alt="Foto do Usuário">
+      <div class="nome-area">
+        <span class="user-greeting">Olá,</span>
+        <span id="nomeCliente" class="nome-usuario"></span>
+        <span id="sobrenomeCliente" class="nome-usuario" style="display:none;"></span>
+      </div>
+    </div>
+    <button id="logoutBtn" class="btn-logout header-logout" style="display:none;"><i class="fa-solid fa-right-from-bracket"></i><span>Sair</span></button>
 
     <!-- Ícone do carrinho -->
     <a href="carrinho.html" class="cart-icon" aria-label="Carrinho de Compras">

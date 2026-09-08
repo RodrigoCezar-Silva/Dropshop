@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MIX-PROMOÇÃO - Avaliações do Produto</title>
+
+  <link rel="stylesheet" href="./css/style-index.css" />
+  <link rel="stylesheet" href="./css/menu.css" />
+  <link rel="stylesheet" href="./css/logo.css" />
+  <link rel="stylesheet" href="./css/statusLogin.css" />
+  <link rel="stylesheet" href="./css/minhaConta.css" />
+  <link rel="stylesheet" href="./css/btn-topo.css" />
+  <link rel="stylesheet" href="./css/footer.css" />
+  <link rel="stylesheet" href="./css/admin-area.css" />
+  <link rel="stylesheet" href="./css/admin-avaliacoes.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="./css/responsive.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="logo">
+      <span class="logo-icon">🛒</span>
+      <span class="logo-text">
+        <span class="mix">MIX</span><span class="promocao">PROMOÇÃO</span>
+      </span>
+    </div>
+
+    <nav class="menu" aria-label="Menu principal">
+      <ul>
+        <li><a href="./index.html"><i class="fa-solid fa-house menu-link-icon" aria-hidden="true"></i><span>Início</span></a></li>
+        <li><a href="./loja.html"><i class="fa-solid fa-store menu-link-icon" aria-hidden="true"></i><span>Nossa Loja</span></a></li>
+        <li><a href="./QuemSomos.html"><i class="fa-solid fa-circle-info menu-link-icon" aria-hidden="true"></i><span>Sobre</span></a></li>
+        <li><a href="./trocas-devolucoes.html"><i class="fa-solid fa-right-left menu-link-icon" aria-hidden="true"></i><span>Trocas e Devoluções</span></a></li>
+        <li><a href="./ajuda.html"><i class="fa-solid fa-circle-question menu-link-icon" aria-hidden="true"></i><span>Ajuda</span></a></li>
+      </ul>
+    </nav>
+
+    <div id="loginButtons">
+      <a href="./login-cliente.html" class="btn-login cliente">👤 Login Cliente</a>
+      <a href="./admin-login.html" class="btn-login admin">👤 Login Administrativo</a>
+      <a href="./login-funcionario.html" class="btn-login admin">👤 Login Funcionário</a>
+    </div>
+
+    <div id="statusLogado" class="status-admin" style="display:none;">
+      <span class="status-text">👑 Administrador: <strong id="nomeUsuario"></strong></span>
+      <button id="logout" class="btn-logout">Sair</button>
+    </div>
+
+    <div id="clienteStatus" style="display:none;">
+      <img id="fotoCliente" class="foto-perfil" src="" alt="Foto Cliente">
+      <span id="nomeCliente"></span>
+      <span id="sobrenomeCliente"></span>
+      <button id="btnMinhaConta" class="btn-minha-conta">👤 Minha Conta</button>
+      <button id="logoutBtn" class="btn-logout">Sair</button>
+    </div>
+  </header>
+
+  <main class="admin-avaliacoes-main">
+    <!-- Barra de navegação e retorno -->
+    <div class="admin-nav-bar">
+      <a href="./controle-estoque.html" class="btn-voltar-admin">
+        <i class="fa-solid fa-arrow-left"></i> Voltar para Controle de Estoque
+      </a>
+      <a href="./admin-area.html" class="btn-voltar-admin-sec">
+        <i class="fa-solid fa-gauge-high"></i> Painel Admin
+      </a>
+    </div>
+
+    <!-- Spotlight do Produto -->
+    <section class="produto-spotlight-card">
+      <img id="spotlightThumb" class="produto-spotlight-thumb" src="https://via.placeholder.com/150?text=Produto" alt="Foto do Produto">
+      
+      <div class="produto-spotlight-info">
+        <div class="produto-spotlight-tags">
+          <span id="spotlightIdTag" class="spotlight-tag-id">ID #--</span>
+          <span id="spotlightCatTag" class="spotlight-tag-cat">Categoria</span>
+          <span id="spotlightPrecoTag" class="spotlight-tag-preco">R$ 0,00</span>
+        </div>
+        <h1 id="spotlightTitulo">Carregando produto...</h1>
+        <div class="produto-spotlight-actions">
+          <a id="spotlightVerLoja" href="#" target="_blank" class="btn-ver-loja">
+            <i class="fa-solid fa-arrow-up-right-from-square"></i> Ver na Loja
+          </a>
+        </div>
+      </div>
+
+      <div class="produto-score-box">
+        <span id="scoreNumero" class="score-numero">0.0</span>
+        <div id="scoreEstrelas" class="score-estrelas">
+          <i class="fa-solid fa-star"></i>
+          <i class="fa-solid fa-star"></i>
+          <i class="fa-solid fa-star"></i>
+          <i class="fa-solid fa-star"></i>
+          <i class="fa-solid fa-star"></i>
+        </div>
+        <span id="scoreTotalTexto" class="score-total-texto">0 avaliações</span>
+      </div>
+    </section>
+
+    <!-- Barra de Filtros e Busca -->
+    <section class="admin-filtros-bar">
+      <div class="filtros-botoes-grupo">
+        <button class="filtro-btn active" data-filtro="todas"><i class="fa-solid fa-list"></i> Todas</button>
+        <button class="filtro-btn" data-filtro="5"><i class="fa-solid fa-star" style="color:#f59e0b;"></i> 5 Estrelas</button>
+        <button class="filtro-btn" data-filtro="4"><i class="fa-solid fa-star" style="color:#f59e0b;"></i> 4 Estrelas</button>
+        <button class="filtro-btn" data-filtro="3"><i class="fa-solid fa-star" style="color:#f59e0b;"></i> 3 Estrelas</button>
+        <button class="filtro-btn" data-filtro="midia"><i class="fa-solid fa-camera"></i> Com Fotos/Vídeos</button>
+      </div>
+
+      <div class="busca-comentarios-input-wrap">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="buscaComentariosInput" class="busca-comentarios-input" placeholder="Buscar por cliente ou texto..." autocomplete="off" />
+      </div>
+    </section>
+
+    <!-- Lista de Comentários / Avaliações -->
+    <section id="comentariosAdminLista" class="comentarios-admin-grid">
+      <div class="comentarios-empty-state">
+        <i class="fa-solid fa-spinner fa-spin" style="font-size: 2.5rem; color: #2563eb; margin-bottom: 12px;"></i>
+        <h3>Carregando avaliações...</h3>
+        <p>Aguarde enquanto buscamos os comentários deste produto no banco de dados.</p>
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal Lightbox para fotos e vídeos em alta resolução -->
+  <div id="lightboxModal" class="modal-lightbox-admin">
+    <div class="modal-lightbox-content">
+      <button id="btnFecharLightbox" class="btn-fechar-lightbox" title="Fechar">&times;</button>
+      <div id="lightboxContainer"></div>
+    </div>
+  </div>
+
+  <!-- Modal de Confirmação de Exclusão -->
+  <div id="confirmarExclusaoModal" class="modal-confirmar-exclusao">
+    <div class="modal-confirmar-card">
+      <div class="modal-confirmar-icon">
+        <i class="fa-solid fa-trash-can"></i>
+      </div>
+      <h3>Excluir Avaliação?</h3>
+      <p>Tem certeza que deseja remover esta avaliação? Esta ação apagará permanentemente o comentário, nota e mídias associadas do banco de dados.</p>
+      <div class="modal-confirmar-botoes">
+        <button id="btnCancelarExclusao" class="btn-cancelar-modal">Cancelar</button>
+        <button id="btnConfirmarExclusao" class="btn-confirmar-deletar">Sim, Excluir</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="./js/statusLogin.js"></script>
+  <script src="./js/logo.js"></script>
+  <script src="./js/btn-topo.js"></script>
+  <script src="./js/bloquear-copia.js"></script>
+  <script src="./js/admin-area.js"></script>
+  <script src="./js/admin-avaliacoes.js"></script>
+  <script src="./js/responsive-nav.js"></script>
+</body>
+</html>
+

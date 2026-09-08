@@ -68,39 +68,78 @@
 
     <section class="admin-estatisticas-resumo">
       <article class="admin-stat-card">
-        <span class="admin-stat-label">Visualizações totais</span>
-        <strong id="totalVisualizacoes">0</strong>
+        <div class="admin-stat-icon icon-blue"><i class="fa-solid fa-eye"></i></div>
+        <div class="admin-stat-info">
+          <span class="admin-stat-label">Visualizações Totais</span>
+          <strong id="totalVisualizacoes">0</strong>
+          <span class="admin-stat-sub">Soma de todos os acessos</span>
+        </div>
       </article>
       <article class="admin-stat-card">
-        <span class="admin-stat-label">Produtos visualizados</span>
-        <strong id="produtosVisualizados">0</strong>
+        <div class="admin-stat-icon icon-purple"><i class="fa-solid fa-boxes-stacked"></i></div>
+        <div class="admin-stat-info">
+          <span class="admin-stat-label">Produtos Visualizados</span>
+          <strong id="produtosVisualizados">0</strong>
+          <span class="admin-stat-sub">Com pelo menos 1 acesso</span>
+        </div>
       </article>
       <article class="admin-stat-card">
-        <span class="admin-stat-label">Produto líder</span>
-        <strong id="produtoLider">-</strong>
+        <div class="admin-stat-icon icon-amber"><i class="fa-solid fa-crown"></i></div>
+        <div class="admin-stat-info">
+          <span class="admin-stat-label">Produto Líder</span>
+          <strong id="produtoLider" title="-">-</strong>
+          <span class="admin-stat-sub" id="produtoLiderSub">Mais acessado da loja</span>
+        </div>
+      </article>
+      <article class="admin-stat-card">
+        <div class="admin-stat-icon icon-emerald"><i class="fa-solid fa-chart-pie"></i></div>
+        <div class="admin-stat-info">
+          <span class="admin-stat-label">Média por Produto</span>
+          <strong id="mediaVisualizacoes">0</strong>
+          <span class="admin-stat-sub">Média geral de visualizações</span>
+        </div>
       </article>
     </section>
 
     <section class="admin-estatisticas-tabela">
       <div class="admin-estatisticas-head">
-        <h2><i class="fa-solid fa-eye"></i> Ranking de visualizações</h2>
-        <a href="./admin-area.html" class="admin-estatisticas-voltar"><i class="fa-solid fa-arrow-left"></i> Voltar para Área Admin</a>
+        <div class="admin-estatisticas-title-box">
+          <h2><i class="fa-solid fa-ranking-star"></i> Ranking de Visualizações</h2>
+          <p class="admin-estatisticas-subtitle">Acompanhe quais itens despertam maior interesse dos clientes</p>
+        </div>
+        <div class="admin-estatisticas-actions">
+          <div class="admin-search-wrapper">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="filtroProdutoInput" class="admin-search-input" placeholder="Buscar por nome ou ID..." autocomplete="off" />
+          </div>
+          <button id="btnRecarregarEstatisticas" class="btn-refresh-stats" title="Recarregar estatísticas">
+            <i class="fa-solid fa-rotate-right"></i>
+          </button>
+          <a href="./admin-area.html" class="admin-estatisticas-voltar"><i class="fa-solid fa-arrow-left"></i> Voltar para Área Admin</a>
+        </div>
       </div>
 
       <div class="admin-estatisticas-table-wrap table-responsive">
         <table>
           <thead>
             <tr>
+              <th style="width: 70px; text-align: center;">Posição</th>
               <th>Produto</th>
               <th>Categoria</th>
               <th>Preço</th>
-              <th>Visualizações</th>
+              <th>Popularidade</th>
               <th>Cadastro</th>
+              <th style="text-align: center; width: 90px;">Ação</th>
             </tr>
           </thead>
           <tbody id="estatisticasProdutosBody">
             <tr>
-              <td colspan="5">Carregando estatísticas...</td>
+              <td colspan="7" class="loading-cell">
+                <div class="loading-spinner-box">
+                  <div class="loading-spinner"></div>
+                  <span>Carregando estatísticas dos produtos...</span>
+                </div>
+              </td>
             </tr>
           </tbody>
         </table>

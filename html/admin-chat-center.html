@@ -3,95 +3,192 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Central de Conversas - MIXPROMOÇÃO</title>
+  <title>Central de Atendimento ao Cliente - MIX-PROMOÇÃO</title>
 
+  <!-- CSS Principal & FontAwesome -->
+  <link rel="stylesheet" href="../css/style-index.css">
   <link rel="stylesheet" href="/css/style-index.css">
+  <link rel="stylesheet" href="../css/menu.css">
   <link rel="stylesheet" href="/css/menu.css">
+  <link rel="stylesheet" href="../css/admin-chat.css">
   <link rel="stylesheet" href="/css/admin-chat.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="stylesheet" href="/css/chatbot-widget.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body class="dark-chat">
-  <header class="site-header">
-    <div class="logo">
-      <span class="logo-icon">🛒</span>
-      <a href="admin-area.html" class="logo-text" aria-label="Área administrativa">MIXPROMOÇÃO</a>
+
+  <!-- Header Exclusivo da Central de Atendimento ao Cliente -->
+  <header class="atendimento-header">
+    <div class="atendimento-brand">
+      <a href="admin-area.html" class="logo-link" style="display:flex; align-items:center; gap:8px; text-decoration:none;">
+        <span class="logo-icon" style="font-size:1.6rem;">🛒</span>
+        <div class="logo-text" style="font-weight:900; font-size:1.25rem; letter-spacing:0.5px;">
+          <span style="color:#00ff88;">MIX</span><span style="color:#ffffff;">PROMOÇÃO</span>
+        </div>
+      </a>
+      <div class="atendimento-badge" style="background:rgba(0,198,255,0.12); border-color:rgba(0,198,255,0.35); color:#38bdf8;">
+        <i class="fa-solid fa-headset"></i> Central de Atendimento ao Cliente
+      </div>
     </div>
 
-    <nav class="menu" aria-label="Menu principal">
-      <ul>
-        <li><a href="admin-area.html"><i class="fa-solid fa-house menu-link-icon" aria-hidden="true"></i><span>Área Admin</span></a></li>
-        <li><a href="loja.html"><i class="fa-solid fa-store menu-link-icon" aria-hidden="true"></i><span>Loja</span></a></li>
-        <li><a href="admin-reclamacoes.html"><i class="fa-solid fa-envelope menu-link-icon" aria-hidden="true"></i><span>Emails</span></a></li>
-        <li><a href="admin-chat-center.html" class="active"><i class="fa-solid fa-comments menu-link-icon" aria-hidden="true"></i><span>Conversas</span></a></li>
-      </ul>
-    </nav>
+    <div class="atendimento-header-right">
+      <div class="status-online-tag">
+        <span class="dot-online"></span>
+        <span id="headerOnlineLabel">Atendente Online</span>
+      </div>
 
-    <div style="margin-left:auto; display:flex; gap:12px; align-items:center;">
-      <div id="adminBadge" style="display:none; color:var(--primary); font-weight:700;">Administrador: Rodrigo Cezar</div>
-      <button id="adminBadgeExit" class="admin-badge-exit" style="display:none;">Sair</button>
+      <nav class="atendimento-nav">
+        <a href="admin-chat-historico.html" class="nav-pill" style="border-color:rgba(16,185,129,0.4); color:#34d399;" title="Ver chamados finalizados e histórico"><i class="fa-solid fa-box-archive"></i> Histórico</a>
+        <a href="admin-area.html" class="nav-pill"><i class="fa-solid fa-gauge-high"></i> Painel Admin</a>
+        <button id="btnLogoutAdmin" class="nav-pill" type="button" style="border-color:rgba(239,68,68,0.35); color:#f87171; background:transparent; cursor:pointer;" title="Sair"><i class="fa-solid fa-right-from-bracket"></i> Sair</button>
+      </nav>
     </div>
   </header>
 
+  <!-- Corpo Principal do Chat de Atendimento ao Cliente -->
   <main class="chat-main">
     <div class="chat-wrap">
-      <aside class="chat-sidebar" role="navigation" aria-label="Lista de conversas">
-        <div class="sidebar-top">
-          <div class="sidebar-title">Conversas</div>
-          <div class="sidebar-actions">
-            <button id="newConvBtn" title="Nova conversa"><i class="fa-solid fa-plus"></i></button>
-            <button id="sidebarMenuBtn" title="Menu"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+      
+      <!-- Barra Lateral: Fila de Clientes e Protocolos -->
+      <aside class="chat-sidebar" role="navigation" aria-label="Fila de Chamados de Clientes">
+        
+        <!-- Cartão do Atendente em Atividade -->
+        <div class="protocol-badge-card" style="border-color:rgba(0,198,255,0.3); background:linear-gradient(145deg, rgba(0,198,255,0.08), rgba(15,28,58,0.7));">
+          <div class="protocol-label" style="color:#38bdf8;">ATENDENTE CONECTADO</div>
+          <div class="customer-name-tag" style="margin-top:4px;">
+            <i class="fa-solid fa-user-tie" style="color:#00c6ff; font-size:1.1rem;"></i>
+            <span><strong id="userGreetingName">Atendente Master</strong></span>
           </div>
+          <div style="font-size:0.75rem; color:#94a3b8; margin-top:4px; display:flex; justify-content:space-between;">
+            <span>Fila ao vivo</span>
+            <span id="queueTimeUpdated">Atualizado</span>
+          </div>
+        </div>
+
+        <div class="sidebar-top">
+          <div class="sidebar-title">
+            <i class="fa-solid fa-users-line"></i> Chamados Ao Vivo
+          </div>
+          <span id="unreadTotalBadge" class="conv-unread" style="background:#f59e0b; display:none;">0</span>
         </div>
 
         <div class="sidebar-search">
-          <input id="chatSearch" placeholder="Pesquisar conversas..." aria-label="Pesquisar conversas">
+          <input id="chatSearch" placeholder="Pesquisar cliente ou protocolo..." aria-label="Pesquisar clientes">
         </div>
 
-        <div id="conversations" class="conversations" role="list"></div>
-
-        <div id="emptyConversations" class="empty-state" role="status" aria-live="polite" style="display:none">
-          <div class="empty-title">Nenhuma conversa</div>
-          <div class="empty-desc">Quando um cliente iniciar um atendimento, a conversa aparecerá aqui.</div>
+        <!-- Filtros Rápidos da Fila Ao Vivo (Sem barra de rolagem e sem texto cortado) -->
+        <div class="chat-filter-tabs">
+          <button class="chat-tab-btn active" data-filter="all" type="button"><i class="fa-solid fa-bolt"></i> Todos</button>
+          <button class="chat-tab-btn" data-filter="aguardando" type="button"><i class="fa-solid fa-bell"></i> Aguardando</button>
+          <button class="chat-tab-btn" data-filter="em_atendimento" type="button"><i class="fa-solid fa-comments"></i> Ativos</button>
         </div>
+
+        <!-- Atalho Rápido para Chamados Concluídos / Arquivados -->
+        <a href="admin-chat-historico.html" class="btn-historico-shortcut" title="Clique para abrir a página de chamados encerrados e histórico">
+          <span><i class="fa-solid fa-clock-rotate-left"></i> Chamados Concluídos</span>
+          <span id="totalConcluidosCountBadge" class="badge-count-pill">0</span>
+        </a>
+
+        <!-- Lista Dinâmica de Conversas de Clientes -->
+        <div id="conversations" class="conversations" role="list">
+          <div class="chat-empty-queue">
+            <i class="fa-solid fa-spinner fa-spin" style="color:#00c6ff;"></i>
+            Carregando chamados...
+          </div>
+        </div>
+
+        <!-- Rodapé da Sidebar com Ações -->
+        <div class="sidebar-footer-actions">
+          <button id="btnAtualizarFila" class="btn-side-action" type="button" title="Atualizar lista de conversas">
+            <i class="fa-solid fa-rotate-right"></i> Atualizar Fila
+          </button>
+          <button id="btnTestSound" class="btn-side-action" type="button" title="Tocar som de teste">
+            <i class="fa-solid fa-bell"></i> Testar Som
+          </button>
+        </div>
+
       </aside>
 
+      <!-- Área de Chat Principal com o Cliente Selecionado -->
       <section class="chat-area">
         <div class="chat-panel">
+          
+          <!-- Cabeçalho do Atendimento Atual -->
           <header class="chat-header">
             <div class="chat-header-left">
-              <div id="chatAvatar" class="chat-avatar">–</div>
+              <div class="attendant-avatar-wrap">
+                <div class="attendant-avatar" id="clientAvatarBox" style="background:linear-gradient(135deg,#0284c7,#00c6ff);">
+                  <i class="fa-solid fa-user"></i>
+                </div>
+                <span class="avatar-status-dot"></span>
+              </div>
+              
               <div class="chat-meta">
-                <div id="chatHeaderName">Selecione uma conversa</div>
-                <div id="chatHeaderStatus" class="chat-status"> </div>
+                <div class="chat-title-row">
+                  <span id="chatHeaderName" class="chat-name">Selecione um cliente</span>
+                  <span id="chatHeaderBadge" class="verified-badge" style="display:none;"><i class="fa-solid fa-circle-check"></i> Ativo</span>
+                </div>
+                <div id="chatHeaderStatus" class="chat-status">
+                  <span id="chatStatusDot" class="pulse-dot" style="display:none;"></span> <span id="chatStatusText">Aguardando seleção de chamado na fila</span>
+                </div>
               </div>
             </div>
+
             <div class="chat-header-right">
-              <button id="btnSearchConv" title="Pesquisar"><i class="fa-solid fa-magnifying-glass"></i></button>
-              <button id="btnExportDoc" title="Baixar histórico (.doc)" style="margin-left:8px"><i class="fa-solid fa-download"></i></button>
-              <button id="btnMoreConv" title="Mais opções"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+              <button id="btnEncerrarAtendimento" class="chat-btn-action danger" type="button" title="Finalizar este atendimento e registrar protocolo" style="display:none;">
+                <i class="fa-solid fa-circle-check"></i> <span>Encerrar Chamado</span>
+              </button>
+              <button id="btnExportChat" class="chat-btn-action" type="button" title="Baixar histórico completo do atendimento">
+                <i class="fa-solid fa-file-arrow-down"></i> <span>Baixar Histórico</span>
+              </button>
             </div>
           </header>
 
+          <!-- Área de Rolagem das Mensagens -->
           <div id="messages" class="messages-area" role="log" aria-live="polite">
-            <div id="emptyMessages" class="empty-state" style="display:block">
-              <div class="empty-title">Nenhuma conversa selecionada</div>
-              <div class="empty-desc">Clique em uma conversa à esquerda para visualizar mensagens.</div>
+            <div class="chat-empty-queue" style="margin-top:60px;">
+              <i class="fa-solid fa-comments" style="font-size:3rem; color:#1e293b; margin-bottom:12px;"></i>
+              <h3 style="color:#f1f5f9; margin:0 0 6px;">Nenhum chamado selecionado</h3>
+              <p style="color:#64748b; margin:0;">Clique em um dos clientes na fila à esquerda para visualizar as mensagens e responder em tempo real.</p>
             </div>
           </div>
 
-          <div class="chat-composer" role="region" aria-label="Compor mensagem">
-            <button class="composer-icon" title="Anexar" aria-hidden="true"><i class="fa-solid fa-paperclip"></i></button>
-            <input id="msgInput" placeholder="Digite uma mensagem" autocomplete="off" aria-label="Escreva sua mensagem" disabled>
+          <!-- Sugestões de Respostas Rápidas para o Atendente -->
+          <div id="quickRepliesWrap" class="quick-replies-bar" style="display:none; padding:8px 16px; background:rgba(11,20,40,0.95); border-top:1px solid rgba(0,198,255,0.12); overflow-x:auto; white-space:nowrap; gap:8px;">
+            <button class="quick-reply-btn" type="button" data-text="Olá! Seja muito bem-vindo(a) à MIX-PROMOÇÃO. Como posso te ajudar hoje?" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:#cbd5e1; padding:4px 10px; border-radius:999px; font-size:0.75rem; cursor:pointer;">👋 Saudação inicial</button>
+            <button class="quick-reply-btn" type="button" data-text="Vou consultar o status do seu pedido no nosso sistema agora mesmo, só um momento por favor." style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:#cbd5e1; padding:4px 10px; border-radius:999px; font-size:0.75rem; cursor:pointer;">📦 Consultar pedido</button>
+            <button class="quick-reply-btn" type="button" data-text="Poderia me informar o número do seu pedido ou CPF cadastrado para localização?" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:#cbd5e1; padding:4px 10px; border-radius:999px; font-size:0.75rem; cursor:pointer;">🔍 Solicitar dados/CPF</button>
+            <button class="quick-reply-btn" type="button" data-text="Seu pagamento via PIX já foi aprovado com sucesso e o pedido já entrou na etapa de preparação!" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:#cbd5e1; padding:4px 10px; border-radius:999px; font-size:0.75rem; cursor:pointer;">💳 Confirmação de PIX</button>
+            <button class="quick-reply-btn" type="button" data-text="Fico feliz em ter te ajudado! Se precisar de mais alguma informação, estarei sempre à disposição. Tenha um ótimo dia!" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:#cbd5e1; padding:4px 10px; border-radius:999px; font-size:0.75rem; cursor:pointer;">✨ Finalização gentil</button>
+          </div>
+
+          <!-- Compositor de Mensagens com Envio e Anexos -->
+          <div class="chat-composer" role="region" aria-label="Enviar mensagem para cliente">
+            <input type="file" id="fileAttachInput" accept="image/*,.pdf,.txt" style="display:none" />
+            
+            <button id="btnAttach" class="composer-icon" type="button" title="Anexar arquivo ou comprovante">
+              <i class="fa-solid fa-paperclip"></i>
+            </button>
+            
+            <input id="msgInput" placeholder="Selecione um chamado para digitar..." autocomplete="off" aria-label="Mensagem para o cliente" disabled>
+            
             <div class="composer-actions">
-              <button id="sendMsgBtn" class="composer-send" title="Enviar" disabled>Enviar</button>
+              <button id="sendMsgBtn" class="composer-send" type="button" title="Enviar resposta para o cliente" disabled style="background:linear-gradient(135deg,#0072ff,#00c6ff);">
+                <span>Enviar</span> <i class="fa-solid fa-paper-plane" style="margin-left:4px;"></i>
+              </button>
             </div>
           </div>
+
         </div>
       </section>
+
     </div>
   </main>
 
+  <!-- Container de Toasts de Notificação Sonora -->
+  <div id="toastContainer" style="position:fixed; top:75px; right:20px; z-index:99999; display:flex; flex-direction:column; gap:10px; pointer-events:none;"></div>
+
+  <!-- Scripts -->
+  <script src="../js/admin-chat-center.js" defer></script>
   <script src="/js/admin-chat-center.js" defer></script>
 </body>
 </html>

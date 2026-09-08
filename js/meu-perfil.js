@@ -19,6 +19,34 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch (e) { /* ignore */ }
   })();
 
+  // Verifica se o cliente foi redirecionado do chat por inatividade (3 minutos)
+  try {
+    const alertaInatividade = sessionStorage.getItem('mix_alerta_inatividade');
+    if (alertaInatividade) {
+      sessionStorage.removeItem('mix_alerta_inatividade');
+      setTimeout(() => {
+        if (typeof window.showStyledPopup === 'function') {
+          const isHtmlDir = window.location.pathname.includes('/html/');
+          window.showStyledPopup({
+            title: 'Atendimento Pausado',
+            message: alertaInatividade,
+            small: true,
+            buttons: [
+              {
+                label: 'Voltar ao Suporte',
+                className: 'btn-alterar',
+                onClick: () => {
+                  window.location.href = (isHtmlDir ? "atendimento.html" : "./html/atendimento.html") + "?novo=1";
+                }
+              },
+              { label: 'Fechar', className: 'btn-secondary' }
+            ]
+          });
+        }
+      }, 250);
+    }
+  } catch (e) {}
+
   // Botão Minha Conta disponível em páginas gerais
   const btnMinhaConta = document.getElementById("btnMinhaConta");
   if (btnMinhaConta) {
@@ -26,6 +54,27 @@ document.addEventListener("DOMContentLoaded", () => {
       window.location.href = "/html/meu-perfil.html";
     });
   }
+
+  // Logout da Área do Cliente (botão no cabeçalho e na barra de atalhos)
+  function logoutCliente() {
+    localStorage.removeItem("tipoUsuario");
+    localStorage.removeItem("token");
+    localStorage.removeItem("nome");
+    localStorage.removeItem("sobrenome");
+    localStorage.removeItem("foto");
+    localStorage.removeItem("fotoMime");
+    localStorage.removeItem("clienteCPF");
+    localStorage.removeItem("email");
+    localStorage.removeItem("clienteTelefone");
+    const isHtmlDir = window.location.pathname.includes('/html/');
+    window.location.href = isHtmlDir ? '../index.html' : './index.html';
+  }
+
+  const btnExitHeader = document.getElementById("btnExitHeader");
+  if (btnExitHeader) btnExitHeader.addEventListener("click", logoutCliente);
+
+  const btnExitTopbar = document.getElementById("btnExitTopbar");
+  if (btnExitTopbar) btnExitTopbar.addEventListener("click", logoutCliente);
 
   // aplicar imediatamente e ouvir alterações em outras abas
   try { syncHeaderFromLocal(); window.addEventListener('storage', syncHeaderFromLocal); } catch (e) { /* ignore */ }
@@ -250,6 +299,8 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     localStorage.setItem("mixClienteUltimaAba", tabId);
+    if (tabId === 'reclamacoes') renderReclamacoes();
+    if (tabId === 'avaliacoes') carregarAvaliacoesCliente();
   }
 
   tabButtons.forEach(btn => {
@@ -258,11 +309,238 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
+  const btnIrParaDados = document.getElementById("btnIrParaDados");
+  if (btnIrParaDados) {
+    btnIrParaDados.addEventListener("click", () => ativarAba("perfil"));
+  }
+  const btnIrParaPedidos = document.getElementById("btnIrParaPedidos");
+  if (btnIrParaPedidos) {
+    btnIrParaPedidos.addEventListener("click", () => ativarAba("compras"));
+  }
+  const btnIrParaAvaliacoes = document.getElementById("btnIrParaAvaliacoes");
+  if (btnIrParaAvaliacoes) {
+    btnIrParaAvaliacoes.addEventListener("click", () => ativarAba("avaliacoes"));
+  }
+  function irParaPaginaAtendimento(e) {
+    if (e && e.preventDefault) e.preventDefault();
+    const isHtmlDir = window.location.pathname.includes('/html/');
+    window.location.href = (isHtmlDir ? "atendimento.html" : "./html/atendimento.html") + "?novo=1";
+  }
+
+  const btnIrParaSuporte = document.getElementById("btnIrParaSuporte");
+  if (btnIrParaSuporte) {
+    btnIrParaSuporte.addEventListener("click", irParaPaginaAtendimento);
+  }
+  const btnSuporteTopbar = document.getElementById("btnSuporteTopbar");
+  if (btnSuporteTopbar) {
+    btnSuporteTopbar.addEventListener("click", irParaPaginaAtendimento);
+  }
+  const tabBtnSuporte = document.getElementById("tabBtnSuporte") || document.querySelector('[data-tab="suporte"]');
+  if (tabBtnSuporte) {
+    tabBtnSuporte.addEventListener("click", irParaPaginaAtendimento);
+  }
+
   const preferencias = obterPreferencias();
   const ultimaAba = localStorage.getItem("mixClienteUltimaAba");
   const abaInicial = preferencias.abrirUltimaAba && ultimaAba ? ultimaAba : preferencias.abaPadrao;
   if (document.getElementById(abaInicial)) {
     ativarAba(abaInicial);
+  }
+  // Pré-carrega contadores de avaliações em segundo plano
+  setTimeout(() => carregarAvaliacoesCliente(), 300);
+
+  // Carrega e renderiza os produtos avaliados e comentários feitos pelo cliente logado
+  async function carregarAvaliacoesCliente() {
+    const container = document.getElementById("listaAvaliacoesCliente");
+    if (!container) return;
+
+    const clienteId = localStorage.getItem("clienteId");
+    const clienteNome = (localStorage.getItem("nome") || "").trim();
+    const clienteSobrenome = (localStorage.getItem("sobrenome") || "").trim();
+    const clienteNomeCompleto = [clienteNome, clienteSobrenome].filter(Boolean).join(" ").trim();
+
+    if (!clienteId && !clienteNomeCompleto) {
+      container.innerHTML = `
+        <div class="empty-state-avaliacoes" style="text-align:center; padding:40px 20px; color:#94a3b8;">
+          <i class="fa-regular fa-star" style="font-size:2.8rem; color:#f59e0b; margin-bottom:14px; display:inline-block;"></i>
+          <h3 style="color:#0f172a; margin-bottom:6px;">Faça login para ver seus comentários</h3>
+        </div>
+      `;
+      return;
+    }
+
+    try {
+      const bases = [];
+      if (typeof apiBase !== 'undefined' && apiBase) bases.push(apiBase);
+      bases.push('http://localhost:3000', 'http://127.0.0.1:3000', '');
+
+      let urlQuery = `?clienteId=${encodeURIComponent(clienteId || 0)}`;
+      if (clienteNomeCompleto) urlQuery += `&autor=${encodeURIComponent(clienteNomeCompleto)}`;
+
+      let resp = null;
+      for (const b of bases) {
+        try {
+          const base = b ? b.replace(/\/$/, '') : '';
+          resp = await fetch(`${base}/api/comentarios${urlQuery}`, { cache: 'no-store' });
+          if (resp && resp.ok) break;
+        } catch (_) {}
+      }
+
+      if (!resp || !resp.ok) {
+        throw new Error('Falha ao carregar avaliações do servidor');
+      }
+
+      const avaliacoes = await resp.json();
+      const lista = Array.isArray(avaliacoes) ? avaliacoes : [];
+
+      // Atualizar contadores no topo da aba
+      const totalEl = document.getElementById("totalAvaliacoesCliente");
+      const mediaEl = document.getElementById("mediaNotasCliente");
+      if (totalEl) totalEl.textContent = lista.length;
+
+      if (mediaEl) {
+        if (lista.length > 0) {
+          const soma = lista.reduce((acc, c) => acc + Number(c.nota || 0), 0);
+          const media = (soma / lista.length).toFixed(1);
+          mediaEl.textContent = `${media} ★`;
+        } else {
+          mediaEl.textContent = "--";
+        }
+      }
+
+      const isHtmlDir = window.location.pathname.includes('/html/');
+      const lojaLink = isHtmlDir ? 'loja.html' : './html/loja.html';
+
+      if (lista.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state-avaliacoes" style="text-align:center; padding:40px 20px; color:#94a3b8;">
+            <i class="fa-regular fa-star" style="font-size:2.8rem; color:#f59e0b; margin-bottom:14px; display:inline-block;"></i>
+            <h3 style="color:#0f172a; margin-bottom:6px;">Nenhum produto avaliado ainda</h3>
+            <p style="font-size:0.92rem; color:#64748b; max-width:440px; margin:0 auto 18px;">Assim que você comentar e avaliar os produtos na loja, eles aparecerão organizados aqui.</p>
+            <a href="${lojaLink}" class="compras-link"><i class="fa-solid fa-bag-shopping"></i> Ir às compras</a>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = "";
+
+      lista.forEach(item => {
+        const card = document.createElement("article");
+        card.classList.add("avaliacao-card");
+
+        const produtoId = item.produtoId || 1;
+        const produtoLink = `${isHtmlDir ? 'produto.html' : './html/produto.html'}?id=${produtoId}`;
+        const avaliacaoLink = `${produtoLink}#comentarios`;
+        const nota = Math.max(1, Math.min(5, Number(item.nota || 5)));
+        const estrelasHtml = "★".repeat(nota) + "☆".repeat(5 - nota);
+        const dataFormatada = item.criadoEm ? new Date(item.criadoEm).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "Recentemente";
+        const precoFormatado = item.produtoPreco ? formatarMoeda(Number(item.produtoPreco)) : "";
+
+        // Topo com foto e dados do produto
+        const topo = document.createElement("div");
+        topo.classList.add("avaliacao-produto-topo");
+
+        const img = document.createElement("img");
+        img.classList.add("avaliacao-produto-img");
+        img.src = item.produtoImagem || "https://placehold.co/100x100?text=Produto";
+        img.alt = item.produtoNome || "Produto";
+        img.onerror = () => { img.src = "https://placehold.co/100x100?text=Sem+Foto"; };
+
+        const info = document.createElement("div");
+        info.classList.add("avaliacao-produto-info");
+
+        const titulo = document.createElement("h4");
+        titulo.classList.add("avaliacao-produto-nome");
+        titulo.innerHTML = `<a href="${produtoLink}">${item.produtoNome || `Produto #${produtoId}`}</a>`;
+
+        const meta = document.createElement("div");
+        meta.classList.add("avaliacao-produto-meta");
+        meta.innerHTML = `
+          <div class="avaliacao-estrelas" title="${nota} de 5 estrelas">${estrelasHtml}</div>
+          ${precoFormatado ? `<span class="avaliacao-produto-preco">${precoFormatado}</span>` : ""}
+          <span class="avaliacao-data"><i class="fa-regular fa-clock"></i> ${dataFormatada}</span>
+        `;
+
+        info.appendChild(titulo);
+        info.appendChild(meta);
+        topo.appendChild(img);
+        topo.appendChild(info);
+        card.appendChild(topo);
+
+        // Corpo com comentário e mídias
+        const corpo = document.createElement("div");
+        corpo.classList.add("avaliacao-corpo");
+
+        if (item.texto) {
+          const texto = document.createElement("p");
+          texto.classList.add("avaliacao-texto");
+          texto.textContent = item.texto;
+          corpo.appendChild(texto);
+        }
+
+        // Fotos e vídeo
+        const midias = [];
+        if (Array.isArray(item.fotos)) {
+          item.fotos.forEach(f => { if (f) midias.push({ tipo: 'img', src: f }); });
+        }
+        if (item.video) {
+          const vSrc = typeof item.video === 'string' ? item.video : (item.video.dataUri || item.video.data);
+          if (vSrc) midias.push({ tipo: 'video', src: vSrc });
+        }
+
+        if (midias.length > 0) {
+          const midiaContainer = document.createElement("div");
+          midiaContainer.classList.add("avaliacao-midia");
+
+          midias.forEach(m => {
+            if (m.tipo === 'img') {
+              const thumb = document.createElement("img");
+              thumb.src = m.src;
+              thumb.classList.add("avaliacao-thumb-img");
+              thumb.title = "Clique para abrir foto ampliada";
+              thumb.addEventListener("click", () => {
+                const w = window.open("");
+                if (w) {
+                  w.document.write(`<title>Foto da Avaliação</title><body style="margin:0;background:#0b1329;display:flex;align-items:center;justify-content:center;height:100vh;"><img src="${m.src}" style="max-width:95vw;max-height:95vh;border-radius:12px;box-shadow:0 10px 40px rgba(0,0,0,0.5);"></body>`);
+                }
+              });
+              midiaContainer.appendChild(thumb);
+            } else if (m.tipo === 'video') {
+              const video = document.createElement("video");
+              video.src = m.src;
+              video.classList.add("avaliacao-thumb-video");
+              video.controls = true;
+              midiaContainer.appendChild(video);
+            }
+          });
+          corpo.appendChild(midiaContainer);
+        }
+
+        card.appendChild(corpo);
+
+        // Rodapé com botão Ver no Produto
+        const rodape = document.createElement("div");
+        rodape.classList.add("avaliacao-rodape");
+        rodape.innerHTML = `
+          <a href="${avaliacaoLink}" class="btn-ver-avaliacao">
+            <i class="fa-solid fa-arrow-up-right-from-square"></i> Ver no Produto
+          </a>
+        `;
+        card.appendChild(rodape);
+
+        container.appendChild(card);
+      });
+
+    } catch (err) {
+      console.warn("Erro ao carregar avaliações do cliente:", err);
+      container.innerHTML = `
+        <div class="empty-state-avaliacoes" style="text-align:center; padding:30px; color:#ef4444;">
+          <i class="fa-solid fa-triangle-exclamation" style="font-size:2rem; margin-bottom:10px; display:inline-block;"></i>
+          <p>Não foi possível carregar suas avaliações no momento. Tente novamente mais tarde.</p>
+        </div>
+      `;
+    }
   }
 
   // Renderizar reclamações do cliente na aba "reclamacoes"

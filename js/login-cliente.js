@@ -4,9 +4,9 @@
  * e redireciona o usuário após autenticação bem-sucedida.
  */
 document.addEventListener("DOMContentLoaded", () => {
-  const formLogin = document.getElementById("loginForm");
+  const formLogin = document.getElementById("formLogin") || document.getElementById("loginForm");
   const msgLogin = document.getElementById("mensagemErro");
-  const usuarioInput = document.getElementById("usuario"); // campo de e-mail
+  const usuarioInput = document.getElementById("usuario"); // campo de e-mail/usuário
   const senhaInput = document.getElementById("senha");
   const toggleSenha = document.getElementById("toggleSenha");
 
@@ -87,6 +87,7 @@ document.addEventListener("DOMContentLoaded", () => {
           localStorage.setItem("dataNascimento", data.dataNascimento);
           localStorage.setItem("foto", data.foto);
           localStorage.setItem("tipoUsuario", "Cliente");
+          sessionStorage.setItem("activeClienteSession", "1");
 
           // 🔹 Redireciona para checkout.html se houver flag, senão para a página indicada em returnTo
           setTimeout(() => {

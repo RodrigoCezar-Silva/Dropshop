@@ -2,11 +2,44 @@
  * Estado visual de autenticação do site.
  * Exibe informações do cliente/admin e controla logout no cabeçalho.
  */
+// Tratamento de reinício de servidor (npm run dev) e abertura da página index
+(function() {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const path = window.location.pathname.toLowerCase();
+    const isIndex = path.endsWith('index.html') || path === '/' || path === '';
+
+    // Se vier com flag de reset (passada pelo npm run dev), limpa login
+    if (params.has('resetAuth') || params.has('deslogar') || params.has('logout')) {
+      const keys = ['tipoUsuario','token','nome','sobrenome','isAdmin','foto','fotoMime','clienteCPF','email','clienteTelefone','clienteId'];
+      keys.forEach(k => localStorage.removeItem(k));
+      sessionStorage.clear();
+      try {
+        window.history.replaceState(null, '', window.location.pathname + window.location.hash);
+      } catch (e) {}
+    } else if (isIndex) {
+      // Se abrir a página index e não houver uma sessão ativa iniciada nesta aba, garante deslogado
+      const activeSession = sessionStorage.getItem('activeClienteSession') === '1';
+      const tipo = localStorage.getItem('tipoUsuario');
+      // Funcionário ou Administrador NUNCA devem permanecer logados na home (index.html)
+      if (tipo === 'Funcionario' || tipo === 'Administrador' || !activeSession) {
+        const keys = ['tipoUsuario','token','nome','sobrenome','isAdmin','foto','fotoMime','clienteCPF','email','clienteTelefone','clienteId'];
+        keys.forEach(k => localStorage.removeItem(k));
+      }
+    }
+  } catch (e) {}
+})();
+
 document.addEventListener("DOMContentLoaded", () => {
     // Cria/injeta widget de usuário no cabeçalho onde houver o botão `btnMinhaConta`
     function ensureHeaderUserWidget() {
       const header = document.querySelector('header.site-header') || document.querySelector('header');
       if (!header) return;
+
+      const path = window.location.pathname.toLowerCase();
+      if (path.includes('funcionario-area') || path.includes('admin-area') || path.includes('controle-estoque') || path.includes('cadastro-') || path.includes('/funcionario-')) {
+        return;
+      }
 
       // Remove qualquer bloco estático existente e substitui pelo widget padrão
       const existing = document.getElementById('clienteStatus');
@@ -33,17 +66,30 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const names = document.createElement('div');
       names.className = 'nome-area';
+
+      const greetingSpan = document.createElement('span');
+      greetingSpan.className = 'user-greeting';
+      greetingSpan.textContent = 'Olá,';
+      names.appendChild(greetingSpan);
+
       const nomeSpan = document.createElement('span');
       nomeSpan.id = 'nomeCliente';
       nomeSpan.className = 'nome-usuario';
+      names.appendChild(nomeSpan);
+
       const sobreSpan = document.createElement('span');
       sobreSpan.id = 'sobrenomeCliente';
       sobreSpan.className = 'nome-usuario';
-      names.appendChild(nomeSpan);
+      sobreSpan.style.display = 'none';
       names.appendChild(sobreSpan);
 
       wrapper.appendChild(img);
       wrapper.appendChild(names);
+      wrapper.title = 'Acessar Meu Perfil';
+      wrapper.style.cursor = 'pointer';
+      wrapper.addEventListener('click', () => {
+        window.location.href = '/html/meu-perfil.html';
+      });
 
       // tenta inserir antes do botão Minha Conta se houver; senão, insere antes do ícone de carrinho ou no fim do header
       let anchor = header.querySelector('#btnMinhaConta');
@@ -54,35 +100,43 @@ document.addEventListener("DOMContentLoaded", () => {
         header.appendChild(wrapper);
       }
 
-      // se não existir o botão 'Minha Conta', cria um pequeno botão de acesso
-      let btn = header.querySelector('#btnMinhaConta');
-      if (!btn) {
-        btn = document.createElement('button');
-        btn.id = 'btnMinhaConta';
-        btn.className = 'btn-minha-conta';
-        btn.textContent = '👤 Minha Conta';
-        wrapper.parentNode.insertBefore(btn, wrapper.nextSibling);
-      }
+      // Remove qualquer botão 'Minha Conta' existente no header
+      header.querySelectorAll('#btnMinhaConta, .btn-minha-conta').forEach(el => el.remove());
 
-      // cria ou garante botão 'Sair' ao lado do 'Minha Conta'
+      // cria ou garante botão 'Sair' ao lado do widget de usuário
       let logoutBtn = header.querySelector('#logoutBtn');
       if (!logoutBtn) {
         logoutBtn = document.createElement('button');
         logoutBtn.id = 'logoutBtn';
-        // mantém estilo geral de btn-logout, e adiciona classe de posicionamento
         logoutBtn.className = 'btn-logout header-logout';
-        logoutBtn.textContent = 'Sair';
-        // insere logo após o btnMinhaConta
-        if (btn && btn.parentNode) btn.parentNode.insertBefore(logoutBtn, btn.nextSibling);
-        else wrapper.parentNode.insertBefore(logoutBtn, wrapper.nextSibling);
+        logoutBtn.innerHTML = '<i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i><span>Sair</span>';
+        wrapper.parentNode.insertBefore(logoutBtn, wrapper.nextSibling);
 
         // attach logout handler
-        logoutBtn.addEventListener('click', () => {
+        logoutBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          const currentTipo = localStorage.getItem('tipoUsuario');
+          if (currentTipo === 'Funcionario') {
+            localStorage.removeItem('tipoUsuario');
+            localStorage.removeItem('token');
+            localStorage.removeItem('nome');
+            localStorage.removeItem('sobrenome');
+            localStorage.removeItem('isAdmin');
+            localStorage.removeItem('foto');
+            localStorage.removeItem('fotoMime');
+            localStorage.removeItem('clienteId');
+            sessionStorage.removeItem('activeClienteSession');
+            const isHtmlDir = window.location.pathname.includes('/html/');
+            window.location.href = isHtmlDir ? '../index.html' : './index.html';
+            return;
+          }
           localStorage.removeItem('tipoUsuario');
           localStorage.removeItem('token');
           localStorage.removeItem('nome');
           localStorage.removeItem('sobrenome');
           localStorage.removeItem('foto');
+          localStorage.removeItem('clienteId');
+          sessionStorage.removeItem('activeClienteSession');
           window.location.href = 'index.html';
         });
       }
@@ -102,6 +156,12 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     ensureHeaderUserWidget();
+    // Aplicar tema salvo globalmente (mixTema) em todas as páginas
+    try {
+      const savedTheme = localStorage.getItem('mixTema');
+      if (savedTheme === 'dark') document.body.classList.add('theme-dark');
+      else document.body.classList.remove('theme-dark');
+    } catch (e) { /* ignore */ }
     // Esconde/remover por padrão o widget de cliente quando não há login
     function removeClientStatusElement() {
       try {
@@ -123,6 +183,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const tipoInit = (rawTipo && rawTipo !== 'null' && rawTipo !== '') ? rawTipo : null;
       if (!tipoInit) {
         removeClientStatusElement();
+        try { localStorage.removeItem('clienteId'); } catch(e) {}
       }
     } catch (e) {
       removeClientStatusElement();
@@ -130,7 +191,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Garante que o container de botões de login exista e esteja visível
     function ensureLoginButtonsExistAndShow() {
+      const tipoAtual = localStorage.getItem('tipoUsuario');
       let _loginButtons = document.getElementById('loginButtons');
+      if (tipoAtual && tipoAtual !== 'null' && tipoAtual !== '') {
+        if (_loginButtons) {
+          try { _loginButtons.style.display = 'none'; } catch (e) { /* ignore */ }
+        }
+        return _loginButtons;
+      }
       const headerEl = document.querySelector('header.site-header') || document.querySelector('header');
       if (!_loginButtons) {
         const div = document.createElement('div');
@@ -138,6 +206,7 @@ document.addEventListener("DOMContentLoaded", () => {
         div.innerHTML = `
           <a href="login-cliente.html" class="btn-login cliente">👤 Login Cliente</a>
           <a href="admin-login.html" class="btn-login admin">👤 Login Administrativo</a>
+          <a href="login-funcionario.html" class="btn-login admin">👤 Login Funcionário</a>
         `;
         if (headerEl) {
           const anchor = headerEl.querySelector('.cart-icon');
@@ -160,7 +229,7 @@ document.addEventListener("DOMContentLoaded", () => {
       } else {
         btnMinhaConta.style.display = "inline-flex";
         btnMinhaConta.addEventListener("click", function() {
-          window.location.href = "./html/meu-perfil.html";
+          window.location.href = "/html/meu-perfil.html";
         });
       }
     }
@@ -220,14 +289,186 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // ---------------- STATUS DE LOGIN ---------------- //
   const statusAdmin = document.getElementById("statusLogado");
+  // Remover bloco de status apenas em páginas administrativas (por exemplo: admin-area, cadastro-admin, controle-estoque)
+  const pathname = window.location.pathname.toLowerCase();
+  const isAdminPage = pathname.includes('/html/admin') || pathname.includes('admin-area') || pathname.includes('cadastro-admin') || pathname.includes('controle-estoque') || pathname.includes('/admin-');
+  // Não remover mais o bloco de status automaticamente em páginas admin.
+  // Mantemos o elemento para permitir mostrar o botão ao lado do status.
+  // Botão ao lado do status (pequeno) — mostrar quando status estiver visível
+  try {
+    const btnExitNear = document.getElementById('btnExitNearStatus');
+    if (btnExitNear) {
+      if (tipoUsuario === 'Administrador' && !isAdminPage) {
+        btnExitNear.style.display = 'inline-flex';
+      } else {
+        btnExitNear.style.display = 'none';
+      }
+      btnExitNear.addEventListener('click', function () {
+        try {
+          localStorage.removeItem('tipoUsuario');
+          localStorage.removeItem('token');
+          localStorage.removeItem('nome');
+          localStorage.removeItem('sobrenome');
+          localStorage.removeItem('foto');
+        } catch (e) { /* ignore */ }
+        window.location.href = 'index.html';
+      });
+    }
+  } catch (e) { /* ignore */ }
+
+  // Botão pequeno à direita do status — aparece quando o status está visível
+  try {
+    const btnExitRight = document.getElementById('btnExitRight');
+    if (btnExitRight) {
+      // mostrar quando for administrador (em páginas públicas e admin-area também)
+      if (tipoUsuario === 'Administrador') {
+        btnExitRight.style.display = 'inline-flex';
+      } else {
+        btnExitRight.style.display = 'none';
+      }
+      btnExitRight.addEventListener('click', function () {
+        try {
+          localStorage.removeItem('tipoUsuario');
+          localStorage.removeItem('token');
+          localStorage.removeItem('nome');
+          localStorage.removeItem('sobrenome');
+          localStorage.removeItem('foto');
+        } catch (e) { /* ignore */ }
+        window.location.href = 'index.html';
+      });
+    }
+  } catch (e) { /* ignore */ }
+
+  // Botão externo (maior) para aparecer fora do bloco de status, à direita
+  try {
+    let btnOutside = document.getElementById('btnExitOutside');
+    if (!btnOutside) {
+      btnOutside = document.createElement('button');
+      btnOutside.id = 'btnExitOutside';
+      btnOutside.className = 'btn-exit-outside';
+      btnOutside.textContent = 'Sair';
+      const header = document.querySelector('header.site-header') || document.querySelector('header');
+      // insert into header for absolute positioning
+      if (header) header.appendChild(btnOutside);
+
+      btnOutside.addEventListener('click', function () {
+        try {
+          localStorage.removeItem('tipoUsuario');
+          localStorage.removeItem('token');
+          localStorage.removeItem('nome');
+          localStorage.removeItem('sobrenome');
+          localStorage.removeItem('foto');
+        } catch (e) { /* ignore */ }
+        window.location.href = 'index.html';
+      });
+
+      // position it to the right outside the status box
+      function positionBtnOutside() {
+        try {
+          const headerRect = header.getBoundingClientRect();
+          const statusRect = statusAdmin ? statusAdmin.getBoundingClientRect() : null;
+          if (!statusRect) return;
+          // compute left relative to header
+          const left = statusRect.right - headerRect.left + 12; // 12px gap
+          const top = statusRect.top - headerRect.top + (statusRect.height/2) - (btnOutside.offsetHeight/2);
+          btnOutside.style.position = 'absolute';
+          btnOutside.style.left = `${left}px`;
+          btnOutside.style.top = `${Math.max(top, 8)}px`;
+          btnOutside.style.zIndex = 1500;
+        } catch (e) { /* ignore */ }
+      }
+
+      window.addEventListener('resize', positionBtnOutside);
+      // small delay to allow layout
+      setTimeout(positionBtnOutside, 120);
+    }
+    try {
+      if (btnOutside) btnOutside.style.display = (tipoUsuario === 'Administrador') ? 'inline-flex' : 'none';
+    } catch (e) {}
+  } catch (e) { /* ignore */ }
+  // Criar botão fixo para sair da página admin (visível apenas em páginas admin)
+  try {
+    if (isAdminPage) {
+      let btnExit = document.getElementById('btnExitAdminPage');
+      if (!btnExit) {
+        btnExit = document.createElement('button');
+        btnExit.id = 'btnExitAdminPage';
+        btnExit.className = 'btn-exit-admin';
+        btnExit.textContent = 'Sair';
+        const header = document.querySelector('header.site-header') || document.querySelector('header');
+        if (header) header.appendChild(btnExit);
+        else document.body.appendChild(btnExit);
+        btnExit.addEventListener('click', function () {
+          try {
+            localStorage.removeItem('tipoUsuario');
+            localStorage.removeItem('token');
+            localStorage.removeItem('nome');
+            localStorage.removeItem('sobrenome');
+            localStorage.removeItem('foto');
+          } catch (e) { /* ignore */ }
+          window.location.href = 'index.html';
+        });
+      }
+      // mostrar botão somente se for administrador
+      try { btnExit.style.display = (tipoUsuario === 'Administrador') ? 'inline-flex' : 'none'; } catch(e){}
+    } else {
+      const existingExit = document.getElementById('btnExitAdminPage');
+      if (existingExit) existingExit.style.display = 'none';
+    }
+  } catch (e) { /* ignore */ }
+
+  // Configura botão de logout do cabeçalho (visível quando houver usuário logado)
+  try {
+    const btnLogoutHeader = document.getElementById('btnLogoutHeader');
+    if (btnLogoutHeader) {
+      btnLogoutHeader.style.display = 'none';
+
+      btnLogoutHeader.addEventListener('click', function () {
+        try {
+          localStorage.removeItem('tipoUsuario');
+          localStorage.removeItem('token');
+          localStorage.removeItem('nome');
+          localStorage.removeItem('sobrenome');
+          localStorage.removeItem('foto');
+        } catch (e) { /* ignore */ }
+        window.location.href = 'index.html';
+      });
+    }
+  } catch (e) { /* ignore */ }
+  // Botão de logout inline (lado esquerdo do status)
+  try {
+    const btnLogoutInline = document.getElementById('btnLogoutInline');
+    if (btnLogoutInline) {
+      // exibir somente quando for administrador e não estiver em páginas admin (evita duplicidade)
+      if (tipoUsuario === 'Administrador' && !isAdminPage) {
+        btnLogoutInline.style.display = 'inline-flex';
+      } else {
+        btnLogoutInline.style.display = 'none';
+      }
+
+      btnLogoutInline.addEventListener('click', function () {
+        try {
+          localStorage.removeItem('tipoUsuario');
+          localStorage.removeItem('token');
+          localStorage.removeItem('nome');
+          localStorage.removeItem('sobrenome');
+          localStorage.removeItem('foto');
+        } catch (e) { /* ignore */ }
+        // Recarrega página inicial após sair do modo admin
+        window.location.href = 'index.html';
+      });
+    }
+  } catch (e) { /* ignore */ }
   const nomeUsuario = document.getElementById("nomeUsuario");
   const logoutAdmin = document.getElementById("logout");
   const paginaAtual = window.location.pathname.toLowerCase();
+  const isIndexPage = paginaAtual.endsWith('index.html') || paginaAtual === '/' || paginaAtual === '';
 
   const clienteStatus = document.getElementById("clienteStatus");
   const fotoCliente = document.getElementById("fotoCliente");
   const nomeCliente = document.getElementById("nomeCliente");
   const sobrenomeCliente = document.getElementById("sobrenomeCliente");
+  const nomeCompletoEl = document.getElementById('nomeCompleto');
   const logoutCliente = document.getElementById("logoutBtn");
 
   const loginButtons = document.getElementById("loginButtons"); // 🔹 Botões de login
@@ -239,26 +480,88 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Verifica se há login armazenado (normaliza valores inválidos como 'null' ou '')
   const rawTipoUsuario = localStorage.getItem("tipoUsuario");
-  const tipoUsuario = (rawTipoUsuario && rawTipoUsuario !== 'null' && rawTipoUsuario !== '') ? rawTipoUsuario : null;
+  let tipoUsuario = (rawTipoUsuario && rawTipoUsuario !== 'null' && rawTipoUsuario !== '') ? rawTipoUsuario : null;
+
+  // Na página inicial (index.html), NUNCA exibe funcionário ou admin, e requer activeClienteSession
+  if (isIndexPage) {
+    const activeSession = sessionStorage.getItem('activeClienteSession') === '1';
+    if (!activeSession || tipoUsuario === 'Funcionario' || tipoUsuario === 'Administrador') {
+      tipoUsuario = null;
+    }
+  }
+
+  // Marca o documento quando for administrador para permitir CSS de alto impacto
+  try {
+    if (tipoUsuario === 'Administrador') {
+      document.body.classList.add('is-admin-mode');
+    } else {
+      document.body.classList.remove('is-admin-mode');
+    }
+  } catch (e) { /* ignore */ }
+
+  // Tornar o nome/logo clicável para voltar à área administrativa
+  try {
+    if (tipoUsuario === 'Administrador') {
+      const adminTargetSelectors = [
+        '.logo-text.admin-name',
+        '.logo .logo-text',
+        '#nomeUsuario',
+        '#statusLogado .status-text',
+        '.logo-text'
+      ];
+      const redirectToAdmin = function () { window.location.href = '/html/admin-area.html'; };
+      adminTargetSelectors.forEach(sel => {
+        try {
+          const el = document.querySelector(sel);
+          if (el) {
+            el.style.cursor = 'pointer';
+            // remove previous handler guard
+            try { el.removeEventListener && el.removeEventListener('click', redirectToAdmin); } catch(e){}
+            el.addEventListener('click', redirectToAdmin);
+          }
+        } catch (e) { /* ignore */ }
+      });
+    }
+  } catch (e) { /* ignore */ }
 
   if (tipoUsuario === "Administrador") {
-    // Mostra status admin
+    // Não mostrar o bloco grande de status como "login"; usar badge discreto no header
     if (statusAdmin) {
-      statusAdmin.style.display = "flex";
+      try { statusAdmin.style.display = "none"; } catch (e) {}
       if (nomeUsuario) {
         const nome = localStorage.getItem("nome");
         const sobrenome = localStorage.getItem("sobrenome");
-        let nomeExibicao = "";
-        if (nome && nome !== "null" && nome !== null) {
-          const partesNome = nome.trim().split(" ");
-          nomeExibicao += partesNome[0];
-        }
-        if (sobrenome && sobrenome !== "null" && sobrenome !== null) {
-          const partesSobrenome = sobrenome.trim().split(" ");
-          nomeExibicao += nomeExibicao ? " " + partesSobrenome[partesSobrenome.length - 1] : partesSobrenome[partesSobrenome.length - 1];
-        }
-        nomeUsuario.textContent = nomeExibicao.trim();
-        if (!nomeExibicao.trim()) nomeUsuario.textContent = "";
+        const nomeVal = (nome && nome !== 'null') ? nome.trim() : '';
+        const sobrenomeVal = (sobrenome && sobrenome !== 'null') ? sobrenome.trim() : '';
+        const fullName = [nomeVal, sobrenomeVal].filter(Boolean).join(' ').trim() || 'Rodrigo Cezar';
+        nomeUsuario.textContent = fullName;
+        // Criar apenas o botão 'Sair' no header (sem badge de texto)
+        try {
+          const header = document.querySelector('header.site-header') || document.querySelector('header');
+          if (header) {
+            let adminBadgeExit = document.getElementById('adminBadgeExit');
+            if (!adminBadgeExit) {
+              adminBadgeExit = document.createElement('button');
+              adminBadgeExit.id = 'adminBadgeExit';
+              adminBadgeExit.className = 'admin-badge-exit';
+              adminBadgeExit.type = 'button';
+              adminBadgeExit.textContent = 'Sair';
+              header.appendChild(adminBadgeExit);
+              adminBadgeExit.addEventListener('click', function () {
+                try {
+                  localStorage.removeItem('tipoUsuario');
+                  localStorage.removeItem('token');
+                  localStorage.removeItem('nome');
+                  localStorage.removeItem('sobrenome');
+                  localStorage.removeItem('foto');
+                } catch (e) { /* ignore */ }
+                window.location.href = 'index.html';
+              });
+            }
+            // garantir visibilidade apenas para administrador
+            adminBadgeExit.style.display = (tipoUsuario === 'Administrador') ? 'inline-flex' : 'none';
+          }
+        } catch (e) { /* ignore */ }
       }
 
       let statusActions = statusAdmin.querySelector(".status-admin-actions");
@@ -267,6 +570,63 @@ document.addEventListener("DOMContentLoaded", () => {
         statusActions.className = "status-admin-actions";
         statusAdmin.appendChild(statusActions);
       }
+
+      // botão de alternar tema (aparece apenas para administradores) —
+      // NÃO criar na página index.html quando logado como admin
+      try {
+        // se estivermos na página index, não adicionamos o botão
+        if (!isIndexPage) {
+          let btnToggleAdminTheme = document.getElementById('btnToggleAdminTheme');
+          if (!btnToggleAdminTheme) {
+            btnToggleAdminTheme = document.createElement('button');
+            btnToggleAdminTheme.id = 'btnToggleAdminTheme';
+            btnToggleAdminTheme.className = 'btn-theme-toggle';
+            btnToggleAdminTheme.setAttribute('aria-pressed', 'false');
+            btnToggleAdminTheme.title = 'Alternar tema (claro / escuro)';
+            btnToggleAdminTheme.style.marginRight = '8px';
+            btnToggleAdminTheme.style.padding = '6px 10px';
+            btnToggleAdminTheme.style.borderRadius = '6px';
+            btnToggleAdminTheme.style.border = 'none';
+            btnToggleAdminTheme.style.cursor = 'pointer';
+            btnToggleAdminTheme.style.background = 'linear-gradient(90deg,#0f7cc6,#0bbdc3)';
+            btnToggleAdminTheme.style.color = '#fff';
+            btnToggleAdminTheme.innerHTML = '<i class="fa fa-moon" aria-hidden="true"></i>&nbsp;<span style="font-weight:600">Tema</span>';
+            statusActions.appendChild(btnToggleAdminTheme);
+
+            // inicializar estado do botão
+            try {
+              const st = localStorage.getItem('mixTema');
+              if (st === 'dark') {
+                btnToggleAdminTheme.setAttribute('aria-pressed','true');
+                btnToggleAdminTheme.innerHTML = '<i class="fa fa-sun" aria-hidden="true"></i>&nbsp;<span style="font-weight:600">Tema</span>';
+              } else {
+                btnToggleAdminTheme.setAttribute('aria-pressed','false');
+                btnToggleAdminTheme.innerHTML = '<i class="fa fa-moon" aria-hidden="true"></i>&nbsp;<span style="font-weight:600">Tema</span>';
+              }
+            } catch(e){}
+
+            btnToggleAdminTheme.addEventListener('click', function() {
+              try {
+                const isDark = document.body.classList.contains('theme-dark');
+                if (!isDark) {
+                  document.body.classList.add('theme-dark');
+                  this.setAttribute('aria-pressed','true');
+                  this.innerHTML = '<i class="fa fa-sun" aria-hidden="true"></i>&nbsp;<span style="font-weight:600">Tema</span>';
+                  try { localStorage.setItem('mixTema', 'dark'); } catch(e){}
+                } else {
+                  document.body.classList.remove('theme-dark');
+                  this.setAttribute('aria-pressed','false');
+                  this.innerHTML = '<i class="fa fa-moon" aria-hidden="true"></i>&nbsp;<span style="font-weight:600">Tema</span>';
+                  try { localStorage.setItem('mixTema', 'light'); } catch(e){}
+                }
+              } catch (e) { console.warn('Erro alternar tema', e); }
+            });
+          }
+        } else {
+          // se estivermos na index.html, remover qualquer instância existente do botão de tema
+          try { const existingThemeBtn = document.getElementById('btnToggleAdminTheme'); if (existingThemeBtn && existingThemeBtn.parentNode) existingThemeBtn.parentNode.removeChild(existingThemeBtn); } catch(e){}
+        }
+      } catch (e) { /* ignore */ }
 
       if (logoutAdmin && logoutAdmin.parentElement !== statusActions) {
         statusActions.appendChild(logoutAdmin);
@@ -279,10 +639,13 @@ document.addEventListener("DOMContentLoaded", () => {
       } catch (e) { /* ignore */ }
     }
     if (loginButtons) loginButtons.style.display = "none"; // 🔹 Esconde botões de login
+    try { const headerLogout = document.getElementById('btnLogoutHeader'); if (headerLogout) headerLogout.style.display = 'none'; } catch(e) {}
     // Esconde botão de logout do cliente se existir (evita duplicidade)
     try { const clientLogout = document.getElementById('logoutBtn'); if (clientLogout) clientLogout.style.display = 'none'; } catch(e){}
     // garante que o widget de cliente não apareça para admin
-    if (clienteStatus) clienteStatus.style.display = 'none';
+    if (clienteStatus) {
+      try { clienteStatus.classList.remove('show'); } catch(e) { clienteStatus.style.display = 'none'; }
+    }
     if (btnMinhaConta) btnMinhaConta.style.display = 'none';
     // Remove eventuais botões de login soltos no header
     try {
@@ -302,25 +665,90 @@ document.addEventListener("DOMContentLoaded", () => {
       document.querySelectorAll('.btn-ajuda, a[href$="ajuda.html"], nav.menu a[href*="ajuda.html"]').forEach(el => el.style.display = 'none');
     } catch (e) { /* ignore */ }
 
+    // Oculta o menu principal e botões do topo quando logado como Administrador
+    try {
+      const nav = document.querySelector('nav.menu');
+      if (nav) nav.style.display = 'none';
+      document.querySelectorAll('.top-buttons, .header-links, header .menu, header .nav, .site-nav').forEach(el => {
+        try { el.style.display = 'none'; } catch(e) {}
+      });
+    } catch (e) { /* ignore */ }
+
+    // Esconder o ícone do carrinho especificamente na página de 'Gerenciar Produtos'
+    try {
+      const heading = document.querySelector('h1, h2');
+      const headingText = heading ? (heading.textContent || '').trim().toLowerCase() : '';
+      const path = window.location.pathname.toLowerCase();
+      const isGerenciarPage = headingText.includes('gerenciar produtos') || path.includes('admin-area') || path.includes('loja.html');
+      if (isGerenciarPage) {
+        document.querySelectorAll('.cart-icon').forEach(el => { try { el.style.display = 'none'; } catch(e){} });
+      }
+    } catch (e) { /* ignore */ }
+
   } else if (tipoUsuario === "Cliente") {
     // Mostra status cliente
     if (clienteStatus) {
-      clienteStatus.style.display = "flex";
+      try { clienteStatus.classList.add('show'); } catch(e) { clienteStatus.style.display = 'flex'; }
       const nome = localStorage.getItem("nome");
       const sobrenome = localStorage.getItem("sobrenome");
 
-      // Exibe o nome completo (campo `nome` + `sobrenome` do banco) sem truncar
+      // Formata nome para exibição elegante no chip (ex: Rodrigo Cezar)
       const nomeVal = (nome && nome !== "null") ? nome.trim() : "";
       const sobrenomeVal = (sobrenome && sobrenome !== "null") ? sobrenome.trim() : "";
-      const nomeCompleto = [nomeVal, sobrenomeVal].filter(Boolean).join(' ').trim();
-      if (nomeCliente) nomeCliente.textContent = nomeCompleto || '';
-      if (sobrenomeCliente) sobrenomeCliente.textContent = '';
+      const partesNome = [nomeVal, sobrenomeVal].filter(Boolean).join(' ').trim().split(/\s+/);
+      let nomeFormatado = partesNome[0] || 'Cliente';
+      if (partesNome.length > 1) {
+        nomeFormatado += ' ' + partesNome[1]; // Ex: "Rodrigo Cezar"
+      }
+      if (nomeCompletoEl) {
+        nomeCompletoEl.textContent = nomeFormatado;
+      } else {
+        if (nomeCliente) nomeCliente.textContent = nomeFormatado;
+        if (sobrenomeCliente) {
+          sobrenomeCliente.textContent = '';
+          sobrenomeCliente.style.display = 'none';
+        }
+      }
 
-      const fotoBase64 = localStorage.getItem("foto");
-      if (fotoBase64 && fotoCliente && fotoBase64 !== "null") {
-        fotoCliente.src = "data:image/png;base64," + fotoBase64;
-      } else if (fotoCliente) {
-        fotoCliente.src = getDefaultAvatarDataUri(); // imagem padrão embutida
+      // Preferir foto do servidor quando possível, cair para base64 em localStorage ou para o avatar padrão
+      try {
+        const clienteId = localStorage.getItem('clienteId');
+        // Evitar apontar automaticamente para :3000 quando a página está em Live Server
+        const explicitApiBase = (typeof window.__API_BASE__ !== 'undefined' && window.__API_BASE__) ? window.__API_BASE__ : null;
+        const serverUrl = explicitApiBase || ((window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') && (!location.port || location.port === '3000') ? `${window.location.protocol}//${window.location.hostname}:3000` : window.location.origin);
+        if (clienteId && fotoCliente) {
+          const url = (serverUrl && serverUrl.indexOf(':3000')>-1) ? `${serverUrl}/api/cliente/${clienteId}/foto?cb=${Date.now()}` : null;
+          fotoCliente.onerror = function () {
+            // se falhar, tentar usar foto em base64 armazenada localmente
+            try {
+              const fb = localStorage.getItem('foto');
+              if (fb && fb !== 'null') { this.onerror = null; this.src = 'data:image/png;base64,' + fb; return; }
+            } catch (e) { /* ignore */ }
+            try { this.onerror = null; this.src = getDefaultAvatarDataUri(); } catch (e) {}
+          };
+          // Não atribuir src se não formos apontar para o backend (evita ERR_CONNECTION_REFUSED)
+          if (url) fotoCliente.src = url; else {
+            try {
+              const fb = localStorage.getItem('foto');
+              if (fb && fb !== 'null') { fotoCliente.src = 'data:image/png;base64,' + fb; }
+              else fotoCliente.src = getDefaultAvatarDataUri();
+            } catch (e) { fotoCliente.src = getDefaultAvatarDataUri(); }
+          }
+        } else {
+          const fotoBase64 = localStorage.getItem("foto");
+          if (fotoBase64 && fotoCliente && fotoBase64 !== "null") {
+            fotoCliente.src = "data:image/png;base64," + fotoBase64;
+          } else if (fotoCliente) {
+            fotoCliente.src = getDefaultAvatarDataUri();
+          }
+        }
+      } catch (e) {
+        const fotoBase64 = localStorage.getItem("foto");
+        if (fotoBase64 && fotoCliente && fotoBase64 !== "null") {
+          fotoCliente.src = "data:image/png;base64," + fotoBase64;
+        } else if (fotoCliente) {
+          fotoCliente.src = getDefaultAvatarDataUri();
+        }
       }
     }
     if (loginButtons) loginButtons.style.display = "none"; // 🔹 Esconde botões de login
@@ -336,25 +764,175 @@ document.addEventListener("DOMContentLoaded", () => {
     if (btnAddProduto) btnAddProduto.style.display = "none";
     if (btnRemoverProduto) btnRemoverProduto.style.display = "none";
     if (btnEditarProduto) btnEditarProduto.style.display = "none";
-    // garante que o botão Minha Conta e o logout do cliente fiquem visíveis
-    if (btnMinhaConta) {
-      btnMinhaConta.style.display = 'inline-flex';
-      try {
-        // botão padronizado 'Minha Conta' (sem nome do usuário)
-        btnMinhaConta.classList.add('btn-minha-conta');
-        btnMinhaConta.innerHTML = `<i class="fa-solid fa-user" aria-hidden="true"></i><span style="margin-left:8px">Minha Conta</span>`;
-        // garantir ação de redirecionamento
-        btnMinhaConta.removeEventListener && btnMinhaConta.removeEventListener('click', () => {});
-        btnMinhaConta.addEventListener('click', () => { window.location.href = './html/meu-perfil.html'; });
-      } catch (e) { /* ignore */ }
+    // garante que o menu principal esteja visível para cliente
+    try { const nav = document.querySelector('nav.menu'); if (nav) nav.style.display = ''; } catch(e){}
+    // Esconde o botão Minha Conta (o acesso ao perfil é feito pelo clique no próprio status do cliente)
+    if (btnMinhaConta) btnMinhaConta.style.display = 'none';
+    try {
+      const headerEl = document.querySelector('header.site-header') || document.querySelector('header');
+      if (headerEl) headerEl.querySelectorAll('#btnMinhaConta, .btn-minha-conta').forEach(el => el.remove());
+    } catch(e){}
+
+    // Garante que o status do cliente redirecione para a Área do Cliente ao ser clicado
+    if (clienteStatus) {
+      clienteStatus.style.cursor = 'pointer';
+      clienteStatus.title = 'Acessar Área do Cliente';
+      clienteStatus.onclick = () => {
+        const isHtmlDir = window.location.pathname.includes('/html/');
+        window.location.href = isHtmlDir ? 'meu-perfil.html' : './html/meu-perfil.html';
+      };
     }
-    if (logoutCliente) logoutCliente.style.display = 'inline-flex';
+    if (logoutCliente) {
+      logoutCliente.style.display = 'inline-flex';
+      logoutCliente.innerHTML = `<i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i><span>Sair</span>`;
+    }
     // Esconde o botão de logout administrativo se presente para evitar dois "Sair"
+    try { const adminLogout = document.getElementById('logout'); if (adminLogout) adminLogout.style.display = 'none'; } catch(e){}
+  } else if (tipoUsuario === "Funcionario") {
+    const isAreaPage = paginaAtual.includes('funcionario-area') || paginaAtual.includes('admin-area') || paginaAtual.includes('controle-estoque') || paginaAtual.includes('cadastro-') || paginaAtual.includes('/funcionario-');
+    if (isAreaPage) {
+      if (clienteStatus) {
+        try { clienteStatus.classList.remove('show'); } catch(e) {}
+        clienteStatus.style.display = 'none';
+      }
+      if (statusAdmin) statusAdmin.style.display = 'none';
+      if (btnMinhaConta) btnMinhaConta.style.display = 'none';
+      if (logoutCliente) logoutCliente.style.display = 'none';
+      if (loginButtons) loginButtons.style.display = 'none';
+      try {
+        const nav = document.querySelector('nav.menu');
+        if (nav) nav.style.display = 'none';
+      } catch (e) {}
+
+      // Garante que o logotipo mostre "Funcionário: <Nome>" no topo
+      try {
+        const logo = document.querySelector('.logo');
+        if (logo) {
+          const nome = (localStorage.getItem('nome') || '').trim();
+          const sobrenome = (localStorage.getItem('sobrenome') || '').trim();
+          const fullName = [nome, sobrenome].filter(Boolean).join(' ').trim() || 'Funcionário';
+          const logoText = logo.querySelector('.logo-text') || logo;
+          logoText.textContent = `Funcionário: ${fullName}`;
+        }
+      } catch (e) {}
+
+      try {
+        const headerEl = document.querySelector('header.site-header') || document.querySelector('header');
+        if (headerEl) {
+          headerEl.querySelectorAll('#logoutBtn, #adminBadgeExit, #btnLogoutHeader, #btnLogoutInline, #btnExitNearStatus, #btnExitRight, #logout, .header-logout, .admin-badge-exit, .btn-exit-admin, #clienteStatus, #statusLogado, .status-admin, .header-user').forEach(el => el.remove());
+
+          // Garante que o botão Sair oficial esteja posicionado à direita
+          let btnExitHeader = document.getElementById('btnExitHeader');
+          if (!btnExitHeader) {
+            btnExitHeader = document.createElement('button');
+            btnExitHeader.id = 'btnExitHeader';
+            btnExitHeader.className = 'btn-header-exit';
+            btnExitHeader.type = 'button';
+            btnExitHeader.title = 'Sair do modo funcionário';
+            btnExitHeader.innerHTML = '<i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i><span>Sair</span>';
+            headerEl.appendChild(btnExitHeader);
+          }
+          btnExitHeader.style.display = 'inline-flex';
+          btnExitHeader.onclick = function(e) {
+            e.preventDefault();
+            localStorage.removeItem("tipoUsuario");
+            localStorage.removeItem("token");
+            localStorage.removeItem("nome");
+            localStorage.removeItem("sobrenome");
+            localStorage.removeItem("isAdmin");
+            localStorage.removeItem("foto");
+            localStorage.removeItem("fotoMime");
+            const isHtmlDir = window.location.pathname.includes('/html/');
+            window.location.href = isHtmlDir ? '../index.html' : './index.html';
+          };
+        }
+      } catch (e) {}
+      return;
+    }
+
+    // 🔹 Mostra status funcionário apenas em páginas públicas (como index.html, loja.html)
+    if (clienteStatus) {
+      try { clienteStatus.classList.add('show'); } catch(e) { clienteStatus.style.display = 'flex'; }
+      const nome = localStorage.getItem("nome");
+      const sobrenome = localStorage.getItem("sobrenome");
+
+      const nomeVal = (nome && nome !== "null") ? nome.trim() : "";
+      const sobrenomeVal = (sobrenome && sobrenome !== "null") ? sobrenome.trim() : "";
+      const nomeCompleto = [nomeVal, sobrenomeVal].filter(Boolean).join(' ').trim() || "Funcionário";
+      if (nomeCompletoEl) {
+        nomeCompletoEl.textContent = nomeCompleto;
+      } else {
+        if (nomeCliente) nomeCliente.textContent = nomeCompleto;
+        if (sobrenomeCliente) sobrenomeCliente.textContent = '';
+      }
+
+      const fotoBase64 = localStorage.getItem("foto");
+      const fotoMime = localStorage.getItem("fotoMime") || "image/jpeg";
+      if (fotoBase64 && fotoCliente && fotoBase64 !== "null") {
+        fotoCliente.src = fotoBase64.startsWith('data:') ? fotoBase64 : `data:${fotoMime};base64,${fotoBase64}`;
+      } else if (fotoCliente) {
+        fotoCliente.src = getDefaultAvatarDataUri();
+      }
+    }
+
+    if (loginButtons) loginButtons.style.display = "none";
+    if (statusAdmin) statusAdmin.style.display = "none";
+    try {
+      const headerEl = document.querySelector('header.site-header') || document.querySelector('header');
+      if (headerEl) headerEl.querySelectorAll('.btn-login').forEach(el => el.remove());
+    } catch (e) {
+      console.warn('Não foi possível remover botões de login soltos:', e);
+    }
+
+    // Esconde botões de administração
+    if (btnAddProduto) btnAddProduto.style.display = "none";
+    if (btnRemoverProduto) btnRemoverProduto.style.display = "none";
+    if (btnEditarProduto) btnEditarProduto.style.display = "none";
+
+    // Garante menu visível
+    try { const nav = document.querySelector('nav.menu'); if (nav) nav.style.display = ''; } catch(e){}
+
+    // Esconde botão "Minha Conta" (exclusivo para cliente)
+    if (btnMinhaConta) btnMinhaConta.style.display = 'none';
+
+    // Garante que o botão Sair do funcionário esteja visível e estilizado
+    let btnSairFuncionario = document.getElementById('logoutBtn');
+    if (!btnSairFuncionario) {
+      btnSairFuncionario = document.createElement('button');
+      btnSairFuncionario.id = 'logoutBtn';
+      const header = document.querySelector('header.site-header') || document.querySelector('header');
+      const cart = header ? header.querySelector('.cart-icon') : null;
+      if (cart && cart.parentNode) {
+        cart.parentNode.insertBefore(btnSairFuncionario, cart);
+      } else if (header) {
+        header.appendChild(btnSairFuncionario);
+      }
+    }
+
+    if (btnSairFuncionario) {
+      btnSairFuncionario.style.display = 'inline-flex';
+      btnSairFuncionario.className = 'btn-logout header-logout btn-logout-funcionario';
+      btnSairFuncionario.innerHTML = '<i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i><span style="margin-left:6px;">Sair</span>';
+      btnSairFuncionario.title = 'Sair e voltar para a tela de login';
+      btnSairFuncionario.onclick = function(e) {
+        e.preventDefault();
+        localStorage.removeItem("tipoUsuario");
+        localStorage.removeItem("token");
+        localStorage.removeItem("nome");
+        localStorage.removeItem("sobrenome");
+        localStorage.removeItem("isAdmin");
+        localStorage.removeItem("foto");
+        localStorage.removeItem("fotoMime");
+        const isHtmlDir = window.location.pathname.includes('/html/');
+        window.location.href = isHtmlDir ? '../index.html' : './index.html';
+      };
+    }
+
     try { const adminLogout = document.getElementById('logout'); if (adminLogout) adminLogout.style.display = 'none'; } catch(e){}
   } else {
     // usuário não logado: garantir estado de 'deslogado' visível
     try {
-      if (clienteStatus) clienteStatus.style.display = 'none';
+      if (clienteStatus) { try { clienteStatus.classList.remove('show'); } catch(e) { clienteStatus.style.display = 'none'; } }
       if (statusAdmin) statusAdmin.style.display = 'none';
       if (btnMinhaConta) btnMinhaConta.style.display = 'none';
       if (logoutCliente) logoutCliente.style.display = 'none';
@@ -362,13 +940,35 @@ document.addEventListener("DOMContentLoaded", () => {
       if (lb) {
         lb.style.display = 'flex';
         lb.style.marginLeft = 'auto';
+        try { const nav = document.querySelector('nav.menu'); if (nav) nav.style.display = ''; } catch(e){}
       }
     } catch (e) { /* ignore */ }
   }
 
+    // Garantir que o badge de admin não seja mostrado para usuários não-admin
+    try {
+      const adminBadge = document.getElementById('adminBadge');
+      if (adminBadge && tipoUsuario !== 'Administrador') {
+        adminBadge.style.display = 'none';
+      }
+    } catch (e) { /* ignore */ }
+
   // Logout admin
 if (logoutAdmin) {
   logoutAdmin.addEventListener("click", () => {
+    const currentTipo = localStorage.getItem("tipoUsuario");
+    if (currentTipo === "Funcionario") {
+      localStorage.removeItem("tipoUsuario");
+      localStorage.removeItem("token");
+      localStorage.removeItem("nome");
+      localStorage.removeItem("sobrenome");
+      localStorage.removeItem("isAdmin");
+      localStorage.removeItem("foto");
+      localStorage.removeItem("fotoMime");
+      const isHtmlDir = window.location.pathname.includes('/html/');
+      window.location.href = isHtmlDir ? '../index.html' : './index.html';
+      return;
+    }
     // Remove apenas dados de login, mantém produtos
     localStorage.removeItem("tipoUsuario");
     localStorage.removeItem("token");
@@ -384,9 +984,28 @@ if (logoutAdmin) {
   });
 }
 
-// Logout cliente
+// Logout cliente e funcionário
 if (logoutCliente) {
-  logoutCliente.addEventListener("click", () => {
+  logoutCliente.addEventListener("click", (e) => {
+    e.preventDefault();
+    const currentTipo = localStorage.getItem("tipoUsuario");
+    if (currentTipo === "Funcionario") {
+      localStorage.removeItem("tipoUsuario");
+      localStorage.removeItem("token");
+      localStorage.removeItem("nome");
+      localStorage.removeItem("sobrenome");
+      localStorage.removeItem("isAdmin");
+      localStorage.removeItem("foto");
+      localStorage.removeItem("fotoMime");
+      try {
+        if (typeof removeClientStatusElement === 'function') removeClientStatusElement();
+        if (statusAdmin) statusAdmin.style.display = 'none';
+        ensureLoginButtonsExistAndShow();
+      } catch (e) { /* ignore */ }
+      const isHtmlDir = window.location.pathname.includes('/html/');
+      window.location.href = isHtmlDir ? '../index.html' : './index.html';
+      return;
+    }
     // Remove apenas dados de login, mantém produtos
     localStorage.removeItem("tipoUsuario");
     localStorage.removeItem("nome");
@@ -406,7 +1025,7 @@ if (logoutCliente) {
   try {
     const headerEl = document.querySelector('header.site-header') || document.querySelector('header');
     const _login = ensureLoginButtonsExistAndShow();
-    if (headerEl && _login) {
+    if (!tipoUsuario && headerEl && _login) {
       // move #loginButtons imediatamente antes do ícone do carrinho e alinha à direita
       const cart = headerEl.querySelector('.cart-icon');
       if (cart && cart.parentNode) cart.parentNode.insertBefore(_login, cart);
@@ -436,7 +1055,7 @@ if (logoutCliente) {
 
     // Mostrar/ocultar link 'Ajuda' no menu principal conforme estado de login
     try {
-      const ajudaLink = document.querySelector('nav.menu a[href="ajuda.html"], nav.menu a[href="./html/ajuda.html"]');
+      const ajudaLink = document.querySelector('nav.menu a[href="ajuda.html"], nav.menu a[href="/html/ajuda.html"]');
       if (ajudaLink) ajudaLink.style.display = isLogged ? '' : 'none';
     } catch (e) { /* ignore */ }
   } catch (e) {
@@ -453,8 +1072,8 @@ if (logoutCliente) {
       if (!ul) return;
 
       // procura o <li> com o link de trocas
-      const trocasAnchor = ul.querySelector('a[href="trocas-devolucoes.html"], a[href="./html/trocas-devolucoes.html"]');
-      const ajudaAnchor = ul.querySelector('a[href="ajuda.html"], a[href="./html/ajuda.html"]');
+      const trocasAnchor = ul.querySelector('a[href="trocas-devolucoes.html"], a[href="/html/trocas-devolucoes.html"]');
+      const ajudaAnchor = ul.querySelector('a[href="ajuda.html"], a[href="/html/ajuda.html"]');
 
       if (!isLogged) {
         // esconder ou remover ajuda
@@ -504,8 +1123,24 @@ if (logoutCliente) {
   // chamar inicialmente com o estado atual
   try { ensureHelpPosition(!!tipoUsuario); } catch (e) { /* ignore */ }
 
+  // Destacar link do menu correspondente à página atual
+  (function markCurrentMenuLink() {
+    try {
+      const path = window.location.pathname.split('/').pop().toLowerCase();
+      if (!path) return;
+      document.querySelectorAll('nav.menu a').forEach(a => {
+        const href = (a.getAttribute('href') || '').split('/').pop().toLowerCase();
+        if (!href) return;
+        if (href === path || (path === 'index.html' && (href === 'index.html' || href === '/'))) {
+          a.classList.add('menu-active');
+        }
+      });
+    } catch (e) { /* ignore */ }
+  })();
+
   // Retry/enforce login buttons in case other scripts modify header after load
   (function enforceLoginButtonsRetry() {
+    if (tipoUsuario) return;
     let attempts = 0;
     const maxAttempts = 8;
     const interval = 120; // ms

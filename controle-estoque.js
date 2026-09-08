@@ -54,14 +54,15 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 
     tr.innerHTML = `
-      <td><img class="estoque-pro-img" src="${produto.imagem || produto.img || 'https://via.placeholder.com/80x80?text=Sem+Imagem'}" alt="${produto.nome}" style="border:2.5px solid #6366f1;box-shadow:0 2px 8px #6366f122;"></td>
-      <td style="font-weight:700;color:#232a4d;letter-spacing:-0.5px;">${produto.nome}</td>
-      <td style="color:#2563eb;font-size:1.13em;font-weight:700;">R$ ${produto.precoAtual ? produto.precoAtual : (produto.preco ? produto.preco.toFixed(2) : '-')}</td>
-      <td><input type="number" class="estoque-pro-qtd" value="${produto.quantidade || 1}" readonly style="background:#e0e7ef;font-weight:600;"></td>
-      <td><span style="background:#6366f120;color:#334155;font-weight:600;padding:6px 14px;border-radius:8px;">${dataFormatada}</span></td>
-      <td class="estoque-pro-data-acoes">
-        <a href="./html/produto.html?id=${produto.id}" class="estoque-pro-btn" target="_blank" style="background:linear-gradient(90deg,#2563eb 60%,#6366f1 100%);font-weight:700;box-shadow:0 2px 8px #2563eb22;">Ver Produto</a>
-        <button class="estoque-pro-btn estoque-pro-remover" data-id="${produto.id}" style="background:linear-gradient(90deg,#ef4444 60%,#f87171 100%);font-weight:700;box-shadow:0 2px 8px #ef444422;">Remover</button>
+      <td style="white-space:nowrap;"><img class="estoque-pro-img" src="${produto.imagem || produto.img || 'https://via.placeholder.com/80x80?text=Sem+Imagem'}" alt="${produto.nome}" style="border:2.5px solid #6366f1;box-shadow:0 2px 8px #6366f122;"></td>
+      <td style="font-weight:700;color:#232a4d;letter-spacing:-0.5px;white-space:nowrap;">${produto.nome}</td>
+      <td style="color:#2563eb;font-size:1.13em;font-weight:700;white-space:nowrap;">R$ ${produto.precoAtual ? produto.precoAtual : (produto.preco ? produto.preco.toFixed(2) : '-')}</td>
+      <td style="white-space:nowrap;"><input type="number" class="estoque-pro-qtd" value="${produto.quantidade || 1}" readonly style="background:#e0e7ef;font-weight:600;"></td>
+      <td style="white-space:nowrap;"><span style="background:#6366f120;color:#334155;font-weight:600;padding:6px 14px;border-radius:8px;white-space:nowrap;display:inline-block;">${dataFormatada}</span></td>
+      <td class="estoque-pro-data-acoes" style="white-space:nowrap;display:flex;align-items:center;gap:10px;flex-wrap:nowrap;justify-content:flex-end;">
+        <a href="produto.html?id=${encodeURIComponent(produto.id)}" class="estoque-pro-btn" target="_blank" style="background:linear-gradient(90deg,#2563eb 60%,#6366f1 100%);font-weight:700;box-shadow:0 2px 8px #2563eb22;white-space:nowrap;">Ver Produto</a>
+        <a href="admin-avaliacoes.html?id=${encodeURIComponent(produto.id)}" class="estoque-pro-btn estoque-pro-avaliacoes" style="background:linear-gradient(90deg,#f59e0b 60%,#d97706 100%);font-weight:700;box-shadow:0 2px 8px #f59e0b33;white-space:nowrap;" title="Ver comentários e avaliações dos clientes"><i class="fa-solid fa-star"></i> Avaliações</a>
+        <button class="estoque-pro-btn estoque-pro-remover" data-id="${escapeHtml(produto.id)}" style="background:linear-gradient(90deg,#ef4444 60%,#f87171 100%);font-weight:700;box-shadow:0 2px 8px #ef444422;white-space:nowrap;">Remover</button>
       </td>
     `;
     tbody.appendChild(tr);
