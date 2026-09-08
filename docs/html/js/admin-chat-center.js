@@ -4,8 +4,12 @@
  * e Comunicação Bidirecional em Tempo Real.
  */
 
-document.addEventListener('DOMContentLoaded', function () {
-  // Elementos do DOM
+(function () {
+  if (window.__adminChatCenterLoaded) return;
+  window.__adminChatCenterLoaded = true;
+
+  document.addEventListener('DOMContentLoaded', function () {
+    // Elementos do DOM
   const convListEl = document.getElementById('conversations');
   const messagesEl = document.getElementById('messages');
   const msgInput = document.getElementById('msgInput');
@@ -229,13 +233,13 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!prev) {
           // Nova conversa que acabou de entrar na lista
           knownConversationsMap.set(cid, { unread, status: c.status, lastPreview: c.lastMessagePreview });
-          if (!isFirstLoad && (c.status === 'aguardando_atendente' || (c.status !== 'ia_atendimento' && unread > 0))) {
+          if (!isFirstLoad && c.status !== 'finalizado' && c.status !== 'closed') {
             novoChamadoDetectado = true;
             clienteChamando = c;
           }
         } else {
           // Conversa existente: cliente enviou nova mensagem ou solicitou atendente
-          if ((unread > prev.unread && c.status !== 'ia_atendimento') || (c.status === 'aguardando_atendente' && prev.status !== 'aguardando_atendente')) {
+          if ((unread > prev.unread) || (c.status === 'aguardando_atendente' && prev.status !== 'aguardando_atendente')) {
             novoChamadoDetectado = true;
             clienteChamando = c;
           }
@@ -249,18 +253,18 @@ document.addEventListener('DOMContentLoaded', function () {
       if (novoChamadoDetectado && clienteChamando) {
         playNotificationChime();
         showToast(
-          `🔔 Novo Chamado Aberto!`,
-          `${clienteChamando.name} quer falar com um atendente (${clienteChamando.protocol || `#CLI-${clienteChamando.id}`})`,
+          `🔔 Novo Chamado Conectado!`,
+          `${clienteChamando.name} (${clienteChamando.protocol || `#CLI-${clienteChamando.id}`})`,
           clienteChamando.id
         );
       }
 
-      // Atualiza badge de total aguardando (ignora chamados em autoatendimento com IA)
-      const totalAguardando = conversations.filter(c => c.status === 'aguardando_atendente' || (c.status !== 'ia_atendimento' && c.unread && c.unread > 0)).length;
+      // Atualiza badge de total na fila ao vivo (todos os chamados ativos)
+      const totalFilaAoVivo = conversations.filter(c => c.status !== 'finalizado' && c.status !== 'closed').length;
       if (unreadTotalBadge) {
-        if (totalAguardando > 0) {
+        if (totalFilaAoVivo > 0) {
           unreadTotalBadge.style.display = 'inline-flex';
-          unreadTotalBadge.textContent = String(totalAguardando);
+          unreadTotalBadge.textContent = String(totalFilaAoVivo);
         } else {
           unreadTotalBadge.style.display = 'none';
         }
@@ -314,12 +318,10 @@ document.addEventListener('DOMContentLoaded', function () {
       totalConcluidosBadge.textContent = String(totalConcluidos);
     }
 
-    // FILA AO VIVO DO ATENDENTE: Exibe apenas chamados que necessitam de atendimento humano oficial
-    // Remove chamados concluídos e chamados em autoatendimento com a IA (ia_atendimento)
+    // FILA AO VIVO DO ATENDENTE: Exibe todos os chamados de clientes ativos
     const chamadosAoVivo = conversations.filter(c => 
       c.status !== 'finalizado' && 
-      c.status !== 'closed' && 
-      c.status !== 'ia_atendimento'
+      c.status !== 'closed'
     );
 
     let filtradas = chamadosAoVivo.filter(c => {
@@ -327,9 +329,9 @@ document.addEventListener('DOMContentLoaded', function () {
         return c.status === 'aguardando_atendente' || c.status === 'open' || (c.unread && c.unread > 0);
       }
       if (activeFilter === 'em_atendimento') {
-        return c.status === 'em_atendimento' && (!c.unread || c.unread === 0);
+        return c.status === 'em_atendimento' || c.status === 'ia_atendimento';
       }
-      return true; // 'all' (Todos da fila ao vivo de atendimento humano)
+      return true; // 'all' (Todos da fila ao vivo de clientes)
     });
 
     if (searchTerm) {
@@ -354,7 +356,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     convListEl.innerHTML = filtradas.map(c => {
       const isSelected = selectedConversation && String(selectedConversation.id) === String(c.id);
-      const isAguardando = c.status === 'aguardando_atendente' || c.status === 'open' || (c.status !== 'ia_atendimento' && c.unread && c.unread > 0);
+      const isAguardando = c.status === 'aguardando_atendente' || c.status === 'open' || (c.unread && c.unread > 0);
       const isEmAtendimento = c.status === 'em_atendimento';
       const isIA = c.status === 'ia_atendimento';
 
@@ -364,7 +366,9 @@ document.addEventListener('DOMContentLoaded', function () {
       } else if (isEmAtendimento) {
         statusBadge = `<span class="badge-chamado-ativo"><i class="fa-solid fa-comments"></i> Em curso</span>`;
       } else if (isIA) {
-        statusBadge = `<span class="badge-chamado-ia" style="background:rgba(56,189,248,0.15);color:#38bdf8;border:1px solid rgba(56,189,248,0.3);padding:2px 8px;border-radius:12px;font-size:0.75rem;font-weight:700;"><i class="fa-solid fa-robot"></i> MixIA</span>`;
+        statusBadge = `<span class="badge-chamado-ia" style="background:rgba(56,189,248,0.15);color:#38bdf8;border:1px solid rgba(56,189,248,0.3);padding:2px 8px;border-radius:12px;font-size:0.75rem;font-weight:700;"><i class="fa-solid fa-user-clock"></i> Conectado</span>`;
+      } else {
+        statusBadge = `<span class="badge-chamado-ativo"><i class="fa-solid fa-comments"></i> Ativo</span>`;
       }
 
       const nomeLimpo = formatarNomeCliente(c.name);
@@ -458,6 +462,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const proto = c.protocol || `#CLI-${c.id}`;
     let statusTexto = 'Atendimento em andamento';
     if (c.status === 'aguardando_atendente' || c.status === 'open') statusTexto = '🔔 Cliente aguardando sua resposta';
+    if (c.status === 'ia_atendimento') statusTexto = '🟢 Cliente conectado no suporte';
     if (c.status === 'finalizado') statusTexto = '✅ Atendimento encerrado';
 
     if (chatStatusText) {
@@ -497,8 +502,9 @@ document.addEventListener('DOMContentLoaded', function () {
     if (msgsHumanas.length === 0) {
       messagesEl.innerHTML = `
         <div class="chat-empty-queue" style="margin-top:40px;">
-          <i class="fa-solid fa-comment-dots" style="font-size:2.5rem; color:#334155;"></i>
-          <p>Nenhuma mensagem de atendimento humano trocada ainda com este cliente.</p>
+          <i class="fa-solid fa-user-check" style="font-size:2.5rem; color:#38bdf8; margin-bottom:8px;"></i>
+          <h4 style="color:#f1f5f9; margin:0 0 6px;">Cliente Conectado</h4>
+          <p style="color:#94a3b8; margin:0;">Este cliente está ativo na central. Digite sua mensagem abaixo para iniciar o atendimento humano.</p>
         </div>
       `;
       return;
@@ -938,3 +944,4 @@ document.addEventListener('DOMContentLoaded', function () {
   carregarFilaChamados();
   pollingQueueInterval = setInterval(carregarFilaChamados, 2500);
 });
+})();
