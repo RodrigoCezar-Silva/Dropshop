@@ -6,6 +6,35 @@ document.addEventListener("DOMContentLoaded", () => {
   const formLogin = document.getElementById("formLogin");
   const mensagemErro = document.getElementById("mensagemErro");
 
+  // helper to navigate to admin area trying common candidates
+  async function navigateToAdmin() {
+    const isHtmlDir = window.location.pathname.includes('/html/');
+    const candidates = isHtmlDir
+      ? ['admin-area.html', '/html/admin-area.html', '/admin-area.html']
+      : ['html/admin-area.html', 'admin-area.html', '/html/admin-area.html', '/admin-area.html'];
+    for (const p of candidates) {
+      try {
+        const res = await fetch(p, { method: 'HEAD' });
+        if (res && res.ok) { window.location.href = p; return; }
+      } catch (e) { }
+    }
+    window.location.href = isHtmlDir ? 'admin-area.html' : 'html/admin-area.html';
+  }
+
+  async function navigateToFuncionario() {
+    const isHtmlDir = window.location.pathname.includes('/html/');
+    const candidates = isHtmlDir
+      ? ['funcionario-area.html', '/html/funcionario-area.html', '/funcionario-area.html']
+      : ['html/funcionario-area.html', 'funcionario-area.html', '/html/funcionario-area.html', '/funcionario-area.html'];
+    for (const p of candidates) {
+      try {
+        const res = await fetch(p, { method: 'HEAD' });
+        if (res && res.ok) { window.location.href = p; return; }
+      } catch (e) { }
+    }
+    window.location.href = isHtmlDir ? 'funcionario-area.html' : 'html/funcionario-area.html';
+  }
+
   if (formLogin) {
     formLogin.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -22,34 +51,59 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       try {
-        const base = window.AUTH_SERVER || window.location.origin;
-        const isRunningOnGitHubPages = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
-        if (!window.AUTH_SERVER && isRunningOnGitHubPages) {
-          if (mensagemErro) {
-            mensagemErro.innerText = "Backend não configurado. Atualize docs/auth-config.json com a URL da sua API.";
-            mensagemErro.style.color = "red";
-          }
-          return;
+        const defaultBackend = 'http://localhost:3000';
+        const hostname = window.location.hostname;
+        const isLocalHost = hostname === 'localhost' || hostname === '127.0.0.1' || !hostname || window.location.protocol === 'file:';
+        let base = window.AUTH_SERVER;
+        const isPlaceholderBase = base && /SEU_API_DOMAIN|your-api|example\.com/i.test(base);
+        const isInvalidAuthServer = !base || base.includes('.html') || isPlaceholderBase;
+        if (isInvalidAuthServer) {
+          base = (isLocalHost && window.location.port === '3000') ? window.location.origin : defaultBackend;
         }
+        if (!base) base = defaultBackend;
 
-        const response = await fetch(`${base.replace(/\/$/, '')}/login-admin`, {
+        let response = await fetch(`${base.replace(/\/$/, '')}/login-admin`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ usuario, senha })
         });
 
-        const result = await response.json();
+        if (response.status === 405 && base !== defaultBackend) {
+          try {
+            response = await fetch(`${defaultBackend}/login-admin`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ usuario, senha })
+            });
+          } catch (e) { }
+        }
+
+        let result = {};
+        try {
+          const text = await response.text();
+          result = text ? JSON.parse(text) : {};
+        } catch (e) {
+          result = {};
+        }
 
         if (response.ok && result.sucesso) {
-          // guarda dados no navegador
           localStorage.setItem("token", result.token);
-          localStorage.setItem("nome", result.nome);
-          localStorage.setItem("sobrenome", result.sobrenome);
-          localStorage.setItem("tipoUsuario", "Administrador");
-          localStorage.setItem("isAdmin", "true"); // 🔹 garante compatibilidade com comentarios.js
-
-          // redirect to admin area after successful admin login
-          window.location.href = "admin-area.html";
+          localStorage.setItem("nome", result.nome || "");
+          localStorage.setItem("sobrenome", result.sobrenome || "");
+          if (result.fotoBase64) {
+            localStorage.setItem('foto', result.fotoBase64);
+            if (result.fotoMime) localStorage.setItem('fotoMime', result.fotoMime);
+          }
+          const role = (result.role || 'admin').toString().toLowerCase();
+          if (role === 'funcionario') {
+            localStorage.setItem("tipoUsuario", "Funcionario");
+            localStorage.removeItem("isAdmin");
+            await navigateToFuncionario();
+          } else {
+            localStorage.setItem("tipoUsuario", "Administrador");
+            localStorage.setItem("isAdmin", "true");
+            await navigateToAdmin();
+          }
         } else {
           if (mensagemErro) {
             mensagemErro.innerText = result.mensagem || "Usuário ou senha inválidos.";
@@ -58,6 +112,29 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       } catch (error) {
         console.error("Erro de conexão:", error);
+        // se o backend não estiver acessível, tentar login mock se configurado em auth-config
+        const cfg = window.AUTH_CONFIG || {};
+        if (cfg.mockAdmin && cfg.mockAdmin.enabled) {
+          const mockUser = cfg.mockAdmin.user || 'admin';
+          const mockPass = cfg.mockAdmin.pass || 'admin';
+          if (usuario === mockUser && senha === mockPass) {
+            // mock successful login
+            localStorage.setItem("token", "MOCK_TOKEN");
+            localStorage.setItem("nome", mockUser);
+            localStorage.setItem("sobrenome", "");
+            localStorage.setItem("tipoUsuario", "Administrador");
+            localStorage.setItem("isAdmin", "true");
+            await navigateToAdmin();
+            return;
+          } else {
+            if (mensagemErro) {
+              mensagemErro.innerText = "Usuário ou senha inválidos (mock).";
+              mensagemErro.style.color = "red";
+            }
+            return;
+          }
+        }
+
         if (mensagemErro) {
           mensagemErro.innerText = "❌ Erro de conexão com servidor!";
           mensagemErro.style.color = "red";

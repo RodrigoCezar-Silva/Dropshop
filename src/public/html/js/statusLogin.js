@@ -17,15 +17,6 @@
       try {
         window.history.replaceState(null, '', window.location.pathname + window.location.hash);
       } catch (e) {}
-    } else if (isIndex) {
-      // Se abrir a página index e não houver uma sessão ativa iniciada nesta aba, garante deslogado
-      const activeSession = sessionStorage.getItem('activeClienteSession') === '1';
-      const tipo = localStorage.getItem('tipoUsuario');
-      // Funcionário ou Administrador NUNCA devem permanecer logados na home (index.html)
-      if (tipo === 'Funcionario' || tipo === 'Administrador' || !activeSession) {
-        const keys = ['tipoUsuario','token','nome','sobrenome','isAdmin','foto','fotoMime','clienteCPF','email','clienteTelefone','clienteId'];
-        keys.forEach(k => localStorage.removeItem(k));
-      }
     }
   } catch (e) {}
 })();

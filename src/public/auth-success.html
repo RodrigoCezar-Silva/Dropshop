@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Autenticação</title>
+</head>
+<body>
+  <p>Autenticando...</p>
+  <script>
+    (function(){
+      function qs(){
+        const q = {};
+        location.search.replace(/^\?/, '').split('&').forEach(function(part){
+          if(!part) return; const kv = part.split('='); q[decodeURIComponent(kv[0])] = decodeURIComponent(kv[1]||'');
+        });
+        return q;
+      }
+      const p = qs();
+      if (p.token) {
+        localStorage.setItem('token', p.token);
+        localStorage.setItem('tipoUsuario', p.tipoUsuario || 'Administrador');
+        if (p.nome) localStorage.setItem('nome', p.nome);
+        if (p.sobrenome) localStorage.setItem('sobrenome', p.sobrenome);
+        // redirect to admin area
+        setTimeout(()=> location.href = './html/admin-area.html', 500);
+      } else {
+        document.body.innerHTML = '<p>Erro na autenticação via GitHub.</p>';
+      }
+    })();
+  </script>
+</body>
+</html>
