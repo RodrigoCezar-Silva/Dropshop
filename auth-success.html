@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Autenticação</title>
+    <link rel="stylesheet" href="/css/chatbot-widget.css" />
 </head>
 <body>
   <p>Autenticando...</p>
@@ -23,7 +24,7 @@
         if (p.nome) localStorage.setItem('nome', p.nome);
         if (p.sobrenome) localStorage.setItem('sobrenome', p.sobrenome);
         // redirect to admin area
-        setTimeout(()=> location.href = './html/admin-area.html', 500);
+        setTimeout(()=> location.href = '/html/admin-area.html', 500);
       } else {
         document.body.innerHTML = '<p>Erro na autenticação via GitHub.</p>';
       }
