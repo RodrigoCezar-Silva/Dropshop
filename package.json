@@ -42,6 +42,7 @@
     "upload:gist": "node scripts/upload-to-gist.js",
     "update:github-file": "node scripts/update-github-file.js",
     "export-db": "node scripts/export-db-to-json.js",
+    "save": "npm run prepare:docs && git add . && git commit -m \"Atualização automática do projeto\" && git push origin main",
     "test": "echo \"No tests specified\" && exit 0"
   },
   "keywords": [],
