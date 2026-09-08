@@ -19,7 +19,7 @@
   <!-- Header Exclusivo do Canal de Atendimento ao Cliente -->
   <header class="atendimento-header">
     <div class="atendimento-brand">
-      <a href="./index.html" class="logo-link" style="display:flex; align-items:center; gap:8px; text-decoration:none;">
+      <a href="index.html" class="logo-link" style="display:flex; align-items:center; gap:8px; text-decoration:none;">
         <span class="logo-icon" style="font-size:1.6rem;">🛒</span>
         <div class="logo-text" style="font-weight:900; font-size:1.25rem; letter-spacing:0.5px;">
           <span style="color:#00ff88;">MIX</span><span style="color:#ffffff;">PROMOÇÃO</span>
@@ -37,10 +37,10 @@
       </div>
 
       <nav class="atendimento-nav">
-        <a href="./index.html" class="nav-pill"><i class="fa-solid fa-house"></i> Início</a>
-        <a href="./loja.html" class="nav-pill"><i class="fa-solid fa-store"></i> Loja</a>
-        <a href="./meu-perfil.html" class="nav-pill"><i class="fa-solid fa-user"></i> Minha Conta</a>
-        <a href="./reclamacoes.html" class="nav-pill"><i class="fa-solid fa-circle-exclamation"></i> Reclamações</a>
+        <a href="index.html" class="nav-pill"><i class="fa-solid fa-house"></i> Início</a>
+        <a href="loja.html" class="nav-pill"><i class="fa-solid fa-store"></i> Loja</a>
+        <a href="meu-perfil.html" class="nav-pill"><i class="fa-solid fa-user"></i> Minha Conta</a>
+        <a href="reclamacoes.html" class="nav-pill"><i class="fa-solid fa-circle-exclamation"></i> Reclamações</a>
       </nav>
     </div>
   </header>
@@ -55,69 +55,31 @@
         <!-- Cartão de Protocolo e Identificação -->
         <div class="protocol-badge-card">
           <div class="protocol-label">PROTOCOLO ATIVO</div>
-          <div class="protocol-num" id="protocolNumber">#CLI-2026-84920</div>
+          <div class="protocol-num" id="protocolNumber">#MIX-2026-84920</div>
           <div class="customer-name-tag">
             <i class="fa-solid fa-user-check"></i>
-            <span>Cliente: <strong id="userGreetingName">Cliente MIX-PROMOÇÃO</strong></span>
+            <span>Cliente: <strong id="userGreetingName">Rodrigo Cezar</strong></span>
           </div>
         </div>
 
-        <div class="sidebar-top">
-          <div class="sidebar-title">
-            <i class="fa-solid fa-comments"></i> Canais & Dúvidas
-          </div>
-        </div>
-
-        <div class="sidebar-search">
-          <input id="chatSearch" placeholder="Pesquisar canal ou assunto..." aria-label="Pesquisar assuntos">
-        </div>
-
-        <!-- Lista de Canais de Suporte -->
-        <div id="conversations" class="conversations" role="list">
-          
-          <div class="conv-item active" data-topic="geral">
-            <div class="conv-avatar attendant-av"><i class="fa-solid fa-headset"></i></div>
-            <div class="conv-info">
-              <div class="name">Atendente Online (Ao Vivo)</div>
-              <div class="meta">Suporte oficial humanizado • Online agora</div>
-            </div>
-            <div class="conv-right">
-              <span class="conv-unread">1</span>
+        <!-- Painel de Informações do Autoatendimento IA -->
+        <div class="sidebar-ai-card">
+          <div class="ai-card-header">
+            <div class="ai-avatar-icon"><i class="fa-solid fa-robot"></i></div>
+            <div class="ai-info-meta">
+              <strong>MixIA 24h Ativa</strong>
+              <span class="ai-status-pulse"><span class="pulse-dot"></span> Autoatendimento</span>
             </div>
           </div>
-
-          <div class="conv-item" data-topic="pedidos">
-            <div class="conv-avatar"><i class="fa-solid fa-box"></i></div>
-            <div class="conv-info">
-              <div class="name">Pedidos e Rastreamento</div>
-              <div class="meta">Status de entrega, envio e rastreio Correios</div>
-            </div>
+          <p class="ai-card-text">
+            Nossa Inteligência Artificial está pronta para responder suas dúvidas sobre pedidos, frete, pagamentos e trocas no chat ao lado.
+          </p>
+          <div class="ai-features-list">
+            <div class="ai-feature-pill"><i class="fa-solid fa-bolt" style="color:#38bdf8;"></i> Resposta Instantânea</div>
+            <div class="ai-feature-pill"><i class="fa-solid fa-shield-halved" style="color:#10b981;"></i> Compra Garantida</div>
+            <div class="ai-feature-pill"><i class="fa-solid fa-clock-rotate-left" style="color:#fbbf24;"></i> 7 Dias de Troca CDC</div>
+            <div class="ai-feature-pill"><i class="fa-solid fa-headset" style="color:#a78bfa;"></i> Suporte Humano via Chat</div>
           </div>
-
-          <div class="conv-item" data-topic="pagamentos">
-            <div class="conv-avatar"><i class="fa-solid fa-receipt"></i></div>
-            <div class="conv-info">
-              <div class="name">Pagamentos e PIX</div>
-              <div class="meta">Comprovantes, aprovação e boletos</div>
-            </div>
-          </div>
-
-          <div class="conv-item" data-topic="trocas">
-            <div class="conv-avatar"><i class="fa-solid fa-rotate-left"></i></div>
-            <div class="conv-info">
-              <div class="name">Trocas e Devoluções</div>
-              <div class="meta">Garantia de 7 dias e suporte a defeitos</div>
-            </div>
-          </div>
-
-          <div class="conv-item" data-topic="chatbot">
-            <div class="conv-avatar"><i class="fa-solid fa-robot"></i></div>
-            <div class="conv-info">
-              <div class="name">MixIA - Inteligência 24h</div>
-              <div class="meta">Tira-dúvidas automático do catálogo</div>
-            </div>
-          </div>
-
         </div>
 
         <!-- Rodapé da Sidebar com Botões de Ação -->
@@ -132,27 +94,27 @@
 
       </aside>
 
-      <!-- Área de Chat Principal com Atendente -->
+      <!-- Área de Chat Principal com Atendente / MixIA -->
       <section class="chat-area">
         <div class="chat-panel">
           
-          <!-- Cabeçalho do Chat com Atendente -->
+          <!-- Cabeçalho do Chat -->
           <header class="chat-header">
             <div class="chat-header-left">
               <div class="attendant-avatar-wrap">
-                <div class="attendant-avatar">
-                  <i class="fa-solid fa-headset"></i>
+                <div class="attendant-avatar" style="background:linear-gradient(135deg,#0072ff,#00c6ff);">
+                  <i class="fa-solid fa-robot"></i>
                 </div>
                 <span class="avatar-status-dot"></span>
               </div>
               
               <div class="chat-meta">
                 <div class="chat-title-row">
-                  <span id="chatHeaderName" class="chat-name">Atendente Online</span>
-                  <span class="verified-badge" title="Atendente Oficial Verificada"><i class="fa-solid fa-circle-check"></i> Oficial</span>
+                  <span id="chatHeaderName" class="chat-name">MixIA — Inteligência Artificial 24h</span>
+                  <span id="chatHeaderBadge" class="verified-badge" title="Inteligência Artificial Oficial"><i class="fa-solid fa-wand-magic-sparkles"></i> IA Oficial</span>
                 </div>
                 <div id="chatHeaderStatus" class="chat-status">
-                  <span class="pulse-dot"></span> Atendente Online • Atendimento ao Cliente • Protocolo <span id="protocolSubtitle">#CLI-2026</span>
+                  <span class="pulse-dot"></span> Online agora • Autoatendimento Inteligente • Protocolo <span id="protocolSubtitle">#MIX-2026</span>
                 </div>
               </div>
             </div>
@@ -173,14 +135,14 @@
           </div>
 
           <!-- Compositor de Mensagens com Envio e Anexos -->
-          <div class="chat-composer" role="region" aria-label="Enviar mensagem para atendente">
+          <div class="chat-composer" role="region" aria-label="Enviar mensagem">
             <input type="file" id="fileAttachInput" accept="image/*,.pdf,.txt" style="display:none" />
             
             <button id="btnAttach" class="composer-icon" type="button" title="Anexar comprovante ou foto">
               <i class="fa-solid fa-paperclip"></i>
             </button>
             
-            <input id="msgInput" placeholder="Digite sua mensagem para o atendente..." autocomplete="off" aria-label="Mensagem para atendente">
+            <input id="msgInput" placeholder="Tire sua dúvida com a MixIA ou peça um atendente..." autocomplete="off" aria-label="Mensagem">
             
             <div class="composer-actions">
               <button id="sendMsgBtn" class="composer-send" type="button" title="Enviar mensagem">
@@ -197,7 +159,5 @@
 
   <!-- Scripts -->
   <script src="./js/atendimento-cliente.js" defer></script>
-  <script src="/js/atendimento-cliente.js" defer></script>
 </body>
 </html>
-

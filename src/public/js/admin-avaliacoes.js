@@ -241,9 +241,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
           <div class="comentario-admin-footer">
             <span class="comentario-id-tag">ID Avaliação: #${c.id}</span>
-            <button class="btn-admin-excluir-comentario" data-id="${c.id}" title="Excluir este comentário do produto">
-              <i class="fa-solid fa-trash-can"></i> Excluir Comentário
-            </button>
           </div>
         </article>
       `;
@@ -253,13 +250,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     containerLista.querySelectorAll(".comentario-midia-thumb, .comentario-video-thumb-box").forEach(el => {
       el.addEventListener("click", () => {
         abrirLightbox(el.dataset.tipo, el.dataset.src);
-      });
-    });
-
-    // Eventos nos botões de excluir
-    containerLista.querySelectorAll(".btn-admin-excluir-comentario").forEach(btn => {
-      btn.addEventListener("click", () => {
-        abrirModalExclusao(Number(btn.dataset.id));
       });
     });
   }

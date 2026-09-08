@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Histórico de Chamados Concluídos - MIX-PROMOÇÃO</title>
+
+  <!-- CSS Principal & FontAwesome -->
+  <link rel="stylesheet" href="../css/style-index.css">
+  <link rel="stylesheet" href="/css/style-index.css">
+  <link rel="stylesheet" href="../css/menu.css">
+  <link rel="stylesheet" href="/css/menu.css">
+  <link rel="stylesheet" href="../css/admin-chat.css">
+  <link rel="stylesheet" href="/css/admin-chat.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body class="dark-chat">
+
+  <!-- Header da Central de Histórico de Chamados -->
+  <header class="atendimento-header">
+    <div class="atendimento-brand">
+      <a href="index.html" class="logo-link" style="display:flex; align-items:center; gap:8px; text-decoration:none;">
+        <span class="logo-icon" style="font-size:1.6rem;">🛒</span>
+        <div class="logo-text" style="font-weight:900; font-size:1.25rem; letter-spacing:0.5px;">
+          <span style="color:#00ff88;">MIX</span><span style="color:#ffffff;">PROMOÇÃO</span>
+        </div>
+      </a>
+      <div class="atendimento-badge" style="background:rgba(16,185,129,0.15); border-color:rgba(16,185,129,0.35); color:#34d399;">
+        <i class="fa-solid fa-box-archive"></i> Histórico de Chamados Concluídos
+      </div>
+    </div>
+
+    <div class="atendimento-header-right">
+      <nav class="atendimento-nav">
+        <a href="admin-chat-center.html" class="nav-pill" style="background:rgba(0,198,255,0.15); border-color:rgba(0,198,255,0.4); color:#38bdf8;" title="Ir para a Central de Atendimento ao Vivo">
+          <i class="fa-solid fa-headset"></i> Atendimento ao Vivo
+        </a>
+        <a href="admin-area.html" class="nav-pill"><i class="fa-solid fa-gauge-high"></i> Painel Admin</a>
+        <button id="btnLogoutAdmin" class="nav-pill" type="button" style="border-color:rgba(239,68,68,0.35); color:#f87171; background:transparent; cursor:pointer;" title="Sair"><i class="fa-solid fa-right-from-bracket"></i> Sair</button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Conteúdo Principal do Histórico -->
+  <main class="historico-main">
+    
+    <!-- Cards de Estatísticas Superiores -->
+    <section class="historico-stats-grid">
+      <div class="historico-stat-card">
+        <div class="historico-stat-icon green">
+          <i class="fa-solid fa-circle-check"></i>
+        </div>
+        <div class="historico-stat-info">
+          <div class="stat-label">Total Concluídos</div>
+          <div id="statTotalEncerrados" class="stat-val">0</div>
+        </div>
+      </div>
+
+      <div class="historico-stat-card">
+        <div class="historico-stat-icon blue">
+          <i class="fa-solid fa-calendar-check"></i>
+        </div>
+        <div class="historico-stat-info">
+          <div class="stat-label">Finalizados Hoje</div>
+          <div id="statHojeEncerrados" class="stat-val">0</div>
+        </div>
+      </div>
+
+      <div class="historico-stat-card">
+        <div class="historico-stat-icon purple">
+          <i class="fa-solid fa-users"></i>
+        </div>
+        <div class="historico-stat-info">
+          <div class="stat-label">Clientes Únicos</div>
+          <div id="statClientesAtendidos" class="stat-val">0</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Barra de Ferramentas e Filtros -->
+    <section class="historico-toolbar">
+      <div class="historico-search-box">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input id="historicoSearch" type="text" placeholder="Pesquisar por protocolo (#CLI-...), nome do cliente ou assunto..." aria-label="Pesquisar histórico">
+      </div>
+
+      <div class="historico-filter-chips">
+        <button class="btn-chip-filter active" data-period="all" type="button">Todos</button>
+        <button class="btn-chip-filter" data-period="today" type="button">Hoje</button>
+        <button class="btn-chip-filter" data-period="week" type="button">Últimos 7 dias</button>
+        <button class="btn-chip-filter" data-period="month" type="button">Este mês</button>
+        <button id="btnRecarregarHistorico" class="btn-chip-filter" type="button" title="Atualizar histórico"><i class="fa-solid fa-rotate-right"></i> Atualizar</button>
+      </div>
+    </section>
+
+    <!-- Painel Duplo: Lista de Chamados à Esquerda + Visualizador à Direita -->
+    <section class="historico-layout">
+      
+      <!-- Painel Esquerdo: Lista de Chamados Concluídos -->
+      <div class="historico-list-pane">
+        <div class="historico-list-header">
+          <span><i class="fa-solid fa-list-check" style="color:#10b981; margin-right:6px;"></i> Chamados Arquivados</span>
+          <span id="historicoCounterBadge" class="badge-count-pill" style="background:rgba(255,255,255,0.08); color:#94a3b8; font-size:0.75rem; padding:2px 8px; border-radius:999px;">0 chamados</span>
+        </div>
+
+        <div id="historicoListScroll" class="historico-list-scroll">
+          <div class="chat-empty-queue">
+            <i class="fa-solid fa-spinner fa-spin" style="color:#10b981;"></i>
+            Carregando histórico de chamados...
+          </div>
+        </div>
+      </div>
+
+      <!-- Painel Direito: Transcrição e Detalhes do Chamado Selecionado -->
+      <div class="historico-detail-pane">
+        
+        <!-- Cabeçalho do Visualizador -->
+        <div id="historicoDetailHeader" class="historico-detail-header" style="display:none;">
+          <div class="historico-detail-title">
+            <h3 id="detailCustomerName">Nome do Cliente</h3>
+            <p id="detailSubtitle">Protocolo #CLI-2026 • Encerrado em --/--/----</p>
+          </div>
+          <div>
+            <button id="btnExportDetailChat" class="chat-btn-action" type="button" title="Baixar histórico em arquivo de texto">
+              <i class="fa-solid fa-file-arrow-down"></i> <span>Baixar Transcrição (.txt)</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Área de Rolagem das Mensagens Históricas -->
+        <div id="historicoMessagesViewer" class="historico-messages-viewer">
+          <div class="historico-empty-state">
+            <i class="fa-solid fa-folder-open"></i>
+            <h3 style="color:#fff; margin-bottom:6px; font-size:1.15rem;">Nenhum chamado selecionado</h3>
+            <p style="max-width:380px; margin:0 auto; line-height:1.4;">Clique em um dos chamados concluídos na lista à esquerda para visualizar a transcrição integral de todas as mensagens trocadas.</p>
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- Scripts -->
+  <script src="../js/admin-chat-historico.js" defer></script>
+  <script src="./js/admin-chat-historico.js" defer></script>
+  <script src="/js/admin-chat-historico.js" defer></script>
+</body>
+</html>

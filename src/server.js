@@ -746,8 +746,8 @@ app.get("/api/cliente/cep/:cep", async (req, res) => {
   }
 });
 
-// ---------------- SIMPLE CHAT STORE (DEV) ---------------- //
-// Endpoints usados pelo frontend de atendimento/admin para listar conversas e mensagens.
+// ---------------- REAL-TIME CHAT STORE & API ---------------- //
+// Endpoints usados pelo canal de atendimento ao cliente e central de conversas (admin/atendente).
 const CHAT_STORE_PATH = path.join(__dirname, 'tmp', 'chat_store.json');
 function readChatStore() {
   try {
@@ -764,98 +764,168 @@ function writeChatStore(data) {
   } catch (e) { console.error('writeChatStore error', e && e.message); return false; }
 }
 
-// Listar conversas
+// Listar conversas / chamados
 app.get('/api/conversations', (req, res) => {
   (async () => {
-    // tentar persistência em DB primeiro
     try {
       const conn = await createDbConnection();
       const clienteEmail = req.query && req.query.cliente_email ? String(req.query.cliente_email).trim() : null;
-      let query = `SELECT id, name, status, unread, last_message_preview as lastMessagePreview, online, UNIX_TIMESTAMP(updated_at)*1000 AS updatedAt FROM chat_conversations`;
+      const protocol = req.query && req.query.protocol ? String(req.query.protocol).trim() : null;
+      const statusFilter = req.query && req.query.status ? String(req.query.status).trim() : null;
+
+      let query = `SELECT id, name, protocol, status, unread, last_message_preview as lastMessagePreview, online, cliente_email, UNIX_TIMESTAMP(created_at)*1000 AS createdAt, UNIX_TIMESTAMP(updated_at)*1000 AS updatedAt FROM chat_conversations WHERE 1=1`;
       const params = [];
+
+      if (protocol) {
+        query += ` AND protocol = ?`;
+        params.push(protocol);
+      }
       if (clienteEmail) {
-        query += ` WHERE cliente_email = ?`;
+        query += ` AND cliente_email = ?`;
         params.push(clienteEmail);
       }
+      if (statusFilter) {
+        query += ` AND status = ?`;
+        params.push(statusFilter);
+      }
+
       query += ` ORDER BY updated_at DESC`;
       const [rows] = await conn.execute(query, params);
-        if (Array.isArray(rows) && rows.length) {
-          await conn.end();
-          return res.json(rows.map(r => ({ id: r.id, name: r.name, status: r.status, unread: r.unread, lastMessagePreview: r.lastMessagePreview, online: !!r.online, updatedAt: r.updatedAt })));
-        }
+      await conn.end();
 
-        // Se não houver registros em chat_conversations, tentar derivar conversas da tabela 'chat'
-        // (caso mensagens existam sem registro na tabela de conversas)
-        let rows2;
-        if (clienteEmail) {
-          // juntar com chat_conversations para filtrar por cliente_email
-          [rows2] = await conn.execute(`
-            SELECT cc.id AS id,
-                   cc.name AS name,
-                   (SELECT text FROM chat WHERE conversation_id = cc.id ORDER BY sent_at DESC LIMIT 1) AS lastMessagePreview,
-                   UNIX_TIMESTAMP(MAX(ch.sent_at))*1000 AS updatedAt,
-                   cc.unread AS unread,
-                   cc.online AS online
-            FROM chat ch
-            JOIN chat_conversations cc ON cc.id = ch.conversation_id
-            WHERE cc.cliente_email = ?
-            GROUP BY cc.id
-            ORDER BY updatedAt DESC
-          `, [clienteEmail]);
-        } else {
-          [rows2] = await conn.execute(`
-            SELECT ch.conversation_id AS id,
-                   (SELECT name FROM chat_conversations cc WHERE cc.id = ch.conversation_id LIMIT 1) AS name,
-                   (SELECT text FROM chat WHERE conversation_id = ch.conversation_id ORDER BY sent_at DESC LIMIT 1) AS lastMessagePreview,
-                   UNIX_TIMESTAMP(MAX(ch.sent_at))*1000 AS updatedAt,
-                   0 AS unread,
-                   1 AS online
-            FROM chat ch
-            GROUP BY ch.conversation_id
-            ORDER BY updatedAt DESC
-          `);
-        }
-        await conn.end();
-        if (Array.isArray(rows2) && rows2.length) {
-          return res.json(rows2.map(r => ({ id: r.id, name: r.name || (`Conversa ${r.id}`), status: 'open', unread: r.unread || 0, lastMessagePreview: r.lastMessagePreview || '', online: !!r.online, updatedAt: r.updatedAt })));
-        }
+      if (Array.isArray(rows)) {
+        return res.json(rows.map(r => ({
+          id: r.id,
+          name: r.name || 'Cliente',
+          protocol: r.protocol || (`#CLI-${r.id}`),
+          status: r.status || 'aguardando_atendente',
+          unread: Number(r.unread) || 0,
+          lastMessagePreview: r.lastMessagePreview || '',
+          online: !!r.online,
+          cliente_email: r.cliente_email || null,
+          createdAt: r.createdAt || Date.now(),
+          updatedAt: r.updatedAt || Date.now()
+        })));
+      }
     } catch (e) {
-      // falha DB: fallback silencioso
+      console.warn('GET /api/conversations DB error, using fallback:', e && e.message);
     }
+
+    // fallback file store
     try {
       const store = readChatStore();
-      return res.json(store.conversations || []);
-    } catch (e) { return res.status(500).json({ sucesso: false, mensagem: 'Erro ao ler conversas.' }); }
+      let list = store.conversations || [];
+      const protocol = req.query && req.query.protocol ? String(req.query.protocol).trim() : null;
+      if (protocol) {
+        list = list.filter(c => c.protocol === protocol);
+      }
+      return res.json(list);
+    } catch (e) {
+      return res.status(500).json({ sucesso: false, mensagem: 'Erro ao ler conversas.' });
+    }
   })();
 });
 
-// Criar nova conversa
+// Criar ou recuperar conversa / chamado
 app.post('/api/conversations', express.json(), (req, res) => {
   (async () => {
     const body = req.body || {};
-    const name = body.name || 'Visitante';
-    // tentar inserir no DB
+    const name = body.name || 'Cliente';
+    const protocol = body.protocol ? String(body.protocol).trim() : ('#CLI-' + Date.now().toString().slice(-5));
+    const clienteEmail = body.cliente_email || body.email || null;
+    const initialStatus = body.status || 'ia_atendimento';
+    const initialUnread = (initialStatus === 'ia_atendimento') ? 0 : 1;
+    const lastPreview = body.lastMessagePreview && !/MixIA|Autoatendimento/i.test(body.lastMessagePreview)
+      ? body.lastMessagePreview
+      : (initialStatus === 'ia_atendimento' ? '' : 'Aguardando atendimento');
+
+    // 1. Tentar localizar conversa existente por protocolo no DB
     try {
       const conn = await createDbConnection();
-      const clienteEmail = body.cliente_email || body.email || null;
-      const [result] = await conn.execute(`INSERT INTO chat_conversations (name, status, unread, last_message_preview, online, cliente_email) VALUES (?, 'open', 0, ?, 1, ?)`, [name, body.lastMessagePreview || '', clienteEmail]);
-      const insertedId = result && (result.insertId || (result[0] && result[0].insertId)) ? (result.insertId || (result[0] && result[0].insertId)) : null;
+      const [existing] = await conn.execute(`SELECT id, name, protocol, status, unread, last_message_preview as lastMessagePreview, online, cliente_email, UNIX_TIMESTAMP(updated_at)*1000 AS updatedAt FROM chat_conversations WHERE protocol = ? LIMIT 1`, [protocol]);
+      if (Array.isArray(existing) && existing.length > 0) {
+        const found = existing[0];
+        // se já existia, garante que está online
+        await conn.execute(`UPDATE chat_conversations SET online = 1, updated_at = NOW() WHERE id = ?`, [found.id]);
+        await conn.end();
+        return res.json({
+          id: found.id,
+          name: found.name,
+          protocol: found.protocol,
+          status: found.status,
+          unread: found.unread,
+          lastMessagePreview: found.lastMessagePreview,
+          online: true,
+          updatedAt: found.updatedAt
+        });
+      }
+
+      // Se não existir, inserir nova
+      const [result] = await conn.execute(
+        `INSERT INTO chat_conversations (name, protocol, status, unread, last_message_preview, online, cliente_email) VALUES (?, ?, ?, ?, ?, 1, ?)`,
+        [name, protocol, initialStatus, initialUnread, lastPreview, clienteEmail]
+      );
+      const insertedId = result && (result.insertId || (result[0] && result[0].insertId));
+
+      // Inserir mensagem inicial do sistema
+      try {
+        const sysText = initialStatus === 'ia_atendimento'
+          ? `🔒 Chamado registrado sob protocolo ${protocol}. Atendimento inteligente com MixIA.`
+          : `🔒 Chamado registrado sob protocolo ${protocol}. Aguardando atendente.`;
+        await conn.execute(
+          `INSERT INTO chat (conversation_id, sender, sender_name, text) VALUES (?, 'system', 'Sistema', ?)`,
+          [insertedId, sysText]
+        );
+      } catch (e) {}
+
       await conn.end();
-      const conv = { id: insertedId, name, lastMessagePreview: body.lastMessagePreview || '', unread: 0, online: true, createdAt: Date.now(), status: 'open' };
+      const conv = {
+        id: insertedId,
+        name,
+        protocol,
+        status: initialStatus,
+        lastMessagePreview: lastPreview,
+        unread: initialUnread,
+        online: true,
+        createdAt: Date.now(),
+        updatedAt: Date.now()
+      };
       return res.json(conv);
     } catch (e) {
-      console.warn('create conversation DB failed, using file store fallback', e && e.message);
+      console.warn('create conversation DB failed, using file store fallback:', e && e.message);
     }
-    // fallback file store
+
+    // Fallback file store
     try {
-      const now = Date.now();
-      const conv = { id: now, name, cliente_email: body.cliente_email || body.email || null, messages: [], lastMessagePreview: body.lastMessagePreview || '', unread: 0, online: true, createdAt: now, status: 'open', escalated: false };
       const store = readChatStore();
       store.conversations = store.conversations || [];
+      const found = store.conversations.find(c => c.protocol === protocol);
+      if (found) return res.json(found);
+
+      const now = Date.now();
+      const sysText = initialStatus === 'ia_atendimento'
+        ? `🔒 Chamado registrado sob protocolo ${protocol}. Atendimento inteligente com MixIA.`
+        : `🔒 Chamado registrado sob protocolo ${protocol}.`;
+      const conv = {
+        id: now,
+        name,
+        protocol,
+        status: initialStatus,
+        cliente_email: clienteEmail,
+        messages: [{ id: now, from: 'system', fromName: 'Sistema', text: sysText, time: now }],
+        lastMessagePreview: lastPreview,
+        unread: initialUnread,
+        online: true,
+        createdAt: now,
+        updatedAt: now
+      };
       store.conversations.unshift(conv);
       writeChatStore(store);
       return res.json(conv);
-    } catch (e) { console.error('POST /api/conversations error', e && e.message); return res.status(500).json({ sucesso: false }); }
+    } catch (e) {
+      console.error('POST /api/conversations error', e && e.message);
+      return res.status(500).json({ sucesso: false });
+    }
   })();
 });
 
@@ -863,61 +933,188 @@ app.post('/api/conversations', express.json(), (req, res) => {
 app.get('/api/conversations/:id/messages', (req, res) => {
   (async () => {
     const { id } = req.params;
-    // tentar DB
     try {
       const conn = await createDbConnection();
-      const [rows] = await conn.execute(`SELECT id, sender as \`from\`, sender_name as fromName, text, UNIX_TIMESTAMP(sent_at)*1000 as time FROM chat WHERE conversation_id = ? ORDER BY sent_at ASC`, [id]);
+      const [rows] = await conn.execute(
+        `SELECT id, sender as \`from\`, sender_name as fromName, text, UNIX_TIMESTAMP(sent_at)*1000 as time FROM chat WHERE conversation_id = ? ORDER BY sent_at ASC`,
+        [id]
+      );
       await conn.end();
-      if (Array.isArray(rows)) return res.json(rows.map(r => ({ id: r.id, from: r.from, fromName: r.fromName, text: r.text, time: r.time })));
+      if (Array.isArray(rows)) {
+        return res.json(rows.map(r => ({
+          id: r.id,
+          from: r.from === 'user' || r.from === 'visitor' ? 'client' : (r.from === 'bot' || r.from === 'ia' ? 'bot' : r.from),
+          fromName: r.fromName,
+          text: r.text,
+          time: r.time
+        })));
+      }
     } catch (e) {
-      // continue to fallback
+      // fallback
     }
+
     try {
       const store = readChatStore();
       const conv = (store.conversations || []).find(c => String(c.id) === String(id));
       if (!conv) return res.status(404).json({ sucesso: false, mensagem: 'Conversa não encontrada' });
       return res.json(conv.messages || []);
-    } catch (e) { console.error('GET messages error', e && e.message); return res.status(500).json({ sucesso: false }); }
+    } catch (e) {
+      return res.status(500).json({ sucesso: false });
+    }
   })();
 });
 
-// Enviar/append mensagem a uma conversa
+// Enviar mensagem a uma conversa (Cliente, Atendente ou Bot IA)
 app.post('/api/conversations/:id/messages', express.json(), (req, res) => {
   (async () => {
     const { id } = req.params;
     const body = req.body || {};
-    // tentar persistir no DB
+    const isBot = body.from === 'bot' || body.from === 'ia';
+    const isAttendant = body.from === 'attendant' || body.from === 'admin';
+    const isSystem = body.from === 'system';
+    const sender = isAttendant ? 'attendant' : (isSystem ? 'system' : (isBot ? 'bot' : 'client'));
+    const senderName = body.fromName || (isAttendant ? 'Atendente' : (isSystem ? 'Sistema' : (isBot ? 'MixIA' : 'Cliente')));
+    const text = String(body.text || '').trim();
+
+    if (!text) {
+      return res.status(400).json({ sucesso: false, mensagem: 'Mensagem vazia' });
+    }
+
+    // Tentar persistir no DB
     try {
       const conn = await createDbConnection();
-      const sender = body.from || 'visitor';
-      const senderName = body.fromName || (sender === 'bot' ? 'Assistente' : 'Visitante');
-      const text = body.text || '';
-      const [result] = await conn.execute(`INSERT INTO chat (conversation_id, sender, sender_name, text) VALUES (?, ?, ?, ?)`, [id, sender, senderName, text]);
-      const insertId = result && (result.insertId || (result[0] && result[0].insertId)) ? (result.insertId || (result[0] && result[0].insertId)) : null;
-      // atualizar metadados da conversa
-      try {
-        await conn.execute(`UPDATE chat_conversations SET last_message_preview = ?, unread = unread + ? WHERE id = ?`, [String(text).slice(0,200), (sender === 'bot' ? 0 : 1), id]);
-      } catch(e) { /* não crítico */ }
+      const [result] = await conn.execute(
+        `INSERT INTO chat (conversation_id, sender, sender_name, text) VALUES (?, ?, ?, ?)`,
+        [id, sender, senderName, text]
+      );
+      const insertId = result && (result.insertId || (result[0] && result[0].insertId));
+
+      if (sender === 'client') {
+        // Se ainda está em ia_atendimento, mantém unread em 0 para não tocar som no atendente
+        await conn.execute(
+          `UPDATE chat_conversations SET last_message_preview = ?, unread = CASE WHEN status = 'ia_atendimento' THEN 0 ELSE unread + 1 END, status = CASE WHEN status = 'finalizado' THEN 'aguardando_atendente' ELSE status END, updated_at = NOW() WHERE id = ?`,
+          [text.slice(0, 200), id]
+        );
+      } else if (sender === 'attendant') {
+        // Se enviada pelo atendente humano: zera unread e coloca em_atendimento
+        await conn.execute(
+          `UPDATE chat_conversations SET last_message_preview = ?, unread = 0, status = 'em_atendimento', updated_at = NOW() WHERE id = ?`,
+          [text.slice(0, 200), id]
+        );
+      } else {
+        // bot ou system: atualiza preview sem incrementar unread para o atendente
+        // bot ou system: atualiza timestamp SEM sobrescrever preview com texto da IA
+        await conn.execute(
+          `UPDATE chat_conversations SET last_message_preview = ?, updated_at = NOW() WHERE id = ?`,
+          [text.slice(0, 200), id]
+          `UPDATE chat_conversations SET updated_at = NOW() WHERE id = ?`,
+          [id]
+        );
+      }
+
       await conn.end();
       const msg = { id: insertId, from: sender, fromName: senderName, text, time: Date.now() };
       return res.json({ sucesso: true, message: msg });
     } catch (e) {
-      console.warn('POST message DB failed, falling back to file store', e && e.message);
+      console.warn('POST message DB failed, falling back to file store:', e && e.message);
     }
-    // fallback file store
+
+    // Fallback file store
     try {
       const store = readChatStore();
       const conv = (store.conversations || []).find(c => String(c.id) === String(id));
       if (!conv) return res.status(404).json({ sucesso: false, mensagem: 'Conversa não encontrada' });
       const now = Date.now();
-      const msg = { id: now, from: body.from || 'visitor', fromName: body.fromName || (body.from === 'bot' ? 'Assistente' : 'Visitante'), text: body.text || '', time: now };
+      const msg = { id: now, from: sender, fromName: senderName, text, time: now };
       conv.messages = conv.messages || [];
       conv.messages.push(msg);
-      conv.lastMessagePreview = msg.text ? String(msg.text).slice(0, 200) : '';
-      if (msg.from !== 'bot') conv.unread = (conv.unread || 0) + 1;
+      conv.lastMessagePreview = text.slice(0, 200);
+      if (sender === 'client' || sender === 'attendant') {
+        conv.lastMessagePreview = text.slice(0, 200);
+      }
+      conv.updatedAt = now;
+      if (sender === 'client') {
+        if (conv.status !== 'ia_atendimento') {
+          conv.unread = (conv.unread || 0) + 1;
+        }
+        if (conv.status === 'finalizado') conv.status = 'aguardando_atendente';
+      } else if (sender === 'attendant') {
+        conv.unread = 0;
+        conv.status = 'em_atendimento';
+      }
       writeChatStore(store);
       return res.json({ sucesso: true, message: msg });
-    } catch (e) { console.error('POST message error', e && e.message); return res.status(500).json({ sucesso: false }); }
+    } catch (e) {
+      return res.status(500).json({ sucesso: false });
+    }
+  })();
+});
+
+// Marcar conversa como lida (chamado visualizado pelo atendente)
+app.post('/api/conversations/:id/read', express.json(), (req, res) => {
+  (async () => {
+    const { id } = req.params;
+    try {
+      const conn = await createDbConnection();
+      await conn.execute(`UPDATE chat_conversations SET unread = 0 WHERE id = ?`, [id]);
+      await conn.end();
+      return res.json({ sucesso: true });
+    } catch (e) {
+      // fallback
+      try {
+        const store = readChatStore();
+        const conv = (store.conversations || []).find(c => String(c.id) === String(id));
+        if (conv) { conv.unread = 0; writeChatStore(store); }
+        return res.json({ sucesso: true });
+      } catch (ee) {
+        return res.status(500).json({ sucesso: false });
+      }
+    }
+  })();
+});
+
+// Alterar status da conversa (ex: finalizado / encerrar chamado / escalado para humano)
+app.post('/api/conversations/:id/status', express.json(), (req, res) => {
+  (async () => {
+    const { id } = req.params;
+    const { status } = req.body || {};
+    const novoStatus = status || 'finalizado';
+
+    try {
+      const conn = await createDbConnection();
+      await conn.execute(
+        `UPDATE chat_conversations SET status = ?, unread = CASE WHEN ? = 'aguardando_atendente' AND unread = 0 THEN 1 ELSE unread END, updated_at = NOW() WHERE id = ?`,
+        [novoStatus, novoStatus, id]
+      );
+
+      if (novoStatus === 'finalizado') {
+        await conn.execute(
+          `INSERT INTO chat (conversation_id, sender, sender_name, text) VALUES (?, 'system', 'Sistema', '✅ Atendimento encerrado. Obrigado pelo contato!')`,
+          [id]
+        );
+      }
+      await conn.end();
+      return res.json({ sucesso: true, status: novoStatus });
+    } catch (e) {
+      try {
+        const store = readChatStore();
+        const conv = (store.conversations || []).find(c => String(c.id) === String(id));
+        if (conv) {
+          conv.status = novoStatus;
+          if (novoStatus === 'aguardando_atendente' && (!conv.unread || conv.unread === 0)) {
+            conv.unread = 1;
+          }
+          if (novoStatus === 'finalizado') {
+            conv.messages = conv.messages || [];
+            conv.messages.push({ id: Date.now(), from: 'system', fromName: 'Sistema', text: '✅ Atendimento encerrado. Obrigado pelo contato!', time: Date.now() });
+          }
+          writeChatStore(store);
+        }
+        return res.json({ sucesso: true, status: novoStatus });
+      } catch (ee) {
+        return res.status(500).json({ sucesso: false });
+      }
+    }
   })();
 });
 
@@ -926,8 +1123,8 @@ app.post('/api/conversations/:id/generate-protocol', express.json(), async (req,
   const { id } = req.params;
   (async () => {
     try {
-      const protocol = 'PROTO-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2,6).toUpperCase();
-      const text = `Protocolo de atendimento: ${protocol} — Atendimento registrado como necessário.`;
+      const protocol = 'CLI-' + new Date().getFullYear() + '-' + Math.floor(10000 + Math.random() * 90000);
+      const text = `Protocolo de atendimento: #${protocol} — Atendimento registrado com sucesso.`;
       // tentar inserir no DB
       try {
         const conn = await createDbConnection();

@@ -115,10 +115,31 @@ document.addEventListener('DOMContentLoaded', function () {
 
   if (!messagesEl) return;
 
+  // Sanitização e Formatação do Nome do Cliente
+  function limparStringNull(val) {
+    if (!val) return '';
+    const str = String(val).trim();
+    if (str.toLowerCase() === 'null' || str.toLowerCase() === 'undefined' || str.toLowerCase() === 'nan') {
+      return '';
+    }
+    return str.replace(/\b(null|undefined|nan)\b/gi, '').replace(/\s+/g, ' ').trim();
+  }
+
+  function formatarNomePessoa(nomeBruto) {
+    const limpo = limparStringNull(nomeBruto);
+    if (!limpo) return 'Cliente';
+    const preposicoes = new Set(['de', 'da', 'do', 'dos', 'das', 'e']);
+    return limpo.split(' ').map((palavra, index) => {
+      const pLower = palavra.toLowerCase();
+      if (index > 0 && preposicoes.has(pLower)) return pLower;
+      return pLower.charAt(0).toUpperCase() + pLower.slice(1);
+    }).join(' ');
+  }
+
   // Identificação do Cliente
-  const nomeCliente = (localStorage.getItem('nome') || '').trim();
-  const sobrenomeCliente = (localStorage.getItem('sobrenome') || '').trim();
-  const clienteFullName = [nomeCliente, sobrenomeCliente].filter(Boolean).join(' ').trim() || 'Cliente';
+  const nomeCliente = limparStringNull(localStorage.getItem('nome'));
+  const sobrenomeCliente = limparStringNull(localStorage.getItem('sobrenome'));
+  const clienteFullName = formatarNomePessoa([nomeCliente, sobrenomeCliente].filter(Boolean).join(' ') || localStorage.getItem('usuario') || 'Cliente');
 
   let atendenteAtual = carregarAtendenteAtual();
   let protocolo = sessionStorage.getItem('mix_cliente_protocolo');

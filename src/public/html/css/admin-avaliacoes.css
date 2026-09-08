@@ -459,12 +459,12 @@
   pointer-events: none;
 }
 
-/* Rodapé do Comentário - Ações Administrativas */
+/* Rodapé do Comentário */
 .comentario-admin-footer {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
-  padding-top: 14px;
+  padding-top: 12px;
   border-top: 1px solid #f1f5f9;
 }
 
@@ -475,26 +475,8 @@
 }
 
 .btn-admin-excluir-comentario {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 14px;
-  border-radius: 10px;
-  background: #fef2f2;
-  color: #dc2626;
-  border: 1px solid #fecaca;
-  font-weight: 700;
-  font-size: 0.82rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.btn-admin-excluir-comentario:hover {
-  background: #dc2626;
-  color: #ffffff;
-  border-color: #dc2626;
-  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.25);
-  transform: translateY(-2px);
+  display: none !important;
+  visibility: hidden !important;
 }
 
 /* --- Estado Vazio / Nenhum Comentário --- */
