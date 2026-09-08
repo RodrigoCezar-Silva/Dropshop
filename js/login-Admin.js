@@ -8,20 +8,31 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // helper to navigate to admin area trying common candidates
   async function navigateToAdmin() {
-    const candidates = [
-      'admin-area.html',
-      'html/admin-area.html',
-      '/admin-area.html',
-      '/html/admin-area.html',
-      `${window.location.pathname.replace(/\/.+$/, '')}/admin-area.html`
-    ];
+    const isHtmlDir = window.location.pathname.includes('/html/');
+    const candidates = isHtmlDir
+      ? ['admin-area.html', '/html/admin-area.html', '/admin-area.html']
+      : ['html/admin-area.html', 'admin-area.html', '/html/admin-area.html', '/admin-area.html'];
     for (const p of candidates) {
       try {
         const res = await fetch(p, { method: 'HEAD' });
         if (res && res.ok) { window.location.href = p; return; }
-      } catch (e) { /* ignore */ }
+      } catch (e) { }
     }
-    window.location.href = 'admin-area.html';
+    window.location.href = isHtmlDir ? 'admin-area.html' : 'html/admin-area.html';
+  }
+
+  async function navigateToFuncionario() {
+    const isHtmlDir = window.location.pathname.includes('/html/');
+    const candidates = isHtmlDir
+      ? ['funcionario-area.html', '/html/funcionario-area.html', '/funcionario-area.html']
+      : ['html/funcionario-area.html', 'funcionario-area.html', '/html/funcionario-area.html', '/funcionario-area.html'];
+    for (const p of candidates) {
+      try {
+        const res = await fetch(p, { method: 'HEAD' });
+        if (res && res.ok) { window.location.href = p; return; }
+      } catch (e) { }
+    }
+    window.location.href = isHtmlDir ? 'funcionario-area.html' : 'html/funcionario-area.html';
   }
 
   if (formLogin) {
@@ -40,33 +51,55 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       try {
-        // Se `AUTH_SERVER` estiver definido usa ele, caso contrário
-        // detecta se estamos rodando pelo Live Server (porta 5500/5501)
-        // e aponta para o backend em http://localhost:3000 por padrão.
-        const defaultBackend = `http://localhost:3000`;
-        const isLiveServer = !!(window.location.port && (window.location.port === '5500' || window.location.port === '5501'));
-        const base = window.AUTH_SERVER || (isLiveServer ? defaultBackend : window.location.origin);
+        const defaultBackend = 'http://localhost:3000';
+        const defaultBackend = 'http://127.0.0.1:3000';
+        const hostname = window.location.hostname;
+        const isLocalHost = hostname === 'localhost' || hostname === '127.0.0.1' || !hostname || window.location.protocol === 'file:';
+        let base = window.AUTH_SERVER;
+        const isPlaceholderBase = base && /SEU_API_DOMAIN|your-api|example\.com/i.test(base);
+        const isInvalidAuthServer = !base || base.includes('.html') || isPlaceholderBase;
+        if (isInvalidAuthServer) {
+          base = (isLocalHost && window.location.port === '3000') ? window.location.origin : defaultBackend;
+        }
+        if (!base) base = defaultBackend;
+
         let response = await fetch(`${base.replace(/\/$/, '')}/login-admin`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ usuario, senha })
         });
+        const endpoints = [
+          base.replace(/\/$/, ''),
+          'http://127.0.0.1:3000',
+          'http://localhost:3000'
+        ].filter((v, i, a) => v && a.indexOf(v) === i);
 
-        // Se o servidor de arquivos respondeu 405 (Method Not Allowed),
-        // provavelmente estamos apontando para o Live Server. Tenta o backend padrão.
         if (response.status === 405 && base !== defaultBackend) {
+        let response = null;
+        let lastError = null;
+
+        for (const endpoint of endpoints) {
           try {
             response = await fetch(`${defaultBackend}/login-admin`, {
+            const res = await fetch(`${endpoint}/login-admin`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ usuario, senha })
             });
-          } catch (e) {
-            // fallback continua para tratar erro abaixo
+          } catch (e) { }
+            if (res && res.status !== 404) {
+              response = res;
+              break;
+            }
+          } catch (err) {
+            lastError = err;
           }
         }
 
-        // Tratar respostas sem corpo JSON para evitar 'Unexpected end of JSON input'
+        if (!response) {
+          throw lastError || new Error("Falha na conexão com o servidor.");
+        }
+
         let result = {};
         try {
           const text = await response.text();
@@ -76,11 +109,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         if (response.ok && result.sucesso) {
-          // guarda dados no navegador
           localStorage.setItem("token", result.token);
           localStorage.setItem("nome", result.nome || "");
           localStorage.setItem("sobrenome", result.sobrenome || "");
-          // salvar foto (base64) se retornada pelo backend
           if (result.fotoBase64) {
             localStorage.setItem('foto', result.fotoBase64);
             if (result.fotoMime) localStorage.setItem('fotoMime', result.fotoMime);
@@ -89,11 +120,11 @@ document.addEventListener("DOMContentLoaded", () => {
           if (role === 'funcionario') {
             localStorage.setItem("tipoUsuario", "Funcionario");
             localStorage.removeItem("isAdmin");
-            window.location.href = "funcionario-area.html";
+            await navigateToFuncionario();
           } else {
             localStorage.setItem("tipoUsuario", "Administrador");
-            localStorage.setItem("isAdmin", "true"); // 🔹 garante compatibilidade com comentarios.js
-            window.location.href = "admin-area.html";
+            localStorage.setItem("isAdmin", "true");
+            await navigateToAdmin();
           }
         } else {
           if (mensagemErro) {
@@ -128,6 +159,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (mensagemErro) {
           mensagemErro.innerText = "❌ Erro de conexão com servidor!";
+          mensagemErro.innerText = "❌ Erro ao conectar com o banco de dados/servidor!";
+          mensagemErro.innerText = "❌ Servidor backend (porta 3000) não está respondendo. Execute 'npm run dev' no terminal.";
           mensagemErro.style.color = "red";
         }
       }

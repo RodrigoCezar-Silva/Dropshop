@@ -62,9 +62,10 @@ document.addEventListener('DOMContentLoaded', () => {
     window.location.href = isHtmlDir ? 'login-funcionario.html' : './login-funcionario.html';
   }
 
-  const tipoUsuario = localStorage.getItem('tipoUsuario');
-  if (tipoUsuario !== 'Funcionario') {
-    window.location.href = 'admin-login.html';
+  const tipoUsuario = (localStorage.getItem('tipoUsuario') || '').toLowerCase();
+  if (tipoUsuario !== 'funcionario') {
+    const isHtmlDir = window.location.pathname.includes('/html/');
+    window.location.href = isHtmlDir ? 'login-funcionario.html' : 'html/login-funcionario.html';
     return;
   }
 

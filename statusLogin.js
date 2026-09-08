@@ -17,15 +17,6 @@
       try {
         window.history.replaceState(null, '', window.location.pathname + window.location.hash);
       } catch (e) {}
-    } else if (isIndex) {
-      // Se abrir a página index e não houver uma sessão ativa iniciada nesta aba, garante deslogado
-      const activeSession = sessionStorage.getItem('activeClienteSession') === '1';
-      const tipo = localStorage.getItem('tipoUsuario');
-      // Funcionário ou Administrador NUNCA devem permanecer logados na home (index.html)
-      if (tipo === 'Funcionario' || tipo === 'Administrador' || !activeSession) {
-        const keys = ['tipoUsuario','token','nome','sobrenome','isAdmin','foto','fotoMime','clienteCPF','email','clienteTelefone','clienteId'];
-        keys.forEach(k => localStorage.removeItem(k));
-      }
     }
   } catch (e) {}
 })();
@@ -37,7 +28,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!header) return;
 
       const path = window.location.pathname.toLowerCase();
-      if (path.includes('funcionario-area') || path.includes('admin-area') || path.includes('controle-estoque') || path.includes('cadastro-') || path.includes('/funcionario-')) {
+      if (path.includes('funcionario-area') || path.includes('admin-area') || path.includes('controle-estoque') || path.includes('cadastro-') || path.includes('/funcionario-') || path.includes('admin-estatisticas') || path.includes('admin-avaliacoes')) {
         return;
       }
 
@@ -386,34 +377,11 @@ document.addEventListener("DOMContentLoaded", () => {
       if (btnOutside) btnOutside.style.display = (tipoUsuario === 'Administrador') ? 'inline-flex' : 'none';
     } catch (e) {}
   } catch (e) { /* ignore */ }
-  // Criar botão fixo para sair da página admin (visível apenas em páginas admin)
+  // Garantir remoção de botão duplicado de saída em páginas admin
   try {
-    if (isAdminPage) {
-      let btnExit = document.getElementById('btnExitAdminPage');
-      if (!btnExit) {
-        btnExit = document.createElement('button');
-        btnExit.id = 'btnExitAdminPage';
-        btnExit.className = 'btn-exit-admin';
-        btnExit.textContent = 'Sair';
-        const header = document.querySelector('header.site-header') || document.querySelector('header');
-        if (header) header.appendChild(btnExit);
-        else document.body.appendChild(btnExit);
-        btnExit.addEventListener('click', function () {
-          try {
-            localStorage.removeItem('tipoUsuario');
-            localStorage.removeItem('token');
-            localStorage.removeItem('nome');
-            localStorage.removeItem('sobrenome');
-            localStorage.removeItem('foto');
-          } catch (e) { /* ignore */ }
-          window.location.href = 'index.html';
-        });
-      }
-      // mostrar botão somente se for administrador
-      try { btnExit.style.display = (tipoUsuario === 'Administrador') ? 'inline-flex' : 'none'; } catch(e){}
-    } else {
-      const existingExit = document.getElementById('btnExitAdminPage');
-      if (existingExit) existingExit.style.display = 'none';
+    const duplicateExit = document.getElementById('btnExitAdminPage');
+    if (duplicateExit && duplicateExit.parentNode) {
+      duplicateExit.parentNode.removeChild(duplicateExit);
     }
   } catch (e) { /* ignore */ }
 
@@ -539,13 +507,16 @@ document.addEventListener("DOMContentLoaded", () => {
         try {
           const header = document.querySelector('header.site-header') || document.querySelector('header');
           if (header) {
+            // Remove qualquer botão duplicado de saída que possa ter sido injetado
+            header.querySelectorAll('#btnExitAdminPage, #btnExitOutside, .btn-exit-admin:not(#adminBadgeExit)').forEach(el => el.remove());
+
             let adminBadgeExit = document.getElementById('adminBadgeExit');
             if (!adminBadgeExit) {
               adminBadgeExit = document.createElement('button');
               adminBadgeExit.id = 'adminBadgeExit';
               adminBadgeExit.className = 'admin-badge-exit';
               adminBadgeExit.type = 'button';
-              adminBadgeExit.textContent = 'Sair';
+              adminBadgeExit.innerHTML = '<i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i><span>Sair</span>';
               header.appendChild(adminBadgeExit);
               adminBadgeExit.addEventListener('click', function () {
                 try {
@@ -557,6 +528,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 } catch (e) { /* ignore */ }
                 window.location.href = 'index.html';
               });
+            } else {
+              adminBadgeExit.innerHTML = '<i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i><span>Sair</span>';
             }
             // garantir visibilidade apenas para administrador
             adminBadgeExit.style.display = (tipoUsuario === 'Administrador') ? 'inline-flex' : 'none';

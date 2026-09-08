@@ -7,21 +7,17 @@ document.addEventListener("DOMContentLoaded", () => {
   const mensagemErro = document.getElementById("mensagemErro");
 
   async function navigateToFuncionario() {
-    const candidates = [
-      'funcionario-area.html',
-      'admin-area.html',
-      '/html/funcionario-area.html',
-      '/html/admin-area.html',
-      '/funcionario-area.html',
-      '/admin-area.html'
-    ];
+    const isHtmlDir = window.location.pathname.includes('/html/');
+    const candidates = isHtmlDir
+      ? ['funcionario-area.html', 'admin-area.html', '/html/funcionario-area.html', '/funcionario-area.html']
+      : ['html/funcionario-area.html', 'funcionario-area.html', '/html/funcionario-area.html', '/funcionario-area.html'];
     for (const p of candidates) {
       try {
         const res = await fetch(p, { method: 'HEAD' });
         if (res && res.ok) { window.location.href = p; return; }
       } catch (e) { }
     }
-    window.location.href = 'funcionario-area.html';
+    window.location.href = isHtmlDir ? 'funcionario-area.html' : 'html/funcionario-area.html';
   }
 
   if (formLogin) {
@@ -40,37 +36,19 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       try {
-        const defaultBackend = `http://localhost:3000`;
-        const isLiveServer = !!(window.location.port && (window.location.port === '5500' || window.location.port === '5501'));
-        const rawBase = window.AUTH_SERVER || (isLiveServer ? defaultBackend : null);
-        const isPlaceholderBase = rawBase && /SEU_API_DOMAIN|your-api|example\.com/i.test(rawBase);
-        const isInvalidAuthServer = rawBase && (rawBase.includes('.html') || rawBase.includes('/admin-login') || rawBase.includes('/repos') || isPlaceholderBase);
-        const base = isInvalidAuthServer ? (isLiveServer ? defaultBackend : null) : rawBase;
+        const defaultBackend = 'http://localhost:3000';
+        const defaultBackend = 'http://127.0.0.1:3000';
+        const hostname = window.location.hostname;
+        const isLocalHost = hostname === 'localhost' || hostname === '127.0.0.1' || !hostname || window.location.protocol === 'file:';
+        let base = window.AUTH_SERVER;
+        const isPlaceholderBase = base && /SEU_API_DOMAIN|your-api|example\.com/i.test(base);
+        const isInvalidAuthServer = !base || base.includes('.html') || base.includes('/admin-login') || isPlaceholderBase;
+        if (isInvalidAuthServer) {
+          base = (isLocalHost && window.location.port === '3000') ? window.location.origin : defaultBackend;
+        }
 
         if (!base) {
-          const cfg = window.AUTH_CONFIG || {};
-          if (cfg.mockAdmin && cfg.mockAdmin.enabled) {
-            if (usuario === cfg.mockAdmin.user && senha === cfg.mockAdmin.pass) {
-              localStorage.setItem("token", "MOCK_TOKEN");
-              localStorage.setItem("nome", cfg.mockAdmin.user);
-              localStorage.setItem("sobrenome", "");
-              localStorage.setItem("tipoUsuario", "Funcionario");
-              localStorage.removeItem("isAdmin");
-              await navigateToFuncionario();
-              return;
-            }
-            if (mensagemErro) {
-              mensagemErro.innerText = "Usuário ou senha inválidos (mock).";
-              mensagemErro.style.color = "red";
-            }
-            return;
-          }
-
-          if (mensagemErro) {
-            mensagemErro.innerText = "Configuração de backend inválida. Atualize a URL da sua API.";
-            mensagemErro.style.color = "red";
-          }
-          return;
+          base = defaultBackend;
         }
 
         let response = await fetch(`${base.replace(/\/$/, '')}/login-admin`, {
@@ -78,15 +56,36 @@ document.addEventListener("DOMContentLoaded", () => {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ usuario, senha })
         });
+        const endpoints = [
+          base.replace(/\/$/, ''),
+          'http://127.0.0.1:3000',
+          'http://localhost:3000'
+        ].filter((v, i, a) => v && a.indexOf(v) === i);
 
         if (response.status === 405 && base !== defaultBackend) {
+        let response = null;
+        let lastError = null;
+
+        for (const endpoint of endpoints) {
           try {
             response = await fetch(`${defaultBackend}/login-admin`, {
+            const res = await fetch(`${endpoint}/login-admin`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ usuario, senha })
             });
           } catch (e) { }
+            if (res && res.status !== 404) {
+              response = res;
+              break;
+            }
+          } catch (err) {
+            lastError = err;
+          }
+        }
+
+        if (!response) {
+          throw lastError || new Error("Falha na conexão com o servidor.");
         }
 
         let result = {};
@@ -109,11 +108,11 @@ document.addEventListener("DOMContentLoaded", () => {
           if (role === 'funcionario') {
             localStorage.setItem("tipoUsuario", "Funcionario");
             localStorage.removeItem("isAdmin");
-            window.location.href = "funcionario-area.html";
+            await navigateToFuncionario();
           } else {
             localStorage.setItem("tipoUsuario", "Administrador");
             localStorage.setItem("isAdmin", "true");
-            window.location.href = "admin-area.html";
+            window.location.href = window.location.pathname.includes('/html/') ? "admin-area.html" : "html/admin-area.html";
           }
         } else if (mensagemErro) {
           mensagemErro.innerText = result.mensagem || "Usuário ou senha inválidos.";
@@ -138,6 +137,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (mensagemErro) {
           mensagemErro.innerText = "❌ Erro de conexão com servidor!";
+          mensagemErro.innerText = "❌ Erro ao conectar com o banco de dados/servidor!";
+          mensagemErro.innerText = "❌ Servidor backend (porta 3000) não está respondendo. Execute 'npm run dev' no terminal.";
           mensagemErro.style.color = "red";
         }
       }

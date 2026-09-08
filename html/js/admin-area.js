@@ -1,8 +1,9 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const tipoUsuario = localStorage.getItem("tipoUsuario");
+  const tipo = (localStorage.getItem("tipoUsuario") || '').toLowerCase();
 
-  if (tipoUsuario !== "Administrador") {
-    window.location.href = "admin-login.html";
+  if (tipo !== "administrador") {
+    const isHtmlDir = window.location.pathname.includes('/html/');
+    window.location.href = isHtmlDir ? 'admin-login.html' : 'html/admin-login.html';
     return;
   }
 
