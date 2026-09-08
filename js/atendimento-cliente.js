@@ -250,7 +250,16 @@
 
     // Protocolo e Atendente Humano Alocado
     const urlParams = new URLSearchParams(window.location.search);
-    const deveForcarNovo = urlParams.get('novo') === '1';
+    const deveForcarNovo = urlParams.get('novo') === '1' || sessionStorage.getItem('mix_forcar_novo_atendimento') === '1';
+
+    if (deveForcarNovo) {
+      try {
+        sessionStorage.removeItem('mix_forcar_novo_atendimento');
+        sessionStorage.removeItem('mix_cliente_protocolo');
+        sessionStorage.removeItem('mix_active_conv_id');
+        sessionStorage.removeItem('mix_atendente_atual');
+      } catch (e) {}
+    }
 
     let atendenteAtual = deveForcarNovo ? sortearProximoAtendente() : carregarAtendenteAtual();
     let protocolo = deveForcarNovo
@@ -347,18 +356,40 @@
 
     function redirecionarPorInatividade() {
       clearInterval(timerInatividadeInterval);
+      if (pollingInterval) clearInterval(pollingInterval);
+
+      // 1. Marca atendimento anterior como finalizado no backend
+      if (activeConversationId) {
+        try {
+          fetch(`${apiBase}/api/conversations/${activeConversationId}/status`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: 'finalizado' })
+          });
+        } catch (e) {}
+      }
+
+      // 2. Limpa dados da sessão e define flag para iniciar um novo chamado quando o cliente voltar
       try {
-        sessionStorage.setItem('mix_alerta_inatividade', 'Você ficou 3 minutos sem interagir no chat. O atendimento foi pausado e retornamos para sua Área do Cliente.');
+        sessionStorage.removeItem('mix_cliente_protocolo');
+        sessionStorage.removeItem('mix_active_conv_id');
+        sessionStorage.removeItem('mix_atendente_atual');
+        sessionStorage.setItem('mix_forcar_novo_atendimento', '1');
+        sessionStorage.setItem('mix_alerta_inatividade', 'Você ficou 3 minutos sem interagir no chat. O atendimento foi encerrado por inatividade e você foi redirecionado para Minha Conta. Ao acessar o suporte novamente, um novo atendimento será iniciado.');
       } catch (e) {}
 
+      // 3. Altera o indicador visual no cabeçalho
       const badge = document.getElementById('inactivityTimerBadge');
       if (badge) {
-        badge.innerHTML = '<i class="fa-solid fa-hourglass-end"></i> <span>Retornando...</span>';
+        badge.innerHTML = '<i class="fa-solid fa-hourglass-end"></i> <span>Encerrando...</span>';
         badge.classList.add('warning');
       }
 
-      const isHtmlDir = window.location.pathname.includes('/html/');
-      window.location.href = isHtmlDir ? "meu-perfil.html" : "./meu-perfil.html";
+      // 4. Redireciona imediatamente para a página Minha Conta (meu-perfil.html)
+      setTimeout(() => {
+        const isHtmlDir = window.location.pathname.includes('/html/');
+        window.location.href = isHtmlDir ? "meu-perfil.html" : "./meu-perfil.html";
+      }, 350);
     }
 
     function atualizarVisualTimer() {
@@ -872,6 +903,23 @@
           const conv = await res.json();
           activeConversationId = conv.id;
           sessionStorage.setItem('mix_active_conv_id', String(conv.id));
+
+          // Se a conversa recuperada do banco já estiver finalizada, inicia um novo atendimento imediatamente
+          if (conv.status === 'finalizado') {
+            sessionStorage.removeItem('mix_cliente_protocolo');
+            sessionStorage.removeItem('mix_active_conv_id');
+            sessionStorage.removeItem('mix_atendente_atual');
+            protocolo = 'CLI-' + new Date().getFullYear() + '-' + Math.floor(10000 + Math.random() * 90000);
+            sessionStorage.setItem('mix_cliente_protocolo', protocolo);
+            atendenteAtual = sortearProximoAtendente();
+            modoHumano = false;
+            messages = [];
+            renderedMessageKeys.clear();
+            atualizarVisualCabecalho();
+            criarMensagemBoasVindas();
+            reiniciarTimerInatividade();
+            return conectarOuCriarChamado();
+          }
 
           // Se a conversa já existia no banco e estava em atendimento humano, preserva
           if (conv.status === 'aguardando_atendente' || conv.status === 'em_atendimento') {

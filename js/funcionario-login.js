@@ -36,7 +36,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       try {
-        const defaultBackend = 'http://localhost:3000';
         const defaultBackend = 'http://127.0.0.1:3000';
         const hostname = window.location.hostname;
         const isLocalHost = hostname === 'localhost' || hostname === '127.0.0.1' || !hostname || window.location.protocol === 'file:';
@@ -51,31 +50,23 @@ document.addEventListener("DOMContentLoaded", () => {
           base = defaultBackend;
         }
 
-        let response = await fetch(`${base.replace(/\/$/, '')}/login-admin`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ usuario, senha })
-        });
         const endpoints = [
           base.replace(/\/$/, ''),
           'http://127.0.0.1:3000',
           'http://localhost:3000'
         ].filter((v, i, a) => v && a.indexOf(v) === i);
 
-        if (response.status === 405 && base !== defaultBackend) {
         let response = null;
         let lastError = null;
 
         for (const endpoint of endpoints) {
           try {
-            response = await fetch(`${defaultBackend}/login-admin`, {
             const res = await fetch(`${endpoint}/login-admin`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ usuario, senha })
             });
-          } catch (e) { }
-            if (res && res.status !== 404) {
+            if (res && res.status !== 404 && res.status !== 405) {
               response = res;
               break;
             }
@@ -120,24 +111,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       } catch (error) {
         console.error("Erro de conexão:", error);
-        const cfg = window.AUTH_CONFIG || {};
-        if (cfg.mockAdmin && cfg.mockAdmin.enabled) {
-          const mockUser = cfg.mockAdmin.user || 'admin';
-          const mockPass = cfg.mockAdmin.pass || 'admin';
-          if (usuario === mockUser && senha === mockPass) {
-            localStorage.setItem("token", "MOCK_TOKEN");
-            localStorage.setItem("nome", mockUser);
-            localStorage.setItem("sobrenome", "");
-            localStorage.setItem("tipoUsuario", "Funcionario");
-            localStorage.removeItem("isAdmin");
-            await navigateToFuncionario();
-            return;
-          }
-        }
-
         if (mensagemErro) {
-          mensagemErro.innerText = "❌ Erro de conexão com servidor!";
-          mensagemErro.innerText = "❌ Erro ao conectar com o banco de dados/servidor!";
           mensagemErro.innerText = "❌ Servidor backend (porta 3000) não está respondendo. Execute 'npm run dev' no terminal.";
           mensagemErro.style.color = "red";
         }
