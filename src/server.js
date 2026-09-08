@@ -835,6 +835,7 @@ app.post('/api/conversations', express.json(), (req, res) => {
     const clienteEmail = body.cliente_email || body.email || null;
     const initialStatus = body.status || 'ia_atendimento';
     const initialUnread = (initialStatus === 'ia_atendimento') ? 0 : 1;
+    const lastPreview = body.lastMessagePreview || (initialStatus === 'ia_atendimento' ? 'Autoatendimento com MixIA' : 'Chamado aberto aguardando atendimento');
     const lastPreview = body.lastMessagePreview && !/MixIA|Autoatendimento/i.test(body.lastMessagePreview)
       ? body.lastMessagePreview
       : (initialStatus === 'ia_atendimento' ? '' : 'Aguardando atendimento');
