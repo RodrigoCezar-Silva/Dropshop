@@ -356,6 +356,7 @@
       return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
     }
 
+    function redirecionarPorInatividade() {
     function encerrarPorInatividade() {
       clearInterval(timerInatividadeInterval);
       if (pollingInterval) clearInterval(pollingInterval);
@@ -385,22 +386,31 @@
         } catch (e) {}
       }
 
+      // 2. Limpa dados da sessão e define flag para iniciar um novo chamado quando o cliente voltar
       // 2. Limpa dados da sessão antiga para que o próximo acesso inicie um novo chamado
       try {
         sessionStorage.removeItem('mix_cliente_protocolo');
         sessionStorage.removeItem('mix_active_conv_id');
         sessionStorage.removeItem('mix_atendente_atual');
         sessionStorage.setItem('mix_forcar_novo_atendimento', '1');
+        sessionStorage.setItem('mix_alerta_inatividade', 'Você ficou 3 minutos sem interagir no chat. O atendimento foi encerrado por inatividade e você foi redirecionado para Minha Conta. Ao acessar o suporte novamente, um novo atendimento será iniciado.');
       } catch (e) {}
 
+      // 3. Altera o indicador visual no cabeçalho
       // 3. Atualiza o indicador visual no cabeçalho
       const badge = document.getElementById('inactivityTimerBadge');
       if (badge) {
+        badge.innerHTML = '<i class="fa-solid fa-hourglass-end"></i> <span>Encerrando...</span>';
         badge.innerHTML = '<i class="fa-solid fa-lock"></i> <span>Encerrado</span>';
         badge.classList.add('warning');
         badge.title = 'Atendimento encerrado por inatividade (3 minutos).';
       }
 
+      // 4. Redireciona imediatamente para a página Minha Conta (meu-perfil.html)
+      setTimeout(() => {
+        const isHtmlDir = window.location.pathname.includes('/html/');
+        window.location.href = isHtmlDir ? "meu-perfil.html" : "./meu-perfil.html";
+      }, 350);
       // 4. Bloqueia a parte de digitar e o botão enviar
       if (msgInput) {
         msgInput.value = '';
@@ -454,18 +464,21 @@
     }
 
     function reiniciarTimerInatividade() {
+      if (timerPausado) return;
       if (timerPausado || atendimentoEncerrado) return;
       segundosRestantes = TEMPO_LIMITE_INATIVIDADE;
       atualizarVisualTimer();
 
       clearInterval(timerInatividadeInterval);
       timerInatividadeInterval = setInterval(() => {
+        if (timerPausado) return;
         if (timerPausado || atendimentoEncerrado) return;
         segundosRestantes--;
         atualizarVisualTimer();
 
         if (segundosRestantes <= 0) {
           clearInterval(timerInatividadeInterval);
+          redirecionarPorInatividade();
           encerrarPorInatividade();
         }
       }, 1000);
@@ -1112,6 +1125,7 @@
     // ENVIO DE MENSAGENS PELO CLIENTE (COM LOCK DE ENVIO ÚNICO & DEBOUNCE)
     // =========================================================================
     async function enviarMensagem(texto = null) {
+      if (isSending) return;
       if (atendimentoEncerrado || isSending) return;
 
       const conteudo = (texto !== null ? texto : (msgInput ? msgInput.value : '')).trim();
