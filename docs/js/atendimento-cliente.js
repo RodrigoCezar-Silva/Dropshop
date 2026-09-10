@@ -278,6 +278,57 @@
       ? `${window.location.protocol}//${window.location.hostname}:3000`
       : (window.AUTH_SERVER || window.location.origin);
 
+    // =========================================================================
+    // CONFIGURAÇÕES DINÂMICAS DO CHATBOT IA & RESPOSTAS PERSONALIZADAS
+    // =========================================================================
+    let chatbotConfig = {};
+    let customRespostas = [];
+
+    function carregarConfiguracoesChatbot() {
+      try {
+        chatbotConfig = JSON.parse(localStorage.getItem('chatbot_config') || '{}');
+      } catch (e) {
+        chatbotConfig = {};
+      }
+      try {
+        customRespostas = JSON.parse(localStorage.getItem('chatbot_respostas_custom') || '[]');
+      } catch (e) {
+        customRespostas = [];
+      }
+
+      if (chatbotConfig.nomeIA && chatbotConfig.nomeIA.trim()) {
+        const customIA = chatbotConfig.nomeIA.trim();
+        MIX_IA.nome = `${customIA} — Inteligência Artificial 24h`;
+        MIX_IA.primeiroNome = customIA;
+      }
+    }
+
+    carregarConfiguracoesChatbot();
+
+    async function sincronizarConfiguracoesServidor() {
+      try {
+        const res = await fetch(`${apiBase}/api/chatbot-config`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.config) {
+            chatbotConfig = data.config;
+            localStorage.setItem('chatbot_config', JSON.stringify(chatbotConfig));
+            if (chatbotConfig.nomeIA && chatbotConfig.nomeIA.trim()) {
+              const customIA = chatbotConfig.nomeIA.trim();
+              MIX_IA.nome = `${customIA} — Inteligência Artificial 24h`;
+              MIX_IA.primeiroNome = customIA;
+              atualizarVisualCabecalho();
+            }
+            if (Array.isArray(chatbotConfig.respostasCustom)) {
+              customRespostas = chatbotConfig.respostasCustom;
+              localStorage.setItem('chatbot_respostas_custom', JSON.stringify(customRespostas));
+            }
+          }
+        }
+      } catch (e) {}
+    }
+    sincronizarConfiguracoesServidor();
+
     // Protocolo e Atendente Humano Alocado
     const urlParams = new URLSearchParams(window.location.search);
     const deveForcarNovo = urlParams.get('novo') === '1' || sessionStorage.getItem('mix_forcar_novo_atendimento') === '1';
@@ -425,21 +476,14 @@
         sessionStorage.setItem('mix_alerta_inatividade', 'Você ficou 3 minutos sem interagir no chat. O atendimento foi encerrado por inatividade e você foi redirecionado para Minha Conta. Ao acessar o suporte novamente, um novo atendimento será iniciado.');
       } catch (e) {}
 
-      // 3. Altera o indicador visual no cabeçalho
       // 3. Atualiza o indicador visual no cabeçalho
       const badge = document.getElementById('inactivityTimerBadge');
       if (badge) {
-        badge.innerHTML = '<i class="fa-solid fa-hourglass-end"></i> <span>Encerrando...</span>';
         badge.innerHTML = '<i class="fa-solid fa-lock"></i> <span>Encerrado</span>';
         badge.classList.add('warning');
         badge.title = 'Atendimento encerrado por inatividade (3 minutos).';
       }
 
-      // 4. Redireciona imediatamente para a página Minha Conta (meu-perfil.html)
-      setTimeout(() => {
-        const isHtmlDir = window.location.pathname.includes('/html/');
-        window.location.href = isHtmlDir ? "meu-perfil.html" : "./meu-perfil.html";
-      }, 350);
       // 4. Bloqueia a parte de digitar e o botão enviar
       if (msgInput) {
         msgInput.value = '';
@@ -493,21 +537,18 @@
     }
 
     function reiniciarTimerInatividade() {
-      if (timerPausado) return;
       if (timerPausado || atendimentoEncerrado) return;
       segundosRestantes = TEMPO_LIMITE_INATIVIDADE;
       atualizarVisualTimer();
 
       clearInterval(timerInatividadeInterval);
       timerInatividadeInterval = setInterval(() => {
-        if (timerPausado) return;
         if (timerPausado || atendimentoEncerrado) return;
         segundosRestantes--;
         atualizarVisualTimer();
 
         if (segundosRestantes <= 0) {
           clearInterval(timerInatividadeInterval);
-          redirecionarPorInatividade();
           encerrarPorInatividade();
         }
       }, 1000);
@@ -733,17 +774,34 @@
     // =========================================================================
     function criarMensagemBoasVindas() {
       const protoFormatado = protocolo.startsWith('#') ? protocolo : '#' + protocolo;
+      const nomeLoja = chatbotConfig.nomeLoja || 'MIX-PROMOÇÃO';
+      const nomeIA = MIX_IA.nome;
 
       const msgSys = {
         type: 'system',
-        text: `🔒 Atendimento Inicializado • Protocolo: ${protoFormatado} • MIX-PROMOÇÃO Central Oficial`,
+        text: `🔒 Atendimento Inicializado • Protocolo: ${protoFormatado} • ${nomeLoja} Central Oficial`,
         time: Date.now()
       };
 
+      let textoBoasVindas = '';
+      if (chatbotConfig.msgBoasVindas && chatbotConfig.msgBoasVindas.trim()) {
+        let customMsg = chatbotConfig.msgBoasVindas.trim()
+          .replace(/\{cliente\}/gi, clienteFullName)
+          .replace(/\{nome\}/gi, clienteFullName)
+          .replace(/\{loja\}/gi, nomeLoja);
+        if (!customMsg.toLowerCase().includes(clienteFullName.toLowerCase())) {
+          textoBoasVindas = `Olá, **${clienteFullName}**! 👋\n\n${customMsg}\n\n💡 **Selecione uma das opções abaixo ou digite sua dúvida no chat:**`;
+        } else {
+          textoBoasVindas = `${customMsg}\n\n💡 **Selecione uma das opções abaixo ou digite sua dúvida no chat:**`;
+        }
+      } else {
+        textoBoasVindas = `Olá, **${clienteFullName}**! 👋 Seja muito bem-vindo(a) à **${nomeLoja}**!\n\nEu sou a **${MIX_IA.primeiroNome || 'MixIA'}**, sua Assistente Virtual Inteligente 24 horas. Fui programada para tirar todas as suas dúvidas e te ajudar de forma imediata!\n\n💡 **Selecione uma das opções abaixo ou digite sua dúvida no chat:**`;
+      }
+
       const msgIA = {
         type: 'bot',
-        author: 'MixIA — Inteligência Artificial 24h',
-        text: `Olá, **${clienteFullName}**! 👋 Seja muito bem-vindo(a) à **MIX-PROMOÇÃO**!\n\nEu sou a **MixIA**, sua Assistente Virtual Inteligente 24 horas. Fui programada para tirar todas as suas dúvidas e te ajudar de forma imediata!\n\n💡 **Selecione uma das opções abaixo ou digite sua dúvida no chat:**`,
+        author: nomeIA,
+        text: textoBoasVindas,
         time: Date.now(),
         suggestions: [
           '📦 Rastrear meu Pedido',
@@ -773,7 +831,7 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               from: 'bot',
-              fromName: 'MixIA',
+              fromName: MIX_IA.primeiroNome || 'MixIA',
               text: msgIA.text
             })
           }).then(res => res.json()).then(data => {
@@ -798,7 +856,33 @@
         return { escalar: true };
       }
 
-      // 2. Pedidos & Rastreamento
+      // 2. Respostas Personalizadas cadastradas no Painel Admin/Funcionário
+      try {
+        const respostas = (Array.isArray(customRespostas) && customRespostas.length > 0)
+          ? customRespostas
+          : JSON.parse(localStorage.getItem('chatbot_respostas_custom') || '[]');
+        for (const r of respostas) {
+          if (r && Array.isArray(r.palavras)) {
+            const match = r.palavras.some(p => {
+              const pNorm = (p || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+              return pNorm && txt.includes(pNorm);
+            });
+            if (match && r.resposta) {
+              return {
+                texto: r.resposta,
+                sugestoes: [
+                  '📦 Rastrear meu Pedido',
+                  '🚚 Prazos de Entrega & Frete',
+                  '💳 Formas de Pagamento & PIX',
+                  '👤 Falar com Atendente Humano'
+                ]
+              };
+            }
+          }
+        }
+      } catch (e) {}
+
+      // 3. Pedidos & Rastreamento
       if (/rastre|pedido|localizar|encomenda|onde est[aá]|cad[eê]|codigo de rastreio/i.test(txt)) {
         return {
           texto: `Com certeza, ${clienteFullName}! 📦\n\n**Como acompanhar o seu pedido na MIX-PROMOÇÃO:**\n\n1. **Área do Cliente:** Acesse **"Minha Conta"** no menu superior e clique na aba **"Pedidos e Itens"** para conferir todos os seus pedidos finalizados e seu status em tempo real.\n2. **Código de Rastreamento:** Enviamos o código de rastreamento oficial dos Correios diretamente para o seu e-mail cadastrado em até **1 a 3 dias úteis** após a aprovação do pagamento.\n3. **Rastreio Nacional:** Com o código em mãos, você pode rastrear a movimentação diretamente no portal dos Correios ou aqui no site.`,

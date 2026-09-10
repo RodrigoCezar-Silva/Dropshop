@@ -1293,6 +1293,97 @@ app.post('/api/sync-offline-chats', express.json({ limit: '10mb' }), async (req,
   }
 });
 
+// ---------------- CHATBOT CONFIGURATION & CUSTOM RESPONSES ---------------- //
+const CHATBOT_CONFIG_PATH = path.join(__dirname, '..', 'data', 'chatbot-config.json');
+
+function getChatbotConfigPadrao() {
+  return {
+    nomeLoja: "MIX-PROMOÇÃO",
+    nomeIA: "MixIA",
+    whatsappNumero: "5511999999999",
+    msgBoasVindas: "",
+    ativo: true,
+    respostasCustom: []
+  };
+}
+
+function readChatbotConfig() {
+  try {
+    if (!fs.existsSync(CHATBOT_CONFIG_PATH)) {
+      return getChatbotConfigPadrao();
+    }
+    const raw = fs.readFileSync(CHATBOT_CONFIG_PATH, 'utf8');
+    const parsed = JSON.parse(raw || '{}');
+    return { ...getChatbotConfigPadrao(), ...parsed };
+  } catch (e) {
+    console.warn('readChatbotConfig error:', e && e.message);
+    return getChatbotConfigPadrao();
+  }
+}
+
+function writeChatbotConfig(cfg) {
+  try {
+    const dir = path.dirname(CHATBOT_CONFIG_PATH);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(CHATBOT_CONFIG_PATH, JSON.stringify(cfg, null, 2), 'utf8');
+    return true;
+  } catch (e) {
+    console.error('writeChatbotConfig error:', e && e.message);
+    return false;
+  }
+}
+
+// Obter configurações do Chatbot
+app.get('/api/chatbot-config', (req, res) => {
+  const config = readChatbotConfig();
+  return res.json({ sucesso: true, config });
+});
+
+// Salvar configurações do Chatbot
+app.post('/api/chatbot-config', express.json(), (req, res) => {
+  try {
+    const body = req.body || {};
+    const atual = readChatbotConfig();
+    const novo = {
+      ...atual,
+      ...body,
+      nomeLoja: (body.nomeLoja !== undefined ? String(body.nomeLoja).trim() : atual.nomeLoja),
+      nomeIA: (body.nomeIA !== undefined ? String(body.nomeIA).trim() : atual.nomeIA),
+      whatsappNumero: (body.whatsappNumero !== undefined ? String(body.whatsappNumero).trim().replace(/\D/g, "") : atual.whatsappNumero),
+      msgBoasVindas: (body.msgBoasVindas !== undefined ? String(body.msgBoasVindas).trim() : atual.msgBoasVindas),
+      ativo: (body.ativo !== undefined ? Boolean(body.ativo) : atual.ativo),
+      respostasCustom: (Array.isArray(body.respostasCustom) ? body.respostasCustom : (Array.isArray(body.respostas) ? body.respostas : atual.respostasCustom))
+    };
+    writeChatbotConfig(novo);
+    return res.json({ sucesso: true, mensagem: 'Configurações do chatbot salvas com sucesso!', config: novo });
+  } catch (err) {
+    console.error('POST /api/chatbot-config error:', err && err.message);
+    return res.status(500).json({ sucesso: false, mensagem: 'Erro ao salvar configurações do chatbot.' });
+  }
+});
+
+// Obter respostas customizadas
+app.get('/api/chatbot-respostas', (req, res) => {
+  const config = readChatbotConfig();
+  return res.json({ sucesso: true, respostas: config.respostasCustom || [] });
+});
+
+// Salvar respostas customizadas
+app.post('/api/chatbot-respostas', express.json(), (req, res) => {
+  try {
+    const lista = Array.isArray(req.body) ? req.body : (req.body && req.body.respostas ? req.body.respostas : []);
+    const atual = readChatbotConfig();
+    atual.respostasCustom = lista;
+    writeChatbotConfig(atual);
+    return res.json({ sucesso: true, mensagem: 'Respostas customizadas salvas com sucesso!', respostas: lista });
+  } catch (err) {
+    console.error('POST /api/chatbot-respostas error:', err && err.message);
+    return res.status(500).json({ sucesso: false, mensagem: 'Erro ao salvar respostas customizadas.' });
+  }
+});
+
+
+
 
 // Endpoint para receber reclamação com anexos (até 5 imagens e 1 vídeo)
 app.post('/api/reclamacao', upload.array('anexos', 6), async (req, res) => {

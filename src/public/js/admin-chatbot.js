@@ -33,33 +33,78 @@
   const statResolvidos = document.getElementById("statResolvidos");
   const faqLista = document.getElementById("faqLista");
 
+  const apiBase = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+    ? `${window.location.protocol}//${window.location.hostname}:3000`
+    : (window.AUTH_SERVER || window.location.origin);
+
   // ===== Carregar config =====
-  function carregarConfig() {
+  async function carregarConfig() {
+    // 1. Carregamento imediato do cache local
     try {
       const cfg = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
-      configNomeLoja.value = cfg.nomeLoja || "";
-      configNomeIA.value = cfg.nomeIA || "";
-      configWhatsapp.value = cfg.whatsappNumero || "";
-      configMsgBoasVindas.value = cfg.msgBoasVindas || "";
-      configAtivo.checked = cfg.ativo !== false;
+      if (configNomeLoja) configNomeLoja.value = cfg.nomeLoja || "";
+      if (configNomeIA) configNomeIA.value = cfg.nomeIA || "";
+      if (configWhatsapp) configWhatsapp.value = cfg.whatsappNumero || "";
+      if (configMsgBoasVindas) configMsgBoasVindas.value = cfg.msgBoasVindas || "";
+      if (configAtivo) configAtivo.checked = cfg.ativo !== false;
     } catch {}
+
+    // 2. Sincroniza com o servidor para garantir persistência em múltiplos navegadores
+    try {
+      const res = await fetch(`${apiBase}/api/chatbot-config`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.config) {
+          const cfg = data.config;
+          if (configNomeLoja && cfg.nomeLoja) configNomeLoja.value = cfg.nomeLoja;
+          if (configNomeIA && cfg.nomeIA) configNomeIA.value = cfg.nomeIA;
+          if (configWhatsapp && cfg.whatsappNumero) configWhatsapp.value = cfg.whatsappNumero;
+          if (configMsgBoasVindas && cfg.msgBoasVindas !== undefined) configMsgBoasVindas.value = cfg.msgBoasVindas;
+          if (configAtivo && typeof cfg.ativo === 'boolean') configAtivo.checked = cfg.ativo;
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(cfg));
+
+          if (Array.isArray(cfg.respostasCustom) && cfg.respostasCustom.length > 0) {
+            localStorage.setItem(RESPOSTAS_KEY, JSON.stringify(cfg.respostasCustom));
+            renderRespostas();
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('[admin-chatbot] Servidor indisponível no momento, utilizando cache local:', e);
+    }
   }
 
   // ===== Salvar config =====
-  function salvarConfig() {
+  async function salvarConfig() {
     const cfg = {
       nomeLoja: configNomeLoja.value.trim(),
       nomeIA: configNomeIA.value.trim(),
       whatsappNumero: configWhatsapp.value.trim().replace(/\D/g, ""),
       msgBoasVindas: configMsgBoasVindas.value.trim(),
-      ativo: configAtivo.checked
+      ativo: configAtivo.checked,
+      respostasCustom: getRespostas()
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(cfg));
+
+    try {
+      const res = await fetch(`${apiBase}/api/chatbot-config`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(cfg)
+      });
+      if (res.ok) {
+        configSalvo.textContent = "✅ Salvo no servidor com sucesso!";
+      } else {
+        configSalvo.textContent = "✅ Salvo localmente!";
+      }
+    } catch (e) {
+      configSalvo.textContent = "✅ Salvo localmente!";
+    }
 
     configSalvo.style.display = "inline";
     setTimeout(() => {
       configSalvo.style.display = "none";
-    }, 2000);
+    }, 2500);
   }
 
   btnSalvarConfig.addEventListener("click", salvarConfig);
@@ -73,6 +118,13 @@
 
   function salvarRespostas(lista) {
     localStorage.setItem(RESPOSTAS_KEY, JSON.stringify(lista));
+    try {
+      fetch(`${apiBase}/api/chatbot-respostas`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ respostas: lista })
+      }).catch(() => {});
+    } catch (e) {}
   }
 
   function renderRespostas() {
