@@ -714,29 +714,37 @@
         // Exibe se a mensagem tiver sugestões E for a última mensagem de bot E não estivermos em modo humano
         const isLatestBotMsg = (isBot || msg.type === 'bot') && !messages.slice(idx + 1).some(m => m.type === 'bot' || m.from === 'bot');
         if (!modoHumano && isLatestBotMsg && msg.suggestions && msg.suggestions.length > 0) {
-          const sugWrap = document.createElement('div');
-          sugWrap.className = 'quick-suggestions';
-          msg.suggestions.forEach(sug => {
-            const btn = document.createElement('button');
-            btn.className = 'suggestion-chip';
-            btn.type = 'button';
-            btn.innerHTML = escapeHtml(sug);
-            btn.addEventListener('click', (e) => {
-              e.preventDefault();
-              if (isSending) return;
-              reiniciarTimerInatividade();
-              const chips = sugWrap.querySelectorAll('.suggestion-chip');
-              chips.forEach(c => {
-                c.disabled = true;
-                c.style.pointerEvents = 'none';
-                c.style.opacity = '0.5';
-              });
-              enviarMensagem(sug);
-            });
-            sugWrap.appendChild(btn);
+          // Oculta opções de atendente humano das sugestões rápidas
+          const sugestoesFiltradas = msg.suggestions.filter(sug => {
+            const sLower = (sug || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            return !sLower.includes('atendente') && !sLower.includes('humano');
           });
-          if (sugWrap.children.length > 0) {
-            messagesEl.appendChild(sugWrap);
+
+          if (sugestoesFiltradas.length > 0) {
+            const sugWrap = document.createElement('div');
+            sugWrap.className = 'quick-suggestions';
+            sugestoesFiltradas.forEach(sug => {
+              const btn = document.createElement('button');
+              btn.className = 'suggestion-chip';
+              btn.type = 'button';
+              btn.innerHTML = escapeHtml(sug);
+              btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (isSending) return;
+                reiniciarTimerInatividade();
+                const chips = sugWrap.querySelectorAll('.suggestion-chip');
+                chips.forEach(c => {
+                  c.disabled = true;
+                  c.style.pointerEvents = 'none';
+                  c.style.opacity = '0.5';
+                });
+                enviarMensagem(sug);
+              });
+              sugWrap.appendChild(btn);
+            });
+            if (sugWrap.children.length > 0) {
+              messagesEl.appendChild(sugWrap);
+            }
           }
         }
       });
@@ -809,8 +817,7 @@
           '💳 Formas de Pagamento & PIX',
           '🔄 Trocas e Devoluções (CDC)',
           '🛍️ Ver Produtos & Promoções',
-          '🛒 Como Comprar no Site',
-          '👤 Falar com Atendente Humano'
+          '🛒 Como Comprar no Site'
         ]
       };
 
@@ -873,8 +880,7 @@
                 sugestoes: [
                   '📦 Rastrear meu Pedido',
                   '🚚 Prazos de Entrega & Frete',
-                  '💳 Formas de Pagamento & PIX',
-                  '👤 Falar com Atendente Humano'
+                  '💳 Formas de Pagamento & PIX'
                 ]
               };
             }
