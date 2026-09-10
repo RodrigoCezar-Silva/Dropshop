@@ -150,12 +150,37 @@
     if (!texto) return false;
     const t = String(texto).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
 
+    // Raízes e termos diretos (cobre variações no plural, singular e digitação)
+    if (
+      t.includes('atendent') ||
+      t.includes('humano') ||
+      t.includes('humana') ||
+      t.includes('operador') ||
+      t.includes('suporte humano') ||
+      t.includes('falar com alguem') ||
+      t.includes('falar com pessoa') ||
+      t.includes('chamar alguem') ||
+      t.includes('chamar atendente') ||
+      t.includes('preciso de atendente') ||
+      t.includes('passar para atendente') ||
+      t.includes('transferir') ||
+      t.includes('transferencia') ||
+      t.includes('nao quero robo') ||
+      t.includes('nao quero bot') ||
+      t.includes('chega de robo') ||
+      t.includes('pessoa de verdade')
+    ) {
+      return true;
+    }
+
     const padroes = [
       /\batendente\b/,
       /\batendentes\b/,
+      /\batendete\b/,
       /\bhumano\b/,
       /\bhumana\b/,
       /\bhumanos\b/,
+      /\bhumanas\b/,
       /\bpessoa\b/,
       /\bpessoas\b/,
       /\boperador\b/,
@@ -171,9 +196,13 @@
       /\bsuporte humano\b/,
       /\batendimento humano\b/,
       /\bchamar atendente\b/,
+      /\bchama atendente\b/,
+      /\bchamar um atendente\b/,
       /\bquero atendente\b/,
+      /\bquero um atendente\b/,
       /\bfalar com atendente\b/,
       /\bfalar com um atendente\b/,
+      /\bfalar com uma atendente\b/,
       /\bfalar com uma pessoa\b/,
       /\bfalar com humano\b/,
       /\bfalar com um humano\b/,
@@ -181,6 +210,7 @@
       /\bchamar alguem\b/,
       /\bpreciso de atendente\b/,
       /\bpreciso de alguem\b/,
+      /\bpreciso falar com atendente\b/,
       /\bpassa(r)? para atendente\b/,
       /\bpassar pro atendente\b/,
       /\bpassar pra atendente\b/,
@@ -197,7 +227,7 @@
     return padroes.some(regex => regex.test(t));
   }
 
-  document.addEventListener('DOMContentLoaded', function () {
+  function initAtendimento() {
     const messagesEl = document.getElementById('messages');
     const msgInput = document.getElementById('msgInput');
     const sendBtn = document.getElementById('sendMsgBtn');
@@ -356,7 +386,6 @@
       return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
     }
 
-    function redirecionarPorInatividade() {
     function encerrarPorInatividade() {
       clearInterval(timerInatividadeInterval);
       if (pollingInterval) clearInterval(pollingInterval);
@@ -647,8 +676,6 @@
           const sugWrap = document.createElement('div');
           sugWrap.className = 'quick-suggestions';
           msg.suggestions.forEach(sug => {
-            if (/humano|atendente/i.test(sug)) return;
-
             const btn = document.createElement('button');
             btn.className = 'suggestion-chip';
             btn.type = 'button';
@@ -724,7 +751,8 @@
           '💳 Formas de Pagamento & PIX',
           '🔄 Trocas e Devoluções (CDC)',
           '🛍️ Ver Produtos & Promoções',
-          '🛒 Como Comprar no Site'
+          '🛒 Como Comprar no Site',
+          '👤 Falar com Atendente Humano'
         ]
       };
 
@@ -1104,7 +1132,48 @@
           }
         }
 
-        // 5. Dispara evento via BroadcastChannel (aviso instantâneo multi-aba)
+        // 5. Mensagem automática de apresentação e boas-vindas do Atendente Humano
+        setTimeout(() => {
+          showTypingIndicator(atendenteAtual.primeiroNome);
+          setTimeout(async () => {
+            removeTypingIndicator();
+            playAttendantReplySound();
+
+            const msgAtendenteBoasVindas = {
+              type: 'attendant',
+              author: `${atendenteAtual.nome} (${atendenteAtual.cargo})`,
+              text: `Olá, **${clienteFullName}**! 👋 Me chamo **${atendenteAtual.nome}**, ${atendenteAtual.cargo} da MIX-PROMOÇÃO.\n\nJá estou acompanhando seu chamado aqui na central! Como posso te ajudar hoje?`,
+              time: Date.now()
+            };
+            messages.push(msgAtendenteBoasVindas);
+            renderMessages();
+            retomarTimerInatividade();
+
+            if (activeConversationId) {
+              try {
+                const resAtend = await fetch(`${apiBase}/api/conversations/${activeConversationId}/messages`, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    from: 'attendant',
+                    fromName: atendenteAtual.nome,
+                    text: msgAtendenteBoasVindas.text
+                  })
+                });
+                if (resAtend.ok) {
+                  const dataAtend = await resAtend.json();
+                  if (dataAtend && dataAtend.message && dataAtend.message.id) {
+                    msgAtendenteBoasVindas.id = dataAtend.message.id;
+                    renderedMessageKeys.add(String(dataAtend.message.id));
+                    renderedMessageKeys.add(`${dataAtend.message.id}_attendant_${dataAtend.message.time || ''}_${msgAtendenteBoasVindas.text.slice(0, 35)}`);
+                  }
+                }
+              } catch (e) {}
+            }
+          }, 800);
+        }, 400);
+
+        // 6. Dispara evento via BroadcastChannel (aviso instantâneo multi-aba)
         const protoFormatado = protocolo.startsWith('#') ? protocolo : '#' + protocolo;
         try {
           const bus = new BroadcastChannel('mix_support_bus');
@@ -1500,11 +1569,30 @@
     }
 
     // =========================================================================
-    // INICIALIZAÇÃO IMEDIATA
+    // ATALHO LATERAL: BOTÃO "SUPORTE HUMANO VIA CHAT"
+    // =========================================================================
+    const pillChamarAtendente = document.getElementById('pillChamarAtendente') || document.getElementById('btnSidebarChamarHumano');
+    if (pillChamarAtendente) {
+      pillChamarAtendente.style.cursor = 'pointer';
+      pillChamarAtendente.addEventListener('click', () => {
+        if (!modoHumano) {
+          enviarMensagem('Quero falar com um atendente humano');
+        }
+      });
+    }
+
+    // =========================================================================
+    // INICIALIZAÇÃO IMEDIATA (SEMPRE INICIA COM AUTOATENDIMENTO MIXIA)
     // =========================================================================
     criarMensagemBoasVindas();
     atualizarVisualCabecalho();
     conectarOuCriarChamado();
     reiniciarTimerInatividade();
-  });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initAtendimento);
+  } else {
+    initAtendimento();
+  }
 })();
