@@ -3,38 +3,23 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Painel Administrativo - MIX-PROMOÇÃO</title>
+  <title>MIX-PROMOCAO - Area Admin</title>
 
-  <link rel="stylesheet" href="/css/style-index.css" />
-  <link rel="stylesheet" href="/css/menu.css" />
-  <link rel="stylesheet" href="/css/logo.css" />
-  <link rel="stylesheet" href="/css/statusLogin.css" />
-  <link rel="stylesheet" href="/css/minhaConta.css" />
-  <link rel="stylesheet" href="/css/btn-topo.css" />
-  <link rel="stylesheet" href="/css/footer.css" />
-  <link rel="stylesheet" href="/css/admin-area.css" />
+  <link rel="stylesheet" href="./css/style-index.css" />
+  <link rel="stylesheet" href="./css/menu.css" />
+  <link rel="stylesheet" href="./css/logo.css" />
+  <link rel="stylesheet" href="./css/statusLogin.css" />
+  <link rel="stylesheet" href="./css/minhaConta.css" />
+  <link rel="stylesheet" href="./css/btn-topo.css" />
+  <link rel="stylesheet" href="./css/footer.css" />
+  <link rel="stylesheet" href="./css/admin-area.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-  <link rel="stylesheet" href="/css/responsive.css" />
-  <link rel="stylesheet" href="/css/chatbot-widget.css" />
+  <link rel="stylesheet" href="./css/responsive.css" />
 </head>
 <body>
   <header class="site-header">
     <div class="logo">
-      <span class="logo-icon" aria-hidden="true">
-        <!-- Inline SVG do ícone de carrinho (cor e estilo ajustáveis via CSS) -->
-        <svg width="40" height="28" viewBox="0 0 64 44" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Ícone carrinho">
-          <defs>
-            <linearGradient id="g1" x1="0" x2="1">
-              <stop offset="0%" stop-color="#00d0ff"/>
-              <stop offset="50%" stop-color="#00f0c6"/>
-              <stop offset="100%" stop-color="#6fe6c4"/>
-            </linearGradient>
-          </defs>
-          <path d="M6 6h6l6 22h34l8-16H20" stroke="url(#g1)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none" />
-          <circle cx="24" cy="36" r="3.6" fill="#00c6ff" />
-          <circle cx="46" cy="36" r="3.6" fill="#00c6ff" />
-        </svg>
-      </span>
+      <span class="logo-icon">??</span>
       <span class="logo-text">
         <span class="mix">MIX</span><span class="promocao">PROMOCAO</span>
       </span>
@@ -42,43 +27,22 @@
 
     <nav class="menu" aria-label="Menu principal">
       <ul>
-        <li><a href="index.html"><i class="fa-solid fa-house menu-link-icon" aria-hidden="true"></i><span>Inicio</span></a></li>
-        <li><a href="loja.html"><i class="fa-solid fa-store menu-link-icon" aria-hidden="true"></i><span>Nossa Loja</span></a></li>
-        <li><a href="QuemSomos.html"><i class="fa-solid fa-circle-info menu-link-icon" aria-hidden="true"></i><span>Sobre</span></a></li>
-        <li><a href="trocas-devolucoes.html"><i class="fa-solid fa-right-left menu-link-icon" aria-hidden="true"></i><span>Trocas e Devolucoes</span></a></li>
-        <li><a href="ajuda.html"><i class="fa-solid fa-circle-question menu-link-icon" aria-hidden="true"></i><span>Ajuda</span></a></li>
+        <li><a href="./index.html"><i class="fa-solid fa-house menu-link-icon" aria-hidden="true"></i><span>Inicio</span></a></li>
+        <li><a href="./loja.html"><i class="fa-solid fa-store menu-link-icon" aria-hidden="true"></i><span>Nossa Loja</span></a></li>
+        <li><a href="./QuemSomos.html"><i class="fa-solid fa-circle-info menu-link-icon" aria-hidden="true"></i><span>Sobre</span></a></li>
+        <li><a href="./trocas-devolucoes.html"><i class="fa-solid fa-right-left menu-link-icon" aria-hidden="true"></i><span>Trocas e Devolucoes</span></a></li>
+        <li><a href="./ajuda.html"><i class="fa-solid fa-circle-question menu-link-icon" aria-hidden="true"></i><span>Ajuda</span></a></li>
       </ul>
     </nav>
 
     <div id="loginButtons">
-      <a href="login-cliente.html" class="btn-login cliente">👤 Login Cliente</a>
-      <a href="admin-login.html" class="btn-login admin">👤 Login Admin</a>
-      <a href="login-funcionario.html" class="btn-login funcionario">👤 Login Funcionário</a>
+      <a href="./login-cliente.html" class="btn-login cliente">👤 Login Cliente</a>
+      <a href="./admin-login.html" class="btn-login admin">👤 Login Admin</a>
+      <a href="./login-funcionario.html" class="btn-login funcionario">👤 Login Funcionário</a>
     </div>
 
     <div id="statusLogado" class="status-admin" style="display:none;">
-      <button id="btnLogoutInline" class="btn-logout-inline" title="Sair do modo admin" aria-label="Sair do modo admin">
-        <i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i>
-      </button>
-      <span class="status-text">
-        <span class="admin-icon" aria-hidden="true">
-          <svg width="28" height="22" viewBox="0 0 64 44" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Ícone carrinho">
-            <defs>
-              <linearGradient id="g-status" x1="0" x2="1">
-                <stop offset="0%" stop-color="#00f0c6"/>
-                <stop offset="100%" stop-color="#00d0ff"/>
-              </linearGradient>
-            </defs>
-            <path d="M6 6h6l6 22h34l8-16H20" stroke="url(#g-status)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none" />
-            <circle cx="24" cy="36" r="3.6" fill="#00c6ff" />
-            <circle cx="46" cy="36" r="3.6" fill="#00c6ff" />
-          </svg>
-        </span>
-        <span class="admin-label">Administrador:</span>
-        <strong id="nomeUsuario"></strong>
-      </span>
-      <button id="btnExitNearStatus" class="btn-exit-near" title="Sair do modo admin">Sair</button>
-      <button id="btnExitRight" class="btn-exit-right" title="Sair do modo admin"><i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i></button>
+      <span class="status-text">?? Administrador: <strong id="nomeUsuario"></strong></span>
       <button id="logout" class="btn-logout">Sair</button>
     </div>
 
@@ -89,284 +53,96 @@
       <button id="btnMinhaConta" class="btn-minha-conta">Minha Conta</button>
       <button id="logoutBtn" class="btn-logout">Sair</button>
     </div>
-    <!-- Botão de logout fixo no canto direito do cabeçalho -->
-    <button id="btnLogoutHeader" class="btn-logout-header" style="display:none;" aria-label="Sair">
-      <i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i>
-      <span>Sair</span>
-    </button>
   </header>
 
   <main class="admin-area-main">
-    <!-- Hero Banner Executivo e Personalizado -->
     <section class="admin-area-hero">
-      <div class="admin-hero-top">
-        <div class="admin-area-eyebrow">
-          <span class="pulse-dot"></span>
-          <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
-          <span>Painel Administrativo Master</span>
-        </div>
-        <div class="admin-hero-date">
-          <i class="fa-regular fa-calendar-days" aria-hidden="true"></i>
-          <span id="adminCurrentDate">Carregando data...</span>
-        </div>
+      <div class="admin-area-eyebrow">
+        <i class="fa-solid fa-user-shield" aria-hidden="true"></i>
+        <span>Painel Administrativo</span>
       </div>
-
-      <div class="admin-hero-content">
-        <h1>Bem-vindo de volta, <span id="heroAdminNome" class="hero-name-highlight">Rodrigo Cezar</span> 👋</h1>
-        <p>Central de controle geral da <strong>MIX-PROMOÇÃO</strong>. Gerencie o catálogo, controle o estoque, processe pedidos, dispare campanhas de marketing e configure a inteligência artificial da loja em tempo real.</p>
-      </div>
-
-      <!-- Barra de Métricas Rápidas (KPIs) -->
-      <div class="admin-hero-kpis">
-        <div class="kpi-chip">
-          <div class="kpi-icon kpi-blue"><i class="fa-solid fa-boxes-stacked" aria-hidden="true"></i></div>
-          <div class="kpi-info">
-            <span class="kpi-value" id="kpiTotalProdutos">0</span>
-            <span class="kpi-label">Produtos em Estoque</span>
-          </div>
-        </div>
-
-        <div class="kpi-chip">
-          <div class="kpi-icon kpi-amber"><i class="fa-solid fa-clipboard-check" aria-hidden="true"></i></div>
-          <div class="kpi-info">
-            <span class="kpi-value">Fluxo Ativo</span>
-            <span class="kpi-label">Gestão de Pedidos</span>
-          </div>
-        </div>
-
-        <div class="kpi-chip">
-          <div class="kpi-icon kpi-purple"><i class="fa-solid fa-robot" aria-hidden="true"></i></div>
-          <div class="kpi-info">
-            <span class="kpi-value">IA 24/7</span>
-            <span class="kpi-label">Chatbot Inteligente</span>
-          </div>
-        </div>
-
-        <div class="kpi-chip">
-          <div class="kpi-icon kpi-emerald"><i class="fa-solid fa-circle-check" aria-hidden="true"></i></div>
-          <div class="kpi-info">
-            <span class="kpi-value" style="color: #34d399;">100% Online</span>
-            <span class="kpi-label">Servidor & Banco Conectados</span>
-          </div>
-        </div>
-      </div>
+      <h1>Area Admin MIX-PROMOCAO</h1>
+      <p>Centralize as acoes principais do sistema em um unico lugar e acesse rapidamente gerenciamento de produtos, cadastro administrativo e navegacao do site.</p>
     </section>
 
-    <!-- Barra de Filtros / Categorias -->
-    <div class="admin-filters-bar" role="tablist" aria-label="Categorias de ferramentas administrativas">
-      <button class="filter-tab active" data-filter="all">
-        <i class="fa-solid fa-layer-group" aria-hidden="true"></i>
-        <span>Todos os Módulos</span>
-        <span class="filter-count">12</span>
-      </button>
-      <button class="filter-tab" data-filter="gestao">
-        <i class="fa-solid fa-boxes-stacked" aria-hidden="true"></i>
-        <span>Gestão & Estoque</span>
-      </button>
-      <button class="filter-tab" data-filter="vendas">
-        <i class="fa-solid fa-chart-line" aria-hidden="true"></i>
-        <span>Vendas & Pedidos</span>
-      </button>
-      <button class="filter-tab" data-filter="atendimento">
-        <i class="fa-solid fa-headset" aria-hidden="true"></i>
-        <span>Atendimento & IA</span>
-      </button>
-      <button class="filter-tab" data-filter="marketing">
-        <i class="fa-solid fa-bullhorn" aria-hidden="true"></i>
-        <span>Marketing</span>
-      </button>
-      <button class="filter-tab" data-filter="sistema">
-        <i class="fa-solid fa-users-gear" aria-hidden="true"></i>
-        <span>Equipe & Sistema</span>
-      </button>
-    </div>
-
-    <!-- Grid de Cards Executivos -->
-    <section class="admin-area-grid" id="adminCardsGrid">
-      <!-- 1. Controle de Estoque -->
-      <article class="admin-card card-theme-blue" data-category="gestao">
-        <div class="admin-card-header">
-          <div class="admin-card-icon"><i class="fa-solid fa-warehouse" aria-hidden="true"></i></div>
-          <span class="card-category-badge">Estoque</span>
-        </div>
+    <section class="admin-area-grid">
+      <article class="admin-card">
+        <div class="admin-card-icon"><i class="fa-solid fa-warehouse" aria-hidden="true"></i></div>
         <h2>Controle de Estoque</h2>
-        <p>Monitore produtos em tempo real, quantidades disponíveis, preços atuais e gerencie a saída e entrada de itens.</p>
-        <a class="admin-card-link" href="controle-estoque.html">
-          <span>Abrir Estoque</span>
-          <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
-        </a>
+        <p>Acesse o painel para visualizar, consultar e acompanhar o estoque dos produtos cadastrados na loja.</p>
+        <a class="admin-card-link" href="./controle-estoque.html"><span>Abrir controle de estoque</span><i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
       </article>
 
-      <!-- 2. Gerenciar Produtos -->
-      <article class="admin-card card-theme-emerald" data-category="gestao">
-        <div class="admin-card-header">
-          <div class="admin-card-icon"><i class="fa-solid fa-boxes-packing" aria-hidden="true"></i></div>
-          <span class="card-category-badge">Catálogo</span>
-        </div>
+      <article class="admin-card">
+        <div class="admin-card-icon"><i class="fa-solid fa-box-open" aria-hidden="true"></i></div>
         <h2>Gerenciar Produtos</h2>
-        <p>Cadastre novos produtos, atualize imagens, descrições, preços promocionais e organize a vitrine pública.</p>
-        <a class="admin-card-link" href="loja.html">
-          <span>Gerenciar Vitrine</span>
-          <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
-        </a>
+        <p>Acesse a vitrine administrativa para editar, remover e revisar os produtos cadastrados.</p>
+        <a class="admin-card-link" href="./loja.html"><span>Abrir gerenciamento</span><i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
       </article>
 
-      <!-- 3. Estatísticas de Produtos -->
-      <article class="admin-card card-theme-purple" data-category="gestao vendas">
-        <div class="admin-card-header">
-          <div class="admin-card-icon"><i class="fa-solid fa-chart-column" aria-hidden="true"></i></div>
-          <span class="card-category-badge">Métricas</span>
-        </div>
-        <h2>Estatísticas de Produtos</h2>
-        <p>Acompanhe quantas visualizações cada item recebeu, os mais acessados da loja e o comportamento dos clientes.</p>
-        <a class="admin-card-link" href="admin-estatisticas.html">
-          <span>Ver Estatísticas</span>
-          <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
-        </a>
+      <article class="admin-card">
+        <div class="admin-card-icon"><i class="fa-solid fa-chart-column" aria-hidden="true"></i></div>
+        <h2>Estatisticas de Produtos</h2>
+        <p>Veja quantas visualizacoes cada produto recebeu e acompanhe quais itens estao chamando mais atencao na loja.</p>
+        <a class="admin-card-link" href="./admin-estatisticas.html"><span>Ver estatisticas</span><i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
       </article>
 
-      <!-- 4. Pedidos dos Clientes -->
-      <article class="admin-card card-theme-amber" data-category="vendas">
-        <div class="admin-card-header">
-          <div class="admin-card-icon"><i class="fa-solid fa-clipboard-list" aria-hidden="true"></i></div>
-          <span class="card-category-badge">Vendas</span>
-        </div>
-        <h2>Pedidos dos Clientes</h2>
-        <p>Visualize as compras realizadas pelos clientes para processar os envios rápidos e a logística de dropshipping.</p>
-        <a class="admin-card-link" href="admin-pedidos.html">
-          <span>Ver Pedidos</span>
-          <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
-        </a>
-      </article>
-
-      <!-- 5. Reclamações dos Clientes -->
-      <article class="admin-card card-theme-rose" data-category="atendimento">
-        <div class="admin-card-header">
-          <div class="admin-card-icon"><i class="fa-solid fa-headset" aria-hidden="true"></i></div>
-          <span class="card-category-badge">Suporte & SAC</span>
-        </div>
-        <h2>Reclamações dos Clientes</h2>
-        <p>Consulte e responda as mensagens de pós-venda, dúvidas e solicitações enviadas pelo formulário oficial de contato.</p>
-        <a class="admin-card-link" href="admin-reclamacoes.html">
-          <span>Gerenciar SAC</span>
-          <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
-        </a>
-      </article>
-
-      <!-- 6. Central de Conversas -->
-      <article class="admin-card card-theme-teal" data-category="atendimento">
-        <div class="admin-card-header">
-          <div class="admin-card-icon"><i class="fa-solid fa-comments" aria-hidden="true"></i></div>
-          <span class="card-category-badge">Chat Ao Vivo</span>
-        </div>
-        <h2>Central de Conversas</h2>
-        <p>Acesse o painel unificado de bate-papo para interagir diretamente e responder aos clientes do site em tempo real.</p>
-        <a class="admin-card-link" href="admin-chat-center.html">
-          <span>Abrir Conversas</span>
-          <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
-        </a>
-      </article>
-
-      <!-- 7. Chatbot IA -->
-      <article class="admin-card card-theme-ai" data-category="atendimento marketing">
-        <div class="admin-card-header">
-          <div class="admin-card-icon"><i class="fa-solid fa-robot" aria-hidden="true"></i></div>
-          <span class="card-category-badge">Inteligência Artificial</span>
-        </div>
-        <h2>Chatbot com IA</h2>
-        <p>Configure respostas automáticas, personalidade do assistente e integre o atendimento inteligente 24h na loja.</p>
-        <a class="admin-card-link" href="admin-chatbot.html">
-          <span>Configurar Chatbot</span>
-          <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
-        </a>
-      </article>
-
-      <!-- 8. E-mails Promocionais -->
-      <article class="admin-card card-theme-sky" data-category="marketing">
-        <div class="admin-card-header">
-          <div class="admin-card-icon"><i class="fa-solid fa-envelope-open-text" aria-hidden="true"></i></div>
-          <span class="card-category-badge">Campanhas</span>
-        </div>
-        <h2>E-mails Promocionais</h2>
-        <p>Dispare ofertas exclusivas, newsletters de lançamentos e campanhas promocionais para a sua base de clientes.</p>
-        <a class="admin-card-link" href="admin-emails.html">
-          <span>Enviar E-mails</span>
-          <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
-        </a>
-      </article>
-
-      <!-- 9. WhatsApp Promocional -->
-      <article class="admin-card card-theme-whatsapp" data-category="marketing">
-        <div class="admin-card-header">
-          <div class="admin-card-icon"><i class="fab fa-whatsapp" aria-hidden="true"></i></div>
-          <span class="card-category-badge">WhatsApp</span>
-        </div>
-        <h2>WhatsApp Promocional</h2>
-        <p>Envie promoções, cupons de desconto e novidades diretamente no WhatsApp cadastrado dos clientes da loja.</p>
-        <a class="admin-card-link" href="admin-whatsapp.html">
-          <span>Disparar WhatsApp</span>
-          <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
-        </a>
-      </article>
-
-      <!-- 10. Cadastrar Administrador -->
-      <article class="admin-card card-theme-slate" data-category="sistema">
-        <div class="admin-card-header">
-          <div class="admin-card-icon"><i class="fa-solid fa-user-plus" aria-hidden="true"></i></div>
-          <span class="card-category-badge">Acesso</span>
-        </div>
+      <article class="admin-card">
+        <div class="admin-card-icon"><i class="fa-solid fa-user-plus" aria-hidden="true"></i></div>
         <h2>Cadastrar Administrador</h2>
-        <p>Adicione novos gestores com acesso administrativo seguro para auxiliar nas operações diárias do sistema.</p>
-        <a class="admin-card-link" href="cadastro-admin.html">
-          <span>Novo Admin</span>
-          <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
-        </a>
+        <p>Cadastre novos usuarios com acesso administrativo para manter a operacao do sistema organizada.</p>
+        <a class="admin-card-link" href="./cadastro-admin.html"><span>Abrir cadastro</span><i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
       </article>
 
-      <!-- 11. Área de Funcionários -->
-      <article class="admin-card card-theme-indigo" data-category="sistema">
-        <div class="admin-card-header">
-          <div class="admin-card-icon"><i class="fa-solid fa-user-tie" aria-hidden="true"></i></div>
-          <span class="card-category-badge">Equipe</span>
-        </div>
-        <h2>Área de Funcionários</h2>
-        <p>Acesse o ambiente restrito da equipe operacional e gerencie permissões direcionadas para funcionários.</p>
-        <a class="admin-card-link" href="funcionario-area.html">
-          <span>Acessar Área</span>
-          <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
-        </a>
+      <article class="admin-card">
+        <div class="admin-card-icon"><i class="fa-solid fa-house" aria-hidden="true"></i></div>
+        <h2>Voltar para o Site</h2>
+        <p>Retorne para a pagina inicial e acompanhe como as alteracoes ficam visiveis para o publico.</p>
+        <a class="admin-card-link" href="./index.html"><span>Ir para a home</span><i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
       </article>
 
-      <!-- 12. Voltar para o Site -->
-      <article class="admin-card card-theme-dark" data-category="sistema">
-        <div class="admin-card-header">
-          <div class="admin-card-icon"><i class="fa-solid fa-store" aria-hidden="true"></i></div>
-          <span class="card-category-badge">Visão Pública</span>
-        </div>
-        <h2>Voltar para a Vitrine</h2>
-        <p>Retorne à página inicial para conferir em tempo real como a vitrine e as promoções aparecem aos visitantes.</p>
-        <a class="admin-card-link" href="index.html">
-          <span>Ver Vitrine</span>
-          <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
-        </a>
+      <article class="admin-card">
+        <div class="admin-card-icon"><i class="fa-solid fa-clipboard-list" aria-hidden="true"></i></div>
+        <h2>Pedidos dos Clientes</h2>
+        <p>Visualize todos os pedidos realizados pelos clientes para processar as compras e fazer o dropshipping.</p>
+        <a class="admin-card-link" href="./admin-pedidos.html"><span>Ver pedidos</span><i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+      </article>
+
+      <article class="admin-card">
+        <div class="admin-card-icon"><i class="fa-solid fa-comments" aria-hidden="true"></i></div>
+        <h2>Reclamacoes dos Clientes</h2>
+        <p>Visualize e responda as reclamacoes enviadas pelos clientes pelo formulario de contato.</p>
+        <a class="admin-card-link" href="./admin-reclamacoes.html"><span>Ver reclamacoes</span><i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+      </article>
+
+      <article class="admin-card">
+        <div class="admin-card-icon"><i class="fa-solid fa-envelope-open-text" aria-hidden="true"></i></div>
+        <h2>Emails Promocionais</h2>
+        <p>Envie emails de promocoes com imagens para os clientes cadastrados e aumente suas vendas.</p>
+        <a class="admin-card-link" href="./admin-emails.html"><span>Enviar emails</span><i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+      </article>
+
+      <article class="admin-card">
+        <div class="admin-card-icon"><i class="fab fa-whatsapp" aria-hidden="true"></i></div>
+        <h2>WhatsApp Promocional</h2>
+        <p>Envie mensagens de promocoes via WhatsApp diretamente para os clientes e aumente suas vendas.</p>
+        <a class="admin-card-link" href="./admin-whatsapp.html"><span>Enviar mensagens</span><i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+      </article>
+
+      <article class="admin-card">
+        <div class="admin-card-icon"><i class="fa-solid fa-robot" aria-hidden="true"></i></div>
+        <h2>Chatbot IA</h2>
+        <p>Configure o assistente virtual com inteligencia artificial que atende clientes automaticamente no site e WhatsApp.</p>
+        <a class="admin-card-link" href="./admin-chatbot.html"><span>Configurar chatbot</span><i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
       </article>
     </section>
 
-    <!-- Painel de Segurança e Dicas Administrativas -->
-    <section class="admin-area-security-banner">
-      <div class="security-banner-icon">
-        <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
-      </div>
-      <div class="security-banner-content">
-        <h3>Ambiente Administrativo Seguro & Monitorado</h3>
-        <p>Você está conectado como <strong>Administrador Master</strong>. Todas as ações de criação de produtos, disparos de mensagens e alterações em estoque ficam registradas com segurança no sistema.</p>
-        <div class="security-tags">
-          <span class="sec-tag"><i class="fa-solid fa-lock" aria-hidden="true"></i> Sessão Protegida</span>
-          <span class="sec-tag"><i class="fa-solid fa-database" aria-hidden="true"></i> Banco MySQL Conectado</span>
-          <span class="sec-tag"><i class="fa-solid fa-bolt" aria-hidden="true"></i> API Node.js Ativa</span>
-          <span class="sec-tag"><i class="fa-solid fa-shield-check" aria-hidden="true"></i> Controle de Estoque Integrado</span>
-        </div>
-      </div>
+    <section class="admin-area-notes">
+      <h2>Atalhos Uteis</h2>
+      <ul>
+        <li>Use o gerenciamento de produtos para editar vitrine, detalhes e midia.</li>
+        <li>Se voce sair da conta, a pagina administrativa volta a exigir login de administrador.</li>
+      </ul>
     </section>
   </main>
 
@@ -389,17 +165,17 @@
       <div class="footer-links">
         <h4>Navegacao</h4>
         <ul>
-          <li><a href="index.html"><i class="fa-solid fa-chevron-right"></i> Inicio</a></li>
-          <li><a href="loja.html"><i class="fa-solid fa-chevron-right"></i> Nossa Loja</a></li>
-          <li><a href="QuemSomos.html"><i class="fa-solid fa-chevron-right"></i> Sobre Nos</a></li>
+          <li><a href="./index.html"><i class="fa-solid fa-chevron-right"></i> Inicio</a></li>
+          <li><a href="./loja.html"><i class="fa-solid fa-chevron-right"></i> Nossa Loja</a></li>
+          <li><a href="./QuemSomos.html"><i class="fa-solid fa-chevron-right"></i> Sobre Nos</a></li>
           
         </ul>
       </div>
       <div class="footer-links suporte">
         <h4>Suporte</h4>
         <ul>
-          <li><a href="trocas-devolucoes.html"><i class="fa-solid fa-chevron-right"></i> Trocas e Devoluções</a></li>
-          <li><a href="carrinho.html"><i class="fa-solid fa-chevron-right"></i> Meu Carrinho</a></li>
+          <li><a href="./trocas-devolucoes.html"><i class="fa-solid fa-chevron-right"></i> Trocas e Devoluções</a></li>
+          <li><a href="./carrinho.html"><i class="fa-solid fa-chevron-right"></i> Meu Carrinho</a></li>
         </ul>
       </div>
       <!-- Contato removido conforme solicitado -->
@@ -418,13 +194,12 @@
     </div>
   </footer>
 
-  <script src="/js/statusLogin.js"></script>
-  <script src="/js/logo.js"></script>
-  <script src="/js/btn-topo.js"></script>
-  <script src="/js/bloquear-copia.js"></script>
-  <script src="/js/admin-area.js"></script>
-  <script src="/js/admin-cards.js"></script>
-  <script src="/js/responsive-nav.js"></script>
-  <script src="/js/chatbot-widget.js"></script>
+  <script src="./js/statusLogin.js"></script>
+  <script src="./js/logo.js"></script>
+  <script src="./js/btn-topo.js"></script>
+  <script src="./js/bloquear-copia.js"></script>
+  <script src="./js/admin-area.js"></script>
+  <script src="./js/admin-cards.js"></script>
+  <script src="./js/responsive-nav.js"></script>
 </body>
 </html>
