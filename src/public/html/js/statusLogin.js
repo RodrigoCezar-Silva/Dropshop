@@ -196,8 +196,8 @@ document.addEventListener("DOMContentLoaded", () => {
         div.id = 'loginButtons';
         div.innerHTML = `
           <a href="login-cliente.html" class="btn-login cliente">👤 Login Cliente</a>
-          <a href="admin-login.html" class="btn-login admin">👤 Login Administrativo</a>
-          <a href="login-funcionario.html" class="btn-login admin">👤 Login Funcionário</a>
+          <a href="admin-login.html" class="btn-login admin">👤 Login Admin</a>
+          <a href="login-funcionario.html" class="btn-login funcionario">👤 Login Funcionário</a>
         `;
         if (headerEl) {
           const anchor = headerEl.querySelector('.cart-icon');
@@ -1008,6 +1008,7 @@ if (logoutCliente) {
       _login.style.gap = '8px';
       _login.style.alignItems = 'center';
       _login.style.zIndex = '999';
+      _login.style.flexWrap = 'nowrap';
     }
   } catch (e) { /* ignore */ }
 

@@ -78,10 +78,14 @@
 .btn-login {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  font-size: 1.1em;
-  font-weight: bold;
-  padding: 12px 24px;
+  justify-content: center;
+  white-space: nowrap !important;
+  word-break: keep-all;
+  flex-shrink: 0;
+  gap: 6px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 10px 16px;
   border: none;              /* remove borda padrão */
   outline: none;             /* remove linha de foco */
   border-radius: 8px;
@@ -91,6 +95,7 @@
   overflow: hidden;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   text-decoration: none;     /* remove sublinhado se for <a> */
+  line-height: 1.2;
 }
 
 
@@ -208,17 +213,25 @@
 }
 
 /* Botões de login */
-.btn-login {
-  padding: 10px 18px;
+.btn-login,
+#loginButtons .btn-login {
+  padding: 10px 16px;
   border-radius: 8px;
   font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
   border: none;
+  outline: none;
   transition: all 0.3s ease;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
+  white-space: nowrap !important;
+  word-break: keep-all;
+  flex-shrink: 0;
   gap: 6px;
+  text-decoration: none;
+  line-height: 1.2;
 }
 
 .btn-login.cliente {
@@ -280,8 +293,11 @@ header.site-header .menu {
 #loginButtons {
   margin-left: auto;
   display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
   gap: 8px;
   align-items: center;
+  flex-shrink: 0;
 }
 
 /* Estilo para o botão 'Minha Conta' criado dinamicamente */
@@ -301,4 +317,33 @@ header.site-header .menu {
 }
 .btn-minha-conta i { font-size: 1rem; line-height:1; }
 .btn-minha-conta:hover { transform: translateY(-2px); box-shadow: 0 6px 12px rgba(0,0,0,0.25); }
+
+/* Ajuste fino responsivo para os botões de login sem quebra de linha */
+@media (max-width: 768px) {
+  #loginButtons {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .btn-login,
+  #loginButtons .btn-login {
+    font-size: 0.88rem;
+    padding: 8px 12px;
+    white-space: nowrap !important;
+  }
+}
+
+@media (max-width: 480px) {
+  #loginButtons {
+    justify-content: center;
+    gap: 4px;
+    width: 100%;
+  }
+  .btn-login,
+  #loginButtons .btn-login {
+    font-size: 0.82rem;
+    padding: 7px 9px;
+    gap: 4px;
+    white-space: nowrap !important;
+  }
+}
 
