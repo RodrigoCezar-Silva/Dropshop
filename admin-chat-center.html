@@ -173,7 +173,7 @@
               <i class="fa-solid fa-paperclip"></i>
             </button>
             
-            <input id="msgInput" placeholder="Selecione um chamado para digitar..." autocomplete="off" aria-label="Mensagem para o cliente" disabled>
+            <input id="msgInput" placeholder="Selecione um chamado para digitar..." autocomplete="on" spellcheck="true" lang="pt-BR" autocorrect="on" autocapitalize="sentences" aria-label="Mensagem para o cliente" disabled>
             
             <div class="composer-actions">
               <button id="sendMsgBtn" class="composer-send" type="button" title="Enviar resposta para o cliente" disabled style="background:linear-gradient(135deg,#0072ff,#00c6ff);">
@@ -192,6 +192,7 @@
   <div id="toastContainer" style="position:fixed; top:75px; right:20px; z-index:99999; display:flex; flex-direction:column; gap:10px; pointer-events:none;"></div>
 
   <!-- Scripts -->
+  <script src="./js/corretor-ortografico.js" defer></script>
   <script src="./js/admin-chat-center.js" defer></script>
 </body>
 </html>
