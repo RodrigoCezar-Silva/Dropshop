@@ -11,13 +11,36 @@
   if (document.getElementById("chatbotFab")) return;
 
   // ===== CONFIG =====
-  const NOME_LOJA = "MIX-PROMOÇÃO";
-  const NOME_IA = "MixIA";
-  const WHATSAPP_NUMERO = "5500000000000"; // Número padrão
+  const savedCfg = (() => { try { return JSON.parse(localStorage.getItem("chatbot_config") || "{}"); } catch { return {}; } })();
+  let NOME_LOJA = (savedCfg.nomeLoja && savedCfg.nomeLoja.trim()) || "MIX-PROMOÇÃO";
+  let NOME_IA = (savedCfg.nomeIA && savedCfg.nomeIA.trim()) || "MixIA";
+  let WHATSAPP_NUMERO = (savedCfg.whatsappNumero && savedCfg.whatsappNumero.trim()) || "5500000000000";
   const MAX_HISTORICO = 50;
   const RESPOSTAS_KEY = "chatbot_respostas_custom";
   const STATS_KEY = "chatbot_stats";
   const FAQ_KEY = "chatbot_faq";
+
+  // Sincroniza configuração com backend se disponível
+  (async function() {
+    try {
+      const apiBase = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+        ? `${window.location.protocol}//${window.location.hostname}:3000`
+        : (window.AUTH_SERVER || window.location.origin);
+      const res = await fetch(`${apiBase}/api/chatbot-config`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.config) {
+          if (data.config.nomeLoja) NOME_LOJA = data.config.nomeLoja;
+          if (data.config.nomeIA) NOME_IA = data.config.nomeIA;
+          if (data.config.whatsappNumero) WHATSAPP_NUMERO = data.config.whatsappNumero;
+          localStorage.setItem("chatbot_config", JSON.stringify(data.config));
+          if (Array.isArray(data.config.respostasCustom)) {
+            localStorage.setItem(RESPOSTAS_KEY, JSON.stringify(data.config.respostasCustom));
+          }
+        }
+      }
+    } catch (e) {}
+  })();
 
   // Verificar se widget está ativo
   try {
@@ -177,12 +200,16 @@
   function exibirBoasVindas() {
     const div = document.createElement("div");
     div.className = "chatbot-msg bot";
+    let subtexto = `<p>Assistente virtual da <strong>${esc(NOME_LOJA)}</strong>. Posso ajudar com produtos, preços, pedidos, trocas e muito mais!</p>`;
+    if (savedCfg.msgBoasVindas && savedCfg.msgBoasVindas.trim()) {
+      subtexto = `<p>${esc(savedCfg.msgBoasVindas.trim())}</p>`;
+    }
     div.innerHTML = `
       <div class="msg-balao">
         <div class="chatbot-boas-vindas">
           <div class="bv-icone">🤖</div>
-          <h3>Olá! Sou a ${NOME_IA} 👋</h3>
-          <p>Assistente virtual da <strong>${NOME_LOJA}</strong>. Posso ajudar com produtos, preços, pedidos, trocas e muito mais!</p>
+          <h3>Olá! Sou a ${esc(NOME_IA)} 👋</h3>
+          ${subtexto}
         </div>
       </div>
       <span class="msg-hora">${horaAtual()}</span>
