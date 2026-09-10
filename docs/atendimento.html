@@ -142,7 +142,7 @@
               <i class="fa-solid fa-paperclip"></i>
             </button>
             
-            <input id="msgInput" placeholder="Tire sua dúvida com a MixIA ou peça um atendente..." autocomplete="off" aria-label="Mensagem">
+            <input id="msgInput" placeholder="Tire sua dúvida com a MixIA ou peça um atendente..." autocomplete="on" spellcheck="true" lang="pt-BR" autocorrect="on" autocapitalize="sentences" aria-label="Mensagem">
             
             <div class="composer-actions">
               <button id="sendMsgBtn" class="composer-send" type="button" title="Enviar mensagem">
@@ -158,6 +158,7 @@
   </main>
 
   <!-- Scripts -->
+  <script src="./js/corretor-ortografico.js" defer></script>
   <script src="./js/atendimento-cliente.js" defer></script>
 </body>
 </html>
