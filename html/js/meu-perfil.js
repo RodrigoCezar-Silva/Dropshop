@@ -277,7 +277,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function obterPreferencias() {
     try {
-      let gotPublic = false;
       const salvas = JSON.parse(localStorage.getItem(chavePreferencias));
       return { ...preferenciasPadrao, ...(salvas || {}) };
     } catch {
@@ -1692,17 +1691,56 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Carrega dados do cliente: tenta /me quando houver token, e faz fallback público por id
+  // Aplica imediatamente os dados salvos em localStorage no carregamento inicial (sem tela vazia)
+  function aplicarDadosIniciaisDoStorage() {
+    try {
+      const id = localStorage.getItem("clienteId") || clienteId || "";
+      const nome = (localStorage.getItem("nome") || "").trim();
+      const sobrenome = (localStorage.getItem("sobrenome") || "").trim();
+      const email = (localStorage.getItem("email") || "").trim();
+      const telefone = (localStorage.getItem("clienteTelefone") || localStorage.getItem("telefone") || "").trim();
+      const cpf = localStorage.getItem("clienteCPF") || "";
+      const rua = localStorage.getItem("clienteRua") || localStorage.getItem("rua") || "";
+      const numero = localStorage.getItem("clienteNumero") || localStorage.getItem("numero") || "";
+      const bairro = localStorage.getItem("clienteBairro") || localStorage.getItem("bairro") || "";
+      const cidade = localStorage.getItem("clienteCidade") || localStorage.getItem("cidade") || "";
+      const estado = localStorage.getItem("clienteEstado") || localStorage.getItem("estado") || "";
+      const cep = localStorage.getItem("clienteCEP") || localStorage.getItem("cep") || "";
+      const foto = localStorage.getItem("foto");
+      const fotoMime = localStorage.getItem("fotoMime") || "image/jpeg";
+
+      aplicarDadosCliente({
+        id,
+        nome,
+        sobrenome,
+        email,
+        telefone,
+        cpf,
+        rua,
+        numero,
+        bairro,
+        cidade,
+        estado,
+        cep,
+        fotoBase64: (foto && foto !== "null" && foto !== "undefined") ? foto : null,
+        fotoMime
+      });
+    } catch (e) {
+      console.warn("Erro ao aplicar dados locais do cliente:", e);
+    }
+  }
+
+  // Carrega dados completos do cliente diretamente do banco de dados (MySQL)
   async function carregarDadosCliente() {
+    let gotData = false;
+
     // Helper: tenta uma lista de URLs até encontrar uma resposta OK
     async function tryFetchUrls(urls, options) {
       for (const u of urls) {
         try {
           const res = await fetch(u, options);
           if (res && res.ok) return res;
-          // se recebeu 4xx/5xx, pare e retorne para que o caller trate (por exemplo 404)
         } catch (err) {
-          // erro de rede (ex: ECONNREFUSED) — tentar próximo
           console.debug('[meu-perfil] tryFetchUrls falhou para', u, err && err.message);
         }
       }
@@ -1710,50 +1748,69 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     try {
-      // candidate bases: apiBase (configurado), depois dois hosts comuns e por fim caminho relativo
       const bases = [];
-      if (apiBase) bases.push(apiBase);
+      if (typeof apiBase !== 'undefined' && apiBase) bases.push(apiBase);
       bases.push('http://localhost:3000', 'http://127.0.0.1:3000', '');
 
-      const urls = bases.map(b => (b ? b : '') + `/api/cliente/${clienteId}`);
-
-      // tenta buscar o cliente público usando os possíveis hosts
-        const pubResp = await tryFetchUrls(urls);
-        if (pubResp) {
-          try {
-            const pubData = await pubResp.json();
-            console.debug('[meu-perfil] pubData recebido', pubData);
-            if (pubData && pubData.sucesso) { aplicarDadosCliente(pubData); gotPublic = true; }
-            else if (pubData && (pubData.nome || pubData.id || pubData.cliente)) { aplicarDadosCliente(pubData); gotPublic = true; }
-          } catch (err) {
-            console.debug('[meu-perfil] erro ao parsear JSON do cliente público', err && err.message);
-          }
-        } else {
-          console.debug('[meu-perfil] não conseguiu alcançar /api/cliente/:id em nenhum host candidato');
-        }
-
-      // agora tenta o endpoint protegido /me se houver token — silencioso em caso de falha de rede
-      if (token && !gotPublic) {
+      // 1. Tentar /api/cliente/me se houver token (busca direta do banco via autenticação)
+      if (token) {
         const meUrls = bases.map(b => (b ? b : '') + '/api/cliente/me');
         const meResp = await tryFetchUrls(meUrls, { headers: { 'Authorization': 'Bearer ' + token } });
         if (meResp) {
           try {
             const data = await meResp.json();
-            if (data && data.sucesso) aplicarDadosCliente(data);
+            if (data && (data.sucesso || data.id || data.email)) {
+              aplicarDadosCliente(data);
+              gotData = true;
+            }
           } catch (err) {
-            console.debug('[meu-perfil] erro ao parsear JSON de /me', err && err.message);
+            console.debug('[meu-perfil] erro ao parsear /api/cliente/me', err);
           }
-        } else {
-          console.debug('[meu-perfil] /api/cliente/me indisponível em todos hosts candidatos (silencioso)');
+        }
+      }
+
+      // 2. Se não carregou por token, tentar buscar por clienteId
+      if (!gotData && clienteId) {
+        const urls = bases.map(b => (b ? b : '') + `/api/cliente/${clienteId}`);
+        const pubResp = await tryFetchUrls(urls);
+        if (pubResp) {
+          try {
+            const pubData = await pubResp.json();
+            if (pubData && (pubData.sucesso || pubData.id || pubData.nome || pubData.cliente)) {
+              aplicarDadosCliente(pubData);
+              gotData = true;
+            }
+          } catch (err) {
+            console.debug('[meu-perfil] erro ao parsear /api/cliente/:id', err);
+          }
+        }
+      }
+
+      // 3. Fallback: buscar cliente por email caso o ID seja diferente
+      const emailLocal = localStorage.getItem('email');
+      if (!gotData && emailLocal) {
+        const emailUrls = bases.map(b => (b ? b : '') + `/api/cliente?email=${encodeURIComponent(emailLocal)}`);
+        const emailResp = await tryFetchUrls(emailUrls);
+        if (emailResp) {
+          try {
+            const emailData = await emailResp.json();
+            if (emailData && (emailData.sucesso || emailData.id || emailData.nome || emailData.cliente)) {
+              aplicarDadosCliente(emailData);
+              gotData = true;
+            }
+          } catch (err) {}
         }
       }
     } catch (e) {
-      console.warn('carregarDadosCliente:', e && e.message);
-      mostrarPopup('Não foi possível carregar os dados do cliente.', 'erro');
+      console.warn('carregarDadosCliente erro:', e && e.message);
     }
   }
 
-  if (clienteId) carregarDadosCliente();
+  // 1. Aplicar imediatamente dados locais para evitar tela em branco
+  aplicarDadosIniciaisDoStorage();
+
+  // 2. Buscar dados atualizados do banco de dados MySQL
+  carregarDadosCliente();
 
   // Extrai e aplica dados do cliente em elementos da página
   function aplicarDadosCliente(data) {
@@ -1779,8 +1836,41 @@ document.addEventListener("DOMContentLoaded", () => {
     if (Array.isArray(data) && data.length) cliente = data[0];
     if (data.data && (data.data.nome || data.data.id)) cliente = data.data;
 
-    // Nome / Sobrenome
-    setValue(['nomeCliente','campo-nome','mp-name'], cliente.nome || '');
+    // Se algum campo estiver ausente, preenche com o localStorage
+    cliente.nome = (cliente.nome !== undefined && cliente.nome !== null && cliente.nome !== 'null') ? cliente.nome : (localStorage.getItem('nome') || '');
+    cliente.sobrenome = (cliente.sobrenome !== undefined && cliente.sobrenome !== null && cliente.sobrenome !== 'null') ? cliente.sobrenome : (localStorage.getItem('sobrenome') || '');
+    cliente.email = (cliente.email !== undefined && cliente.email !== null && cliente.email !== 'null') ? cliente.email : (localStorage.getItem('email') || '');
+    cliente.telefone = (cliente.telefone !== undefined && cliente.telefone !== null && cliente.telefone !== 'null') ? cliente.telefone : (localStorage.getItem('clienteTelefone') || localStorage.getItem('telefone') || '');
+    cliente.cpf = (cliente.cpf !== undefined && cliente.cpf !== null && cliente.cpf !== 'null') ? cliente.cpf : (localStorage.getItem('clienteCPF') || '');
+    cliente.id = cliente.id || clienteId || localStorage.getItem('clienteId') || '';
+
+    // Sanitiza strings 'null' ou 'undefined'
+    if (cliente.nome === 'null') cliente.nome = '';
+    if (cliente.sobrenome === 'null') cliente.sobrenome = '';
+    if (cliente.email === 'null') cliente.email = '';
+    if (cliente.telefone === 'null') cliente.telefone = '';
+    if (cliente.rua === 'null') cliente.rua = '';
+    if (cliente.bairro === 'null') cliente.bairro = '';
+    if (cliente.numero === 'null') cliente.numero = '';
+    if (cliente.cidade === 'null') cliente.cidade = '';
+    if (cliente.estado === 'null') cliente.estado = '';
+    if (cliente.cep === 'null') cliente.cep = '';
+
+    // Sincroniza localStorage com dados consistentes
+    if (cliente.nome) localStorage.setItem('nome', cliente.nome);
+    if (cliente.sobrenome) localStorage.setItem('sobrenome', cliente.sobrenome);
+    if (cliente.email) localStorage.setItem('email', cliente.email);
+    if (cliente.telefone) localStorage.setItem('clienteTelefone', cliente.telefone);
+    if (cliente.id) localStorage.setItem('clienteId', String(cliente.id));
+
+    // Nome / Sobrenome nos inputs
+    const nomeCompletoInput = `${cliente.nome || ''} ${cliente.sobrenome || ''}`.trim() || cliente.nome || '';
+    if (document.getElementById('sobrenomeCliente')) {
+      setValue(['nomeCliente','campo-nome','mp-name'], cliente.nome || '');
+      setValue(['sobrenomeCliente','campo-sobrenome'], cliente.sobrenome || '');
+    } else {
+      setValue(['nomeCliente','campo-nome','mp-name'], nomeCompletoInput);
+    }
     // CPF
     setValue(['cpfCliente','campo-cpf'], cliente.cpf || '');
     // Email
@@ -1788,10 +1878,14 @@ document.addEventListener("DOMContentLoaded", () => {
     // Telefone
     setValue(['telefoneCliente','campo-telefone'], cliente.telefone || '');
     // Data de nascimento
-    const dataN = cliente.data_nascimento ? new Date(cliente.data_nascimento) : null;
-    const dataISO = dataN ? `${dataN.getFullYear()}-${String(dataN.getMonth()+1).padStart(2,'0')}-${String(dataN.getDate()).padStart(2,'0')}` : '';
-    const dnEl = document.getElementById('dataNascimentoCliente');
-    if (dnEl) dnEl.value = dataISO;
+    if (cliente.data_nascimento || cliente.dataNascimento) {
+      const dataN = new Date(cliente.data_nascimento || cliente.dataNascimento);
+      if (!isNaN(dataN.getTime())) {
+        const dataISO = `${dataN.getFullYear()}-${String(dataN.getMonth()+1).padStart(2,'0')}-${String(dataN.getDate()).padStart(2,'0')}`;
+        const dnEl = document.getElementById('dataNascimentoCliente');
+        if (dnEl) dnEl.value = dataISO;
+      }
+    }
 
     // Endereço
     setValue(['ruaCliente','campo-rua'], cliente.rua || '');
@@ -1802,45 +1896,62 @@ document.addEventListener("DOMContentLoaded", () => {
     setValue(['estadoCliente','campo-estado'], cliente.estado || '');
     setValue(['cepCliente','campo-cep'], cliente.cep || '');
 
-    // Aplicar foto do cliente: preferir `fotoBase64` no payload,
-    // senão tentar carregar a imagem pública do servidor (/api/cliente/:id/foto)
-    if (cliente.fotoBase64) {
-      const dataUrl = `data:${cliente.fotoMime||'image/jpeg'};base64,${cliente.fotoBase64}`;
-      ['fotoCliente','mp-avatar','fotoClienteResumo','fotoClienteSidebar','fotoClienteSidebarImg'].forEach(id=>{
+    // Aplicar foto do cliente
+    let rawFoto = cliente.fotoBase64 || cliente.foto || localStorage.getItem('foto');
+    function generateInitialsAvatar(name, size = 128) {
+      const initials = (name || '')
+        .split(/\s+/)
+        .filter(Boolean)
+        .map(n => n[0])
+        .slice(0,2)
+        .join('')
+        .toUpperCase() || 'U';
+      const bg = '#00c6ff';
+      const fg = '#ffffff';
+      const fontSize = Math.floor(size * 0.42);
+      const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='${size}' height='${size}'><rect width='100%' height='100%' fill='${bg}'/><text x='50%' y='50%' dy='0.35em' text-anchor='middle' fill='${fg}' font-family='system-ui,Segoe UI,Roboto,Arial' font-size='${fontSize}' font-weight='bold'>${initials}</text></svg>`;
+      return 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svg)));
+    }
+    const fallback = generateInitialsAvatar((cliente.nome || '') + ' ' + (cliente.sobrenome || ''));
+
+    if (rawFoto && rawFoto !== 'null' && rawFoto !== 'undefined') {
+      let dataUrl = '';
+      if (rawFoto.startsWith('data:') || rawFoto.startsWith('http') || rawFoto.startsWith('/')) {
+        dataUrl = rawFoto;
+      } else {
+        const mime = cliente.fotoMime || localStorage.getItem('fotoMime') || 'image/jpeg';
+        dataUrl = `data:${mime};base64,${rawFoto}`;
+      }
+      localStorage.setItem('foto', rawFoto);
+      ['fotoCliente','mp-avatar','fotoClienteResumo','fotoClienteSidebar','fotoClienteSidebarImg'].forEach(id => {
         const el = document.getElementById(id);
-        if (el) el.src = dataUrl;
+        if (el) {
+          el.onerror = function () { try { this.onerror = null; this.src = fallback; } catch (e) {} };
+          el.src = dataUrl;
+        }
+      });
+    } else if (cliente.id || clienteId) {
+      const targetId = cliente.id || clienteId;
+      const serverUrl = (typeof apiBase !== 'undefined' && apiBase) ? apiBase : '';
+      const fotoUrl = `${serverUrl}/api/cliente/${targetId}/foto?cb=${Date.now()}`;
+      ['fotoCliente','mp-avatar','fotoClienteResumo','fotoClienteSidebar','fotoClienteSidebarImg'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.onerror = function () { try { this.onerror = null; this.src = fallback; } catch (e) {} };
+          el.src = fotoUrl;
+        }
       });
     } else {
-      // Tentar foto pública no servidor; se falhar, exibir avatar com iniciais
-      const serverUrl = (typeof apiBase !== 'undefined' && apiBase) ? apiBase : '';
-      const fotoUrl = `${serverUrl}/api/cliente/${clienteId}/foto?cb=${Date.now()}`;
-
-      function generateInitialsAvatar(name, size = 128) {
-        const initials = (name || '')
-          .split(/\s+/)
-          .filter(Boolean)
-          .map(n => n[0])
-          .slice(0,2)
-          .join('')
-          .toUpperCase() || 'U';
-        const bg = '#e6e6e6';
-        const fg = '#6b7280';
-        const fontSize = Math.floor(size * 0.45);
-        const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='${size}' height='${size}'><rect width='100%' height='100%' fill='${bg}'/><text x='50%' y='50%' dy='0.35em' text-anchor='middle' fill='${fg}' font-family='system-ui,Segoe UI,Roboto,Arial' font-size='${fontSize}'>${initials}</text></svg>`;
-        return 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svg)));
-      }
-
-      const fallback = generateInitialsAvatar((cliente.nome || '') + ' ' + (cliente.sobrenome || ''));
-      ['fotoCliente','mp-avatar','fotoClienteResumo','fotoClienteSidebar','fotoClienteSidebarImg'].forEach(id=>{
+      ['fotoCliente','mp-avatar','fotoClienteResumo','fotoClienteSidebar','fotoClienteSidebarImg'].forEach(id => {
         const el = document.getElementById(id);
-        if (!el) return;
-        el.onerror = function () { try { this.onerror = null; this.src = fallback; } catch (e) {} };
-        el.src = fotoUrl;
+        if (el) {
+          el.src = fallback;
+        }
       });
     }
 
     // atualiza resumo usando o cliente normalizado
-    atualizarResumoCliente(cliente, clienteId);
+    atualizarResumoCliente(cliente, cliente.id || clienteId);
   }
 
   // Pré-visualizar nova foto
@@ -1940,17 +2051,25 @@ document.addEventListener("DOMContentLoaded", () => {
           "#nomeCliente, #sobrenomeCliente, #emailCliente, #telefoneCliente, #dataNascimentoCliente, #ruaCliente, #bairroCliente, #numeroCliente, #complementoCliente, #estadoCliente"
         ).forEach(campo => campo.setAttribute("readonly", true));
 
+        const nomeValor = (document.getElementById("nomeCliente") ? document.getElementById("nomeCliente").value : "").trim();
+        const partesNome = nomeValor.split(/\s+/);
+        const primeiroNome = partesNome[0] || "";
+        const restanteNome = partesNome.slice(1).join(" ");
+        const sobrenomeEl = document.getElementById("sobrenomeCliente");
+        const sobrenomeValor = sobrenomeEl ? sobrenomeEl.value : (restanteNome || localStorage.getItem("sobrenome") || "");
+
         const dadosAtualizados = {
-          nome: document.getElementById("nomeCliente").value,
-          sobrenome: document.getElementById("sobrenomeCliente").value,
-          email: document.getElementById("emailCliente").value,
-          telefone: document.getElementById("telefoneCliente").value,
-          data_nascimento: document.getElementById("dataNascimentoCliente").value,
-          rua: document.getElementById("ruaCliente").value,
-          bairro: document.getElementById("bairroCliente").value,
-          numero: document.getElementById("numeroCliente").value,
-          complemento: document.getElementById("complementoCliente").value,
-          estado: document.getElementById("estadoCliente").value
+          nome: primeiroNome || nomeValor,
+          sobrenome: sobrenomeValor,
+          email: document.getElementById("emailCliente") ? document.getElementById("emailCliente").value : "",
+          telefone: document.getElementById("telefoneCliente") ? document.getElementById("telefoneCliente").value : "",
+          data_nascimento: document.getElementById("dataNascimentoCliente") ? document.getElementById("dataNascimentoCliente").value : "",
+          rua: document.getElementById("ruaCliente") ? document.getElementById("ruaCliente").value : "",
+          bairro: document.getElementById("bairroCliente") ? document.getElementById("bairroCliente").value : "",
+          numero: document.getElementById("numeroCliente") ? document.getElementById("numeroCliente").value : "",
+          complemento: document.getElementById("complementoCliente") ? document.getElementById("complementoCliente").value : "",
+          cidade: document.getElementById("cidadeCliente") ? document.getElementById("cidadeCliente").value : "",
+          estado: document.getElementById("estadoCliente") ? document.getElementById("estadoCliente").value : ""
         };
 
         fetch((typeof apiBase !== 'undefined' ? apiBase : '') + `/api/cliente/${clienteId}`, {
@@ -2179,18 +2298,21 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function atualizarResumoCliente(data, idCliente) {
-    const nomeCompleto = `${data.nome || "Cliente"} ${data.sobrenome || ""}`.trim();
-    const email = data.email || "Email não informado";
-    const telefone = data.telefone || "Não informado";
-    const estado = data.estado || "Estado não informado";
-    const bairro = data.bairro || "Bairro não informado";
+    if (!data) return;
+    const nomeCompleto = `${data.nome || ""} ${data.sobrenome || ""}`.trim() || (localStorage.getItem("nome") || "Cliente MIX-PROMOÇÃO");
+    const email = data.email || (localStorage.getItem("email") || "Email não informado");
+    const telefone = data.telefone || (localStorage.getItem("clienteTelefone") || localStorage.getItem("telefone") || "Não informado");
+    const estado = data.estado || (localStorage.getItem("clienteEstado") || localStorage.getItem("estado") || "Estado não informado");
+    const bairro = data.bairro || (localStorage.getItem("clienteBairro") || localStorage.getItem("bairro") || "Bairro não informado");
     const localizacao = [bairro, estado].filter(valor => valor && !valor.includes("não informado") && !valor.includes("Não informado")).join(" - ") || "Localização não informada";
+
+    const idFormatado = (idCliente && idCliente !== 'null' && idCliente !== 'undefined') ? (String(idCliente).startsWith('#') ? idCliente : `#${idCliente}`) : '--';
 
     definirTexto("resumoNome", nomeCompleto);
     definirTexto("resumoEmail", email);
     definirTexto("resumoEstado", estado);
     definirTexto("resumoBairro", bairro);
-    definirTexto("resumoClienteId", `#${idCliente}`);
+    definirTexto("resumoClienteId", idFormatado);
     definirTexto("resumoTelefone", telefone);
     definirTexto("perfilSidebarNome", nomeCompleto);
     definirTexto("perfilSidebarEmail", email);
@@ -2368,7 +2490,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function definirTexto(id, valor) {
     const elemento = document.getElementById(id);
-    if (elemento) elemento.textContent = valor;
+    if (!elemento) return;
+    const span = elemento.querySelector('span');
+    const icon = elemento.querySelector('i');
+    if (span) {
+      span.textContent = valor || '';
+    } else if (icon) {
+      const iconClone = icon.cloneNode(true);
+      elemento.textContent = '';
+      elemento.appendChild(iconClone);
+      if (valor) {
+        elemento.appendChild(document.createTextNode(' ' + valor));
+      }
+    } else {
+      elemento.textContent = valor || '';
+    }
   }
 
   // Função para popup elegante (duração em ms opcional)
