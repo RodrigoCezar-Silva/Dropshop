@@ -1121,12 +1121,22 @@ document.addEventListener("DOMContentLoaded", () => {
     const telefoneClienteEl = document.getElementById('telefoneCliente');
 
     let nomePadrao = (nomeClienteEl ? nomeClienteEl.value : '') || localStorage.getItem('nome') || localStorage.getItem('clienteNome') || '';
-    const sobrenomePadrao = (sobrenomeClienteEl ? sobrenomeClienteEl.value : '') || localStorage.getItem('sobrenome') || '';
-    if (sobrenomePadrao && !nomePadrao.includes(sobrenomePadrao)) {
+    let sobrenomePadrao = (sobrenomeClienteEl ? sobrenomeClienteEl.value : '') || localStorage.getItem('sobrenome') || '';
+    
+    // Limpar valores 'null' ou 'undefined' literais
+    if (nomePadrao === 'null' || nomePadrao === 'undefined') nomePadrao = '';
+    if (sobrenomePadrao === 'null' || sobrenomePadrao === 'undefined') sobrenomePadrao = '';
+
+    if (sobrenomePadrao && !nomePadrao.toLowerCase().includes(sobrenomePadrao.toLowerCase())) {
       nomePadrao = `${nomePadrao} ${sobrenomePadrao}`.trim();
     }
-    const emailPadrao = (emailClienteEl ? emailClienteEl.value : '') || localStorage.getItem('email') || localStorage.getItem('clienteEmail') || '';
-    const telefonePadrao = (telefoneClienteEl ? telefoneClienteEl.value : '') || localStorage.getItem('telefone') || localStorage.getItem('clienteTelefone') || '';
+    nomePadrao = nomePadrao.replace(/\bnull\b/gi, '').replace(/\bundefined\b/gi, '').replace(/\s+/g, ' ').trim();
+
+    let emailPadrao = (emailClienteEl ? emailClienteEl.value : '') || localStorage.getItem('email') || localStorage.getItem('clienteEmail') || '';
+    let telefonePadrao = (telefoneClienteEl ? telefoneClienteEl.value : '') || localStorage.getItem('telefone') || localStorage.getItem('clienteTelefone') || '';
+    if (emailPadrao === 'null' || emailPadrao === 'undefined') emailPadrao = '';
+    if (telefonePadrao === 'null' || telefonePadrao === 'undefined') telefonePadrao = '';
+    telefonePadrao = telefonePadrao.replace(/\bnull\b/gi, '').replace(/\bundefined\b/gi, '').trim();
 
     const overlay = document.createElement('div');
     overlay.id = 'modalNovaReclamacao';
@@ -1188,7 +1198,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
           <div class="form-group-modal">
             <label for="campoDescricaoRec"><i class="fa-solid fa-message"></i> Descrição da Reclamação <span class="campo-obrigatorio">*</span></label>
-            <textarea id="campoDescricaoRec" name="reclamacao" class="modal-input modal-textarea" rows="4" placeholder="Descreva aqui detalhadamente o ocorrido (informe números de pedidos, produtos ou datas relevantes se aplicável)..." required></textarea>
+            <textarea id="campoDescricaoRec" name="reclamacao" class="modal-input modal-textarea" rows="3" placeholder="Descreva aqui detalhadamente o ocorrido (informe números de pedidos, produtos ou datas relevantes se aplicável)..." required></textarea>
           </div>
 
           <div class="form-group-modal">
