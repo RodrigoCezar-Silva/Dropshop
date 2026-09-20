@@ -1,110 +1,77 @@
 <!doctype html>
 <html lang="pt-BR">
   <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Cadastro Administrador — MIX-PROMOÇÃO</title>
-    <link rel="stylesheet" href="/css/cadastro-admin.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cadastro de Administrador</title>
+    <!-- CSS externo -->
+    <link rel="stylesheet" href="./css/cadastro-admin.css" />
+    <link rel="stylesheet" href="./css/btn-topo.css" />
+    <link rel="stylesheet" href="./css/footer.css" />
+    <!-- Ícones Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+    <link rel="stylesheet" href="./css/responsive.css" />
   </head>
   <body>
-    <div class="page-wrap">
-      <aside class="left-widget" aria-hidden="true">
-        <button class="floating-widget" title="Painel"><i class="fa-solid fa-sliders"></i></button>
-      </aside>
+    <div class="container">
+      <h2>Cadastrar Novo Administrador</h2>
+      
+      <form id="cadastroForm" class="form">
+        <!-- Usuário -->
+        <div class="campo">
+          <label for="usuario">Usuário</label>
+          <input type="text" id="usuario" name="usuario" required />
+        </div>
 
-      <main class="card" role="main">
-        <header class="card-header">
-          <div class="back-wrap">
-            <button id="btnBack" class="back-btn" aria-label="Voltar para admin">
-              <span class="back-icon"><i class="fa-solid fa-arrow-left"></i></span>
-              <span class="back-text">Voltar</span>
-            </button>
+        <!-- Senha -->
+        <div class="campo">
+          <label for="senha">Senha</label>
+          <div class="senha-wrapper">
+            <input type="password" id="senha" name="senha" required />
+            <button type="button" id="toggleSenha" class="toggle-btn" aria-label="Mostrar/ocultar senha">👁️</button>
           </div>
-          <div class="card-title">
-            <h1>Cadastrar Administrador</h1>
-            <p class="muted">Crie uma conta administrativa com acesso seguro.</p>
+          <div id="password-strength"></div>
+        </div>
+
+        <!-- Confirmar Senha -->
+        <div class="campo">
+          <label for="confirmarSenha">Confirmar Senha</label>
+          <div class="senha-wrapper">
+            <input type="password" id="confirmarSenha" name="confirmarSenha" required />
+            <button type="button" id="toggleConfirmarSenha" class="toggle-btn" aria-label="Mostrar/ocultar confirmação">👁️</button>
           </div>
-        </header>
+          <div id="password-strength-confirm"></div>
+          <p id="mensagemSenha"></p>
+        </div>
 
-        <form id="cadastroForm" class="form" novalidate>
-          <div class="row avatar-row">
-            <div class="avatar-preview" id="avatarPreview"> <i class="fa-solid fa-user"></i></div>
-            <div>
-              <label class="label">Foto (opcional)</label>
-              <input type="file" id="inputAvatar" name="foto" accept="image/*" data-preview="#avatarPreview">
-              <small class="muted">PNG/JPG até 2MB</small>
-            </div>
-          </div>
+        <!-- Nome -->
+        <div class="campo">
+          <label for="nome">Nome</label>
+          <input type="text" id="nome" name="nome" required />
+        </div>
 
-          <div class="row grid">
-            <div class="field">
-              <label for="usuario">Usuário</label>
-              <input id="usuario" name="usuario" type="text" placeholder="nome.usuario" required>
-            </div>
-          </div>
+        <!-- Sobrenome -->
+        <div class="campo">
+          <label for="sobrenome">Sobrenome</label>
+          <input type="text" id="sobrenome" name="sobrenome" required />
+        </div>
 
-          <div class="row grid">
-            <div class="field">
-              <label for="senha">Senha</label>
-              <div class="senha-wrap">
-                <input id="senha" name="senha" type="password" placeholder="••••••••" required>
-                <button type="button" id="toggleSenha" class="toggle-btn" aria-label="Mostrar senha"><i class="fa-solid fa-eye"></i></button>
-              </div>
-              <div id="passwordStrength" class="strength"></div>
-            </div>
+        <!-- Botão -->
+        <button type="submit" class="btn-submit">Cadastrar</button>
+      </form>
 
-            <div class="field">
-              <label for="confirmarSenha">Confirmar senha</label>
-              <div class="senha-wrap">
-                <input id="confirmarSenha" name="confirmarSenha" type="password" placeholder="••••••••" required>
-                <button type="button" id="toggleConfirm" class="toggle-btn" aria-label="Mostrar confirmação"><i class="fa-solid fa-eye"></i></button>
-              </div>
-              <div id="senhaMsg" class="strength"></div>
-            </div>
-          </div>
-
-          <div class="row grid">
-            <div class="field">
-              <label for="nome">Nome</label>
-              <input id="nome" name="nome" type="text" placeholder="João" required>
-            </div>
-            <div class="field">
-              <label for="sobrenome">Sobrenome</label>
-              <input id="sobrenome" name="sobrenome" type="text" placeholder="Silva" required>
-            </div>
-          </div>
-
-          <div class="row">
-            <div class="field full">
-              <label for="role">Função</label>
-              <select id="role" name="role">
-                <option value="admin">Administrador</option>
-                <option value="funcionario">Funcionário</option>
-              </select>
-            </div>
-          </div>
-
-          <p id="mensagemCadastro" role="status" class="mensagem"></p>
-
-          <div class="row actions">
-            <button type="submit" id="btnSubmit" class="btn primary">Cadastrar</button>
-            <button type="button" id="btnCancelar" class="btn ghost">Cancelar</button>
-          </div>
-        </form>
-      </main>
+      <!-- Mensagem de feedback -->
+      <p id="mensagemCadastro" role="alert"></p>
     </div>
 
-    <div id="popupSuccess" class="popup-overlay hidden" role="alertdialog" aria-live="polite" aria-hidden="true">
-      <div class="popup-card">
-        <div class="popup-icon"><i class="fa-solid fa-circle-check"></i></div>
-        <h2>Cadastro realizado</h2>
-        <p>As informações foram enviadas com sucesso para o banco de dados.</p>
-        <button id="popupClose" class="btn ghost">Fechar</button>
-      </div>
-    </div>
+    
 
-    <script src="/js/cadastro-admin.js"></script>
-    <script src="/js/preview-images.js"></script>
+    <!-- Script JS -->
+    <script src="./js/cadastro-admin.js"></script>
+    <script src="./js/btn-topo.js"></script>
+    <script src="./js/bloquear-copia.js"></script>
+
+    <script src="./js/responsive-nav.js"></script>
+
   </body>
 </html>
