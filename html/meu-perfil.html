@@ -44,7 +44,7 @@
       </div>
       <div class="cliente-topbar-actions">
         <a href="./index.html" class="cliente-mini-link"><i class="fa-solid fa-house"></i><span>Início</span></a>
-        <a href="./atendimento.html?novo=1" id="btnSuporteTopbar" class="cliente-mini-link cliente-mini-link-outline" title="Abrir Canal de Atendimento Online"><i class="fa-solid fa-headset"></i><span>Suporte</span></a>
+        <a href="./atendimento.html?novo=1" id="btnSuporteTopbar" class="cliente-mini-link cliente-mini-link-outline" onclick="return window.irParaPaginaAtendimento ? window.irParaPaginaAtendimento(event) : true;" title="Abrir Canal de Atendimento Online"><i class="fa-solid fa-headset"></i><span>Suporte</span></a>
         <button id="btnExitTopbar" class="cliente-mini-link cliente-mini-link-logout" type="button" title="Sair da conta"><i class="fa-solid fa-right-from-bracket"></i><span>Sair</span></button>
       </div>
     </section>

@@ -321,11 +321,114 @@ document.addEventListener("DOMContentLoaded", () => {
   if (btnIrParaAvaliacoes) {
     btnIrParaAvaliacoes.addEventListener("click", () => ativarAba("avaliacoes"));
   }
+  // =========================================================================
+  // BLOQUEIO DE HORÁRIO DE ATENDIMENTO DO SUPORTE (08:00 às 22:00)
+  // =========================================================================
+  function estaNoHorarioAtendimento() {
+    const agora = new Date();
+    const hora = agora.getHours();
+    const minutos = agora.getMinutes();
+    const totalMinutos = hora * 60 + minutos;
+
+    const inicioMinutos = 8 * 60; // 08:00 da manhã
+    const fimMinutos = 22 * 60;   // 22:00 da noite
+
+    // O atendimento funciona apenas entre 08:00 e 22:00
+    // Fora desse horário (a partir das 22:00 até as 07:59), fica bloqueado.
+    return totalMinutos >= inicioMinutos && totalMinutos < fimMinutos;
+  }
+  window.estaNoHorarioAtendimento = estaNoHorarioAtendimento;
+
+  function mostrarPopupHorarioAtendimento() {
+    const titulo = "Horário de Atendimento";
+    const htmlMensagem = `
+      <div style="text-align:center; padding:10px 4px 4px;">
+        <div style="width:68px; height:68px; border-radius:50%; background:rgba(245,158,11,0.12); border:2px solid rgba(245,158,11,0.4); display:inline-flex; align-items:center; justify-content:center; margin-bottom:16px;">
+          <i class="fa-solid fa-clock" style="font-size:2.2rem; color:#f59e0b;"></i>
+        </div>
+        <h4 style="margin:0 0 10px; font-size:1.2rem; font-weight:800; color:#0f172a;">Atendimento Fechado no Momento</h4>
+        <p style="margin:0 0 14px; font-size:1rem; color:#334155; line-height:1.55;">
+          O horário de funcionamento do nosso suporte é de <strong>08:00 da manhã até as 22:00 da noite</strong>.
+        </p>
+        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:12px 16px; margin-bottom:14px; font-size:0.9rem; color:#475569; text-align:left; display:flex; align-items:flex-start; gap:10px;">
+          <i class="fa-solid fa-circle-info" style="color:#0284c7; font-size:1.15rem; margin-top:2px; flex-shrink:0;"></i>
+          <span>Nosso canal de suporte online está atualmente indisponível. Por favor, volte a entrar em contato a partir das <strong>08:00</strong>.</span>
+        </div>
+      </div>
+    `;
+
+    if (typeof window.showStyledPopup === 'function') {
+      window.showStyledPopup({
+        title: titulo,
+        message: htmlMensagem,
+        small: true,
+        buttons: [
+          { label: 'Entendi', className: 'mix-popup-btn' }
+        ]
+      });
+    } else {
+      const overlay = document.createElement('div');
+      overlay.className = 'mix-popup-overlay';
+      overlay.style.cssText = 'position:fixed; inset:0; background:rgba(10,12,15,0.65); display:flex; align-items:center; justify-content:center; z-index:99999; backdrop-filter:blur(4px);';
+      const box = document.createElement('div');
+      box.className = 'mix-popup-box small';
+      box.style.cssText = 'background:#fff; border-radius:14px; padding:22px; max-width:440px; width:92%; box-shadow:0 12px 36px rgba(0,0,0,0.3);';
+      box.innerHTML = `
+        ${htmlMensagem}
+        <div style="display:flex; justify-content:center; margin-top:14px;">
+          <button type="button" style="background:linear-gradient(135deg,#0072ff,#00c6ff); color:#fff; border:0; padding:10px 24px; border-radius:8px; font-weight:700; cursor:pointer; font-size:0.95rem;">Entendi</button>
+        </div>
+      `;
+      box.querySelector('button').addEventListener('click', () => overlay.remove());
+      overlay.appendChild(box);
+      document.body.appendChild(overlay);
+    }
+  }
+  window.mostrarPopupHorarioAtendimento = mostrarPopupHorarioAtendimento;
+
   function irParaPaginaAtendimento(e) {
-    if (e && e.preventDefault) e.preventDefault();
+    if (e) {
+      if (e.preventDefault) e.preventDefault();
+      if (e.stopPropagation) e.stopPropagation();
+    }
+
+    if (!estaNoHorarioAtendimento()) {
+      mostrarPopupHorarioAtendimento();
+      return false;
+    }
+
     const isHtmlDir = window.location.pathname.includes('/html/');
     window.location.href = (isHtmlDir ? "atendimento.html" : "./html/atendimento.html") + "?novo=1";
+    return true;
   }
+  window.irParaPaginaAtendimento = irParaPaginaAtendimento;
+
+  function atualizarEstadoBotaoSuporte() {
+    const btnSuporteTopbar = document.getElementById("btnSuporteTopbar");
+    if (!btnSuporteTopbar) return;
+
+    const aberto = estaNoHorarioAtendimento();
+    if (!aberto) {
+      btnSuporteTopbar.classList.add("bloqueado-horario");
+      btnSuporteTopbar.setAttribute("title", "Suporte fechado no momento (Horário: 08:00 às 22:00). Clique para detalhes.");
+      let badge = btnSuporteTopbar.querySelector(".badge-horario-bloqueado");
+      if (!badge) {
+        badge = document.createElement("span");
+        badge.className = "badge-horario-bloqueado";
+        badge.textContent = "Fechado";
+        btnSuporteTopbar.appendChild(badge);
+      }
+    } else {
+      btnSuporteTopbar.classList.remove("bloqueado-horario");
+      btnSuporteTopbar.setAttribute("title", "Abrir Canal de Atendimento Online (Disponível 08:00 às 22:00)");
+      const badge = btnSuporteTopbar.querySelector(".badge-horario-bloqueado");
+      if (badge) badge.remove();
+    }
+  }
+
+  // Atualiza estado do botão de suporte na inicialização e a cada 30 segundos
+  atualizarEstadoBotaoSuporte();
+  setInterval(atualizarEstadoBotaoSuporte, 30000);
 
   const btnIrParaSuporte = document.getElementById("btnIrParaSuporte");
   if (btnIrParaSuporte) {

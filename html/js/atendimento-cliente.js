@@ -291,6 +291,48 @@
     }
 
     // =========================================================================
+    // VERIFICAÇÃO DE HORÁRIO DE SUPORTE (08:00 às 22:00)
+    // =========================================================================
+    function estaNoHorarioAtendimento() {
+      const agora = new Date();
+      const hora = agora.getHours();
+      const minutos = agora.getMinutes();
+      const totalMinutos = hora * 60 + minutos;
+      const inicioMinutos = 8 * 60; // 08:00
+      const fimMinutos = 22 * 60;   // 22:00
+      return totalMinutos >= inicioMinutos && totalMinutos < fimMinutos;
+    }
+
+    if (!estaNoHorarioAtendimento()) {
+      setTimeout(() => {
+        if (typeof window.showStyledPopup === 'function') {
+          window.showStyledPopup({
+            title: 'Horário de Atendimento',
+            message: `
+              <div style="text-align:center; padding:10px 4px 4px;">
+                <div style="width:68px; height:68px; border-radius:50%; background:rgba(245,158,11,0.12); border:2px solid rgba(245,158,11,0.4); display:inline-flex; align-items:center; justify-content:center; margin-bottom:14px;">
+                  <i class="fa-solid fa-clock" style="font-size:2rem; color:#f59e0b;"></i>
+                </div>
+                <h4 style="margin:0 0 8px; font-size:1.15rem; font-weight:800; color:#0f172a;">Atendimento Fechado no Momento</h4>
+                <p style="margin:0 0 12px; font-size:0.95rem; color:#334155; line-height:1.55;">
+                  O horário de funcionamento do nosso suporte é de <strong>08:00 da manhã até as 22:00 da noite</strong>.
+                </p>
+                <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:10px 14px; margin-bottom:12px; font-size:0.88rem; color:#64748b;">
+                  Nosso canal de suporte online estará disponível novamente às <strong>08:00</strong>.
+                </div>
+              </div>
+            `,
+            small: true,
+            buttons: [
+              { label: 'Voltar ao Meu Perfil', className: 'mix-popup-btn', onClick: () => { window.location.href = './meu-perfil.html'; } },
+              { label: 'Fechar', className: 'mix-popup-btn secondary' }
+            ]
+          });
+        }
+      }, 350);
+    }
+
+    // =========================================================================
     // CONFIGURAÇÕES DINÂMICAS DO CHATBOT IA & RESPOSTAS PERSONALIZADAS
     // =========================================================================
     let chatbotConfig = {};
