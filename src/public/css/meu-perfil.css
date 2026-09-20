@@ -523,6 +523,66 @@ body.theme-dark #btnToggleTheme.cliente-mini-link-outline:hover {
   box-shadow: 0 4px 14px rgba(0, 198, 255, 0.2);
 }
 
+/* Botão de Suporte Bloqueado Fora do Horário de Atendimento (08:00 às 22:00) */
+.cliente-mini-link.bloqueado-horario {
+  opacity: 0.88;
+  border-color: #f59e0b !important;
+  color: #b45309 !important;
+  background: #fffbeb !important;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.15) !important;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cliente-mini-link.bloqueado-horario i {
+  color: #d97706 !important;
+}
+
+.cliente-mini-link.bloqueado-horario:hover {
+  opacity: 1;
+  border-color: #d97706 !important;
+  background: #fef3c7 !important;
+  color: #92400e !important;
+  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.28) !important;
+  transform: translateY(-1px);
+}
+
+.cliente-mini-link .badge-horario-bloqueado {
+  font-size: 0.65rem;
+  background: #ef4444;
+  color: #ffffff;
+  padding: 1px 6px;
+  border-radius: 999px;
+  margin-left: 6px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  display: inline-flex;
+  align-items: center;
+}
+
+body.theme-dark .cliente-mini-link.bloqueado-horario {
+  background: rgba(245, 158, 11, 0.12) !important;
+  border-color: rgba(245, 158, 11, 0.45) !important;
+  color: #fcd34d !important;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.2) !important;
+}
+
+body.theme-dark .cliente-mini-link.bloqueado-horario i {
+  color: #fbbf24 !important;
+}
+
+body.theme-dark .cliente-mini-link.bloqueado-horario:hover {
+  background: rgba(245, 158, 11, 0.22) !important;
+  border-color: #f59e0b !important;
+  color: #fef3c7 !important;
+}
+
+body.theme-dark .cliente-mini-link .badge-horario-bloqueado {
+  background: #dc2626;
+  color: #fff;
+}
+
 .cliente-mini-link-logout {
   background: linear-gradient(135deg, #ff416c, #ff4b2b);
   color: #fff;
