@@ -3015,6 +3015,73 @@ app.post("/login/social", async (req, res) => {
   }
 });
 
+// ✅ Buscar dados de cliente por query (ex: ?email=... ou ?id=...)
+app.get("/api/cliente", async (req, res) => {
+  try {
+    const email = req.query && req.query.email ? String(req.query.email).trim().toLowerCase() : null;
+    const id = req.query && req.query.id ? Number(req.query.id) : null;
+    if (!email && !id) return res.status(400).json({ sucesso: false, mensagem: "Email ou ID obrigatório." });
+
+    const connection = await createDbConnection();
+    let rows = [];
+    if (id) {
+      [rows] = await connection.execute("SELECT * FROM clientes WHERE id = ? LIMIT 1", [id]);
+    } else {
+      [rows] = await connection.execute("SELECT * FROM clientes WHERE LOWER(TRIM(email)) = ? LIMIT 1", [email]);
+    }
+    await connection.end();
+
+    if (!rows.length) return res.status(404).json({ sucesso: false, mensagem: "Cliente não encontrado!" });
+
+    const cliente = rows[0];
+    let fotoBase64 = null;
+    let fotoMime = null;
+    try {
+      if (cliente.foto) {
+        const buf = Buffer.from(cliente.foto);
+        fotoBase64 = buf.toString('base64');
+        if (buf[0] === 0x89 && buf[1] === 0x50 && buf[2] === 0x4E && buf[3] === 0x47) fotoMime = 'image/png';
+        else if (buf[0] === 0xFF && buf[1] === 0xD8) fotoMime = 'image/jpeg';
+        else if (buf[0] === 0x47 && buf[1] === 0x49 && buf[2] === 0x46) fotoMime = 'image/gif';
+        else if (buf.slice(0,4).toString() === 'RIFF' && buf.slice(8,12).toString() === 'WEBP') fotoMime = 'image/webp';
+        else fotoMime = cliente.foto_mime || 'application/octet-stream';
+      } else if (cliente.foto_path) {
+        const uploadsDir = path.join(__dirname, 'public', 'uploads');
+        const filePath = path.join(uploadsDir, cliente.foto_path);
+        if (fs.existsSync(filePath)) {
+          fotoBase64 = fs.readFileSync(filePath).toString('base64');
+          fotoMime = cliente.foto_mime || 'image/jpeg';
+        }
+      }
+    } catch (e) {
+      console.warn('Erro lendo foto do cliente (query):', e && e.message);
+    }
+
+    res.json({
+      sucesso: true,
+      id: cliente.id,
+      nome: cliente.nome,
+      sobrenome: cliente.sobrenome,
+      email: cliente.email,
+      telefone: cliente.telefone,
+      data_nascimento: cliente.data_nascimento,
+      rua: cliente.rua,
+      bairro: cliente.bairro,
+      numero: cliente.numero,
+      complemento: cliente.complemento,
+      estado: cliente.estado,
+      cidade: cliente.cidade,
+      cep: cliente.cep,
+      cpf: decryptCPF(cliente.cpf),
+      fotoBase64,
+      fotoMime
+    });
+  } catch (error) {
+    console.error("Erro ao buscar cliente por query:", error.message);
+    res.status(500).json({ sucesso: false, mensagem: "Erro no servidor!" });
+  }
+});
+
 // ✅ Buscar dados de cliente pelo ID (NÃO retorna foto por segurança)
 app.get("/api/cliente/:id", async (req, res) => {
   try {
@@ -3038,7 +3105,14 @@ app.get("/api/cliente/:id", async (req, res) => {
         else if (buf[0] === 0xFF && buf[1] === 0xD8) fotoMime = 'image/jpeg';
         else if (buf[0] === 0x47 && buf[1] === 0x49 && buf[2] === 0x46) fotoMime = 'image/gif';
         else if (buf.slice(0,4).toString() === 'RIFF' && buf.slice(8,12).toString() === 'WEBP') fotoMime = 'image/webp';
-        else fotoMime = 'application/octet-stream';
+        else fotoMime = cliente.foto_mime || 'application/octet-stream';
+      } else if (cliente.foto_path) {
+        const uploadsDir = path.join(__dirname, 'public', 'uploads');
+        const filePath = path.join(uploadsDir, cliente.foto_path);
+        if (fs.existsSync(filePath)) {
+          fotoBase64 = fs.readFileSync(filePath).toString('base64');
+          fotoMime = cliente.foto_mime || 'image/jpeg';
+        }
       }
     } catch (e) {
       console.warn('Erro lendo foto do cliente:', e && e.message);
@@ -3091,7 +3165,14 @@ app.get("/api/cliente/me", autenticarToken, async (req, res) => {
         else if (buf[0] === 0xFF && buf[1] === 0xD8) fotoMime = 'image/jpeg';
         else if (buf[0] === 0x47 && buf[1] === 0x49 && buf[2] === 0x46) fotoMime = 'image/gif';
         else if (buf.slice(0,4).toString() === 'RIFF' && buf.slice(8,12).toString() === 'WEBP') fotoMime = 'image/webp';
-        else fotoMime = 'application/octet-stream';
+        else fotoMime = cliente.foto_mime || 'application/octet-stream';
+      } else if (cliente.foto_path) {
+        const uploadsDir = path.join(__dirname, 'public', 'uploads');
+        const filePath = path.join(uploadsDir, cliente.foto_path);
+        if (fs.existsSync(filePath)) {
+          fotoBase64 = fs.readFileSync(filePath).toString('base64');
+          fotoMime = cliente.foto_mime || 'image/jpeg';
+        }
       }
     } catch (e) {
       console.warn('Erro lendo foto do cliente (me):', e && e.message);
