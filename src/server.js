@@ -1441,10 +1441,11 @@ app.post('/api/chatbot-respostas', express.json(), (req, res) => {
 
 
 // Endpoint para receber reclamação com anexos (até 5 imagens e 1 vídeo)
-app.post('/api/reclamacao', upload.array('anexos', 6), async (req, res) => {
+app.post(['/api/reclamacao', '/api/reclamacoes'], upload.array('anexos', 6), async (req, res) => {
   try {
     const { nome, email, telefone, assunto, reclamacao } = req.body;
-    console.debug('[server] POST /api/reclamacao recebida:', { nome, email, telefone, assunto, anexosCount: (req.files || []).length });
+    const protocolo = req.body.protocolo ? String(req.body.protocolo).trim() : (`#REC-${new Date().getFullYear()}-${Math.floor(10000 + Math.random() * 90000)}`);
+    console.debug('[server] POST /api/reclamacao recebida:', { protocolo, nome, email, telefone, assunto, anexosCount: (req.files || []).length });
     if (!nome || !email || !assunto || !reclamacao) {
       return res.status(400).json({ sucesso: false, mensagem: 'Campos obrigatórios ausentes.' });
     }
@@ -1469,6 +1470,7 @@ app.post('/api/reclamacao', upload.array('anexos', 6), async (req, res) => {
 
     const novo = {
       id: Date.now(),
+      protocolo,
       nome,
       email,
       telefone: telefone || null,
@@ -1515,7 +1517,7 @@ app.post('/api/reclamacao', upload.array('anexos', 6), async (req, res) => {
       const escolhido = atendentes[Math.floor(Math.random() * atendentes.length)];
       const nomeAtendente = escolhido; // mostrar apenas o nome do atendente sem rótulo "(Atendente IA)"
       const prazo = 'até 5 dias úteis';
-      const textoAuto = `Olá ${nome},\n\nObrigado por entrar em contato sobre "${assunto}". Lamento que você tenha passado por isso. Recebi sua mensagem: "${reclamacao}". Vamos analisar e tomar as providências necessárias o mais rápido possível. Entraremos em contato com atualizações em até 48 horas.\n\nAtenciosamente,\n${nomeAtendente}`;
+      const textoAuto = `Olá ${nome},\n\nObrigado por entrar em contato sobre "${assunto}". Lamento que você tenha passado por isso. Recebi sua mensagem: "${reclamacao}". Vamos analisar e tomar as providências necessárias o mais rápido possível. Entraremos em contato com atualizações no prazo de até 24 horas.\n\nAtenciosamente,\n${nomeAtendente}`;
       const respostaAuto = { texto: textoAuto, data: new Date().toLocaleString('pt-BR'), autor: nomeAtendente };
       novo.respostas.push(respostaAuto);
       // marcar como respondida automaticamente para refletir no admin/cliente
@@ -1528,9 +1530,9 @@ app.post('/api/reclamacao', upload.array('anexos', 6), async (req, res) => {
     try {
       const connection = await createDbConnection();
       await connection.execute(
-        `INSERT INTO reclamacoes (id, nome, email, telefone, assunto, reclamacao, anexos_json, data_reclamacao, status, respostas_json)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [novo.id, novo.nome, novo.email, novo.telefone, novo.assunto, novo.reclamacao, JSON.stringify(novo.anexos), novo.data, novo.status, JSON.stringify(novo.respostas)]
+        `INSERT INTO reclamacoes (id, protocolo, nome, email, telefone, assunto, reclamacao, anexos_json, data_reclamacao, status, respostas_json)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [novo.id, novo.protocolo, novo.nome, novo.email, novo.telefone, novo.assunto, novo.reclamacao, JSON.stringify(novo.anexos), novo.data, novo.status, JSON.stringify(novo.respostas)]
       );
       await connection.end();
 
@@ -1643,6 +1645,7 @@ app.get('/api/reclamacoes', async (req, res) => {
       await connection.end();
       const lista = (rows || []).map(r => ({
         id: r.id,
+        protocolo: r.protocolo || (`#REC-2026-${String(r.id).slice(-5)}`),
         nome: r.nome,
         email: r.email,
         telefone: r.telefone,

@@ -713,11 +713,20 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     if (!filtradas.length) {
-      container.innerHTML = '<p class="reclamacoes-vazio">Nenhuma reclamação encontrada.</p>';
+      container.innerHTML = `
+        <div class="empty-state-suporte" style="text-align:center; padding:36px 20px; color:#94a3b8;">
+          <i class="fa-solid fa-clipboard-check" style="font-size:2.4rem; color:#00c6ff; margin-bottom:12px; display:inline-block;"></i>
+          <h3 style="color:#f1f5f9; margin-bottom:6px;">Nenhuma reclamação registrada</h3>
+          <p style="font-size:0.9rem; margin-bottom:18px;">Todas as suas interações estão em dia. Teve algum imprevisto com sua compra ou entrega?</p>
+          <button type="button" class="compras-link btn-abrir-reclamacao-action" style="cursor:pointer; border:none; display:inline-flex; align-items:center; gap:8px; margin:0 auto; padding:10px 20px; border-radius:8px; font-weight:600;">
+            <i class="fa-solid fa-plus-circle"></i><span>Abrir Reclamação</span>
+          </button>
+        </div>`;
       return;
     }
 
     const html = filtradas.map(r => {
+      const protocoloTxt = r.protocolo || (`#REC-2026-${String(r.id).slice(-5)}`);
       // determina miniatura: se for do cliente atual, tenta usar a foto já carregada na página
       let avatarSrc = '';
       try {
@@ -781,6 +790,7 @@ document.addEventListener("DOMContentLoaded", () => {
               </div>
             </div>
             <div class="reclamacao-head-right">
+              <span class="reclamacao-protocolo-pill" title="Número do Protocolo Oficial"><i class="fa-solid fa-receipt"></i> ${escapar(protocoloTxt)}</span>
               <div class="reclamacao-data">${(r.data||'')}</div>
               <div class="reclamacao-status">${(r.status||'pendente').toUpperCase()}</div>
             </div>
@@ -966,6 +976,380 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // Função para formatar telefone no padrão brasileiro
+  function formatarTelefone(v) {
+    if (!v) return '';
+    v = String(v).replace(/\D/g, '');
+    if (v.length > 11) v = v.slice(0, 11);
+    if (v.length > 10) {
+      return v.replace(/^(\d{2})(\d{5})(\d{4})$/, '($1) $2-$3');
+    } else if (v.length > 6) {
+      return v.replace(/^(\d{2})(\d{4})(\d{0,4})$/, '($1) $2-$3');
+    } else if (v.length > 2) {
+      return v.replace(/^(\d{2})(\d{0,5})$/, '($1) $2');
+    }
+    return v;
+  }
+
+  // Gera protocolo dinâmico #REC-2026-XXXXXX
+  function gerarProtocoloReclamacao() {
+    const ano = new Date().getFullYear();
+    const cod = Math.floor(100000 + Math.random() * 900000);
+    return `#REC-${ano}-${cod}`;
+  }
+
+  // Popup de confirmação e sucesso profissional com prazo de até 24h
+  function mostrarPopupSucessoReclamacao(protocolo, email, telefone, nome) {
+    const existing = document.getElementById('popupSucessoReclamacao');
+    if (existing) existing.remove();
+
+    const overlay = document.createElement('div');
+    overlay.id = 'popupSucessoReclamacao';
+    overlay.className = 'modal-overlay show';
+    overlay.innerHTML = `
+      <div class="modal-conteudo modal-reclamacao-sucesso-box">
+        <button type="button" class="modal-fechar" id="fecharSucessoReclamacaoX" title="Fechar">&times;</button>
+        <div class="modal-sucesso-icone-wrapper">
+          <div class="modal-sucesso-circle">
+            <i class="fa-solid fa-check"></i>
+          </div>
+        </div>
+        <h2 class="modal-sucesso-titulo">Reclamação Registrada com Sucesso!</h2>
+        <p class="modal-sucesso-subtitulo">Olá <strong>${escapar(nome || 'Cliente')}</strong>, sua manifestação foi recebida com prioridade.</p>
+        
+        <div class="modal-sucesso-protocolo-card">
+          <span class="protocolo-card-tag"><i class="fa-solid fa-receipt"></i> PROTOCOLO DE ATENDIMENTO</span>
+          <div class="protocolo-card-code" id="textoProtocoloSucesso">${escapar(protocolo)}</div>
+          <button type="button" class="btn-copiar-protocolo" id="btnCopiarProtocolo" title="Copiar número do protocolo">
+            <i class="fa-regular fa-copy"></i> <span>Copiar Protocolo</span>
+          </button>
+        </div>
+
+        <div class="modal-sucesso-aviso-prazo">
+          <div class="aviso-prazo-icon"><i class="fa-solid fa-clock-rotate-left"></i></div>
+          <div class="aviso-prazo-content">
+            <h4>Prazo de Retorno: até 24 horas</h4>
+            <p>Nossa equipe de Ouvidoria e Suporte já iniciou a triagem do seu caso. Entraremos em contato com você <strong>no prazo de até 24 horas</strong> através do seu e-mail <strong>${escapar(email || '')}</strong>${telefone ? ` ou WhatsApp <strong>${escapar(telefone)}</strong>` : ''} com o posicionamento e resolução.</p>
+          </div>
+        </div>
+
+        <div class="modal-sucesso-acoes">
+          <button type="button" class="btn-modal-concluir" id="btnFecharSucessoReclamacao">
+            <i class="fa-solid fa-check-double"></i> Entendido, Acompanhar Reclamação
+          </button>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(overlay);
+
+    const fechar = () => {
+      overlay.classList.add('hide');
+      setTimeout(() => { try { overlay.remove(); } catch(e){} }, 200);
+      try {
+        if (typeof ativarAba === 'function') ativarAba('reclamacoes');
+        const el = document.getElementById('reclamacoes');
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } catch(e) {}
+    };
+
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) fechar();
+    });
+
+    const btnFechar = overlay.querySelector('#btnFecharSucessoReclamacao');
+    if (btnFechar) btnFechar.addEventListener('click', fechar);
+
+    const btnX = overlay.querySelector('#fecharSucessoReclamacaoX');
+    if (btnX) btnX.addEventListener('click', fechar);
+
+    const btnCopiar = overlay.querySelector('#btnCopiarProtocolo');
+    if (btnCopiar) {
+      const fallbackCopia = () => {
+        try {
+          const ta = document.createElement('textarea');
+          ta.value = protocolo;
+          ta.style.position = 'fixed';
+          ta.style.opacity = '0';
+          document.body.appendChild(ta);
+          ta.focus();
+          ta.select();
+          document.execCommand('copy');
+          ta.remove();
+          btnCopiar.innerHTML = '<i class="fa-solid fa-check"></i> <span>Protocolo Copiado!</span>';
+          btnCopiar.classList.add('copiado');
+          setTimeout(() => {
+            btnCopiar.innerHTML = '<i class="fa-regular fa-copy"></i> <span>Copiar Protocolo</span>';
+            btnCopiar.classList.remove('copiado');
+          }, 2500);
+        } catch(e) {}
+      };
+
+      const executarCopia = () => {
+        try {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(protocolo).then(() => {
+              btnCopiar.innerHTML = '<i class="fa-solid fa-check"></i> <span>Protocolo Copiado!</span>';
+              btnCopiar.classList.add('copiado');
+              setTimeout(() => {
+                btnCopiar.innerHTML = '<i class="fa-regular fa-copy"></i> <span>Copiar Protocolo</span>';
+                btnCopiar.classList.remove('copiado');
+              }, 2500);
+            }).catch(() => fallbackCopia());
+          } else {
+            fallbackCopia();
+          }
+        } catch (err) {
+          fallbackCopia();
+        }
+      };
+
+      btnCopiar.addEventListener('click', executarCopia);
+    }
+  }
+
+  // Modal para abrir nova reclamação
+  function abrirModalNovaReclamacao() {
+    const existing = document.getElementById('modalNovaReclamacao');
+    if (existing) existing.remove();
+
+    const protocolo = gerarProtocoloReclamacao();
+
+    const nomeClienteEl = document.getElementById('nomeCliente');
+    const sobrenomeClienteEl = document.getElementById('sobrenomeCliente');
+    const emailClienteEl = document.getElementById('emailCliente');
+    const telefoneClienteEl = document.getElementById('telefoneCliente');
+
+    let nomePadrao = (nomeClienteEl ? nomeClienteEl.value : '') || localStorage.getItem('nome') || localStorage.getItem('clienteNome') || '';
+    const sobrenomePadrao = (sobrenomeClienteEl ? sobrenomeClienteEl.value : '') || localStorage.getItem('sobrenome') || '';
+    if (sobrenomePadrao && !nomePadrao.includes(sobrenomePadrao)) {
+      nomePadrao = `${nomePadrao} ${sobrenomePadrao}`.trim();
+    }
+    const emailPadrao = (emailClienteEl ? emailClienteEl.value : '') || localStorage.getItem('email') || localStorage.getItem('clienteEmail') || '';
+    const telefonePadrao = (telefoneClienteEl ? telefoneClienteEl.value : '') || localStorage.getItem('telefone') || localStorage.getItem('clienteTelefone') || '';
+
+    const overlay = document.createElement('div');
+    overlay.id = 'modalNovaReclamacao';
+    overlay.className = 'modal-overlay show';
+    overlay.innerHTML = `
+      <div class="modal-conteudo modal-reclamacao-box">
+        <button type="button" class="modal-fechar" id="fecharNovaReclamacaoModal" title="Fechar">&times;</button>
+        
+        <div class="modal-header-reclamacao">
+          <div class="modal-header-icon"><i class="fa-solid fa-file-signature"></i></div>
+          <div class="modal-header-text">
+            <h2>Registrar Reclamação</h2>
+            <p>Conte-nos o que ocorreu e nossa ouvidoria analisará com total prioridade.</p>
+          </div>
+        </div>
+
+        <div class="modal-protocolo-banner">
+          <div class="modal-protocolo-badge">
+            <i class="fa-solid fa-receipt"></i>
+            <span>PROTOCOLO DA RECLAMAÇÃO</span>
+          </div>
+          <div class="modal-protocolo-code">${protocolo}</div>
+          <div class="modal-protocolo-dica">Identificador oficial do seu chamado de suporte</div>
+        </div>
+
+        <form id="formNovaReclamacaoModal" class="form-nova-reclamacao" autocomplete="off">
+          <input type="hidden" name="protocolo" id="campoProtocoloRec" value="${protocolo}">
+          
+          <div class="form-row-dupla">
+            <div class="form-group-modal">
+              <label for="campoNomeRec"><i class="fa-solid fa-user"></i> Nome Completo <span class="campo-obrigatorio">*</span></label>
+              <input type="text" id="campoNomeRec" name="nome" class="modal-input" placeholder="Seu nome completo" value="${escapar(nomePadrao)}" required>
+            </div>
+
+            <div class="form-group-modal">
+              <label for="campoTelefoneRec"><i class="fa-solid fa-phone"></i> Telefone / WhatsApp <span class="campo-obrigatorio">*</span></label>
+              <input type="tel" id="campoTelefoneRec" name="telefone" class="modal-input" placeholder="(11) 99999-9999" value="${escapar(formatarTelefone(telefonePadrao))}" required>
+            </div>
+          </div>
+
+          <div class="form-group-modal">
+            <label for="campoEmailRec"><i class="fa-solid fa-envelope"></i> E-mail de Contato <span class="campo-obrigatorio">*</span></label>
+            <input type="email" id="campoEmailRec" name="email" class="modal-input" placeholder="seuemail@exemplo.com" value="${escapar(emailPadrao)}" required>
+          </div>
+
+          <div class="form-group-modal">
+            <label for="campoAssuntoRec"><i class="fa-solid fa-tag"></i> Assunto da Reclamação <span class="campo-obrigatorio">*</span></label>
+            <select id="campoAssuntoRec" name="assunto" class="modal-input modal-select" required>
+              <option value="" disabled selected>Selecione o motivo da reclamação...</option>
+              <option value="Atraso na Entrega">Atraso na Entrega do Pedido</option>
+              <option value="Produto com Defeito">Produto com Defeito ou Avariado</option>
+              <option value="Produto Incorreto / Divergente">Produto Incorreto / Divergente do Solicitado</option>
+              <option value="Problema com Pagamento / Reembolso">Problema com Pagamento ou Solicitação de Reembolso</option>
+              <option value="Cancelamento de Pedido">Cancelamento de Pedido</option>
+              <option value="Dúvida ou Problema no Atendimento">Dificuldade ou Problema no Atendimento</option>
+              <option value="Outro Motivo">Outro Motivo / Reclamação Geral</option>
+            </select>
+          </div>
+
+          <div class="form-group-modal">
+            <label for="campoDescricaoRec"><i class="fa-solid fa-message"></i> Descrição da Reclamação <span class="campo-obrigatorio">*</span></label>
+            <textarea id="campoDescricaoRec" name="reclamacao" class="modal-input modal-textarea" rows="4" placeholder="Descreva aqui detalhadamente o ocorrido (informe números de pedidos, produtos ou datas relevantes se aplicável)..." required></textarea>
+          </div>
+
+          <div class="form-group-modal">
+            <label for="campoAnexosRec"><i class="fa-solid fa-paperclip"></i> Anexar Fotos ou Vídeos (Opcional - máx. 5 fotos ou 1 vídeo)</label>
+            <div class="upload-anexo-box" id="uploadAnexoBox">
+              <input type="file" id="campoAnexosRec" name="anexos" multiple accept="image/*,video/*" style="display:none;">
+              <div class="upload-anexo-trigger" id="uploadAnexoTrigger">
+                <i class="fa-solid fa-cloud-arrow-up"></i>
+                <span>Clique para selecionar arquivos ou fotos</span>
+              </div>
+              <div id="listaAnexosSelecionados" class="lista-anexos-selecionados"></div>
+            </div>
+          </div>
+
+          <div class="modal-aviso-suporte">
+            <i class="fa-solid fa-clock"></i>
+            <span>Após o envio, nossa equipe entrará em contato com você <strong>no prazo de até 24 horas</strong>.</span>
+          </div>
+
+          <div class="modal-actions-reclamacao">
+            <button type="button" class="btn-cancelar-modal" id="btnCancelarNovaRec">Cancelar</button>
+            <button type="submit" class="btn-enviar-modal" id="btnEnviarNovaRec">
+              <i class="fa-solid fa-paper-plane"></i>
+              <span>Enviar Reclamação</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    `;
+
+    document.body.appendChild(overlay);
+
+    const fechar = () => {
+      overlay.classList.add('hide');
+      setTimeout(() => { try { overlay.remove(); } catch(e){} }, 200);
+    };
+
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) fechar();
+    });
+
+    const btnFechar = overlay.querySelector('#fecharNovaReclamacaoModal');
+    if (btnFechar) btnFechar.addEventListener('click', fechar);
+
+    const btnCancelar = overlay.querySelector('#btnCancelarNovaRec');
+    if (btnCancelar) btnCancelar.addEventListener('click', (e) => { e.preventDefault(); fechar(); });
+
+    // Máscara de telefone
+    const telInput = overlay.querySelector('#campoTelefoneRec');
+    if (telInput) {
+      telInput.addEventListener('input', (e) => {
+        e.target.value = formatarTelefone(e.target.value);
+      });
+    }
+
+    // Anexos trigger
+    const fileInput = overlay.querySelector('#campoAnexosRec');
+    const trigger = overlay.querySelector('#uploadAnexoTrigger');
+    const listaAnexos = overlay.querySelector('#listaAnexosSelecionados');
+    if (trigger && fileInput) {
+      trigger.addEventListener('click', () => fileInput.click());
+      fileInput.addEventListener('change', () => {
+        if (!listaAnexos) return;
+        listaAnexos.innerHTML = '';
+        if (!fileInput.files || !fileInput.files.length) return;
+        Array.from(fileInput.files).forEach((file) => {
+          const item = document.createElement('div');
+          item.className = 'anexo-item-chip';
+          item.innerHTML = `<i class="fa-regular fa-file"></i> <span>${escapar(file.name)}</span>`;
+          listaAnexos.appendChild(item);
+        });
+      });
+    }
+
+    // Envio do formulário
+    const form = overlay.querySelector('#formNovaReclamacaoModal');
+    const btnEnviar = overlay.querySelector('#btnEnviarNovaRec');
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const nomeVal = (overlay.querySelector('#campoNomeRec').value || '').trim();
+      const emailVal = (overlay.querySelector('#campoEmailRec').value || '').trim();
+      const telVal = (overlay.querySelector('#campoTelefoneRec').value || '').trim();
+      const assuntoVal = (overlay.querySelector('#campoAssuntoRec').value || '').trim();
+      const descVal = (overlay.querySelector('#campoDescricaoRec').value || '').trim();
+
+      if (!nomeVal || !emailVal || !telVal || !assuntoVal || !descVal) {
+        if (typeof mostrarPopup === 'function') {
+          mostrarPopup('Por favor, preencha todos os campos obrigatórios (*).', 'aviso');
+        } else {
+          alert('Por favor, preencha todos os campos obrigatórios (*).');
+        }
+        return;
+      }
+
+      btnEnviar.disabled = true;
+      btnEnviar.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Enviando...</span>';
+
+      const formData = new FormData();
+      formData.append('protocolo', protocolo);
+      formData.append('nome', nomeVal);
+      formData.append('email', emailVal);
+      formData.append('telefone', telVal);
+      formData.append('assunto', assuntoVal);
+      formData.append('reclamacao', descVal);
+
+      if (fileInput && fileInput.files) {
+        for (let i = 0; i < fileInput.files.length; i++) {
+          formData.append('anexos', fileInput.files[i]);
+        }
+      }
+
+      let resp = null;
+      let dataResp = null;
+      const bases = [];
+      if (typeof apiBase !== 'undefined' && apiBase) bases.push(apiBase);
+      bases.push('http://localhost:3000', 'http://127.0.0.1:3000', '');
+
+      for (const b of bases) {
+        try {
+          const url = (b ? b : '') + '/api/reclamacao';
+          resp = await fetch(url, {
+            method: 'POST',
+            body: formData
+          });
+          if (resp && resp.ok) {
+            dataResp = await resp.json().catch(() => null);
+            break;
+          }
+        } catch (err) {
+          resp = null;
+        }
+      }
+
+      const recCriada = (dataResp && dataResp.reclamacao) ? dataResp.reclamacao : {
+        id: Date.now(),
+        protocolo: protocolo,
+        nome: nomeVal,
+        email: emailVal,
+        telefone: telVal,
+        assunto: assuntoVal,
+        reclamacao: descVal,
+        anexos: [],
+        data: new Date().toLocaleString('pt-BR'),
+        status: 'pendente',
+        respostas: []
+      };
+
+      // Salvar/atualizar mixReclamacoes localmente
+      try {
+        let lista = [];
+        try { lista = JSON.parse(localStorage.getItem('mixReclamacoes') || '[]'); } catch { lista = []; }
+        lista.unshift(recCriada);
+        localStorage.setItem('mixReclamacoes', JSON.stringify(lista));
+      } catch(err) { console.warn('Erro ao salvar mixReclamacoes no storage:', err); }
+
+      fechar();
+      renderReclamacoes();
+      mostrarPopupSucessoReclamacao(protocolo, emailVal, telVal, nomeVal);
+    });
+  }
+
   // Modal dinâmico para edição da reclamação (cliente)
   function abrirModalEdicao(reclamacao) {
     if (!reclamacao) return;
@@ -981,6 +1365,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <button class="modal-fechar" id="fecharEditarModal">&times;</button>
         <div class="modal-header"><i class="fa fa-edit"></i><h2>Editar Reclamação</h2></div>
         <div class="modal-info">
+          <div class="modal-info-item"><i class="fa-solid fa-receipt"></i> <strong>Protocolo:</strong> <span class="reclamacao-protocolo-pill">${escapar(reclamacao.protocolo || ('#REC-2026-' + String(reclamacao.id).slice(-5)))}</span></div>
           <div class="modal-info-item"><i class="fa fa-user"></i> <strong>${escapar(reclamacao.nome)}</strong></div>
           <div class="modal-info-item"><i class="fa fa-envelope"></i> ${escapar(reclamacao.email)}</div>
         </div>
@@ -1080,8 +1465,9 @@ document.addEventListener("DOMContentLoaded", () => {
           <div class="modal-info">
             ${avatarHtml}
             <div class="modal-info-details">
+              <div class="modal-info-item protocol"><i class="fa-solid fa-receipt"></i> <strong>Protocolo:</strong> <span class="reclamacao-protocolo-pill">${escapar(reclamacao.protocolo || ('#REC-2026-' + String(reclamacao.id).slice(-5)))}</span></div>
               <div class="modal-info-item name"><strong>${escapar(reclamacao.nome||'')}</strong></div>
-              <div class="modal-info-item email"><i class="fa fa-envelope"></i> ${escapar(reclamacao.email||'')}</div>
+              <div class="modal-info-item email"><i class="fa-envelope fa"></i> ${escapar(reclamacao.email||'')}</div>
               ${reclamacao.telefone ? `<div class="modal-info-item phone"><i class="fa fa-phone"></i> ${escapar(reclamacao.telefone)}</div>` : ''}
               <div class="modal-info-item tag"><i class="fa fa-tag"></i> ${escapar(reclamacao.assunto||'')}</div>
               <div class="modal-info-item message"><i class="fa fa-message"></i> ${escapar(reclamacao.reclamacao||'')}</div>
@@ -1207,6 +1593,15 @@ document.addEventListener("DOMContentLoaded", () => {
     const t = e.target.closest && e.target.closest('.tab-btn');
     if (!t) return;
     if (t.dataset && t.dataset.tab === 'reclamacoes') setTimeout(renderReclamacoes, 40);
+  });
+
+  // Abrir modal de nova reclamação via botão no cabeçalho da aba ou botão do estado vazio
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest && (e.target.closest('#btnNovaReclamacaoModal') || e.target.closest('.btn-abrir-reclamacao-action'));
+    if (btn) {
+      e.preventDefault();
+      abrirModalNovaReclamacao();
+    }
   });
 
   // Se fomos redirecionados do formulário de contato, abrir aba de reclamações
