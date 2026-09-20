@@ -1706,8 +1706,9 @@ document.addEventListener("DOMContentLoaded", () => {
       const cidade = localStorage.getItem("clienteCidade") || localStorage.getItem("cidade") || "";
       const estado = localStorage.getItem("clienteEstado") || localStorage.getItem("estado") || "";
       const cep = localStorage.getItem("clienteCEP") || localStorage.getItem("cep") || "";
-      const foto = localStorage.getItem("foto");
+      let foto = localStorage.getItem("foto");
       const fotoMime = localStorage.getItem("fotoMime") || "image/jpeg";
+      if (foto === "null" || foto === "undefined" || !foto || foto.length < 5) foto = null;
 
       aplicarDadosCliente({
         id,
@@ -1722,7 +1723,7 @@ document.addEventListener("DOMContentLoaded", () => {
         cidade,
         estado,
         cep,
-        fotoBase64: (foto && foto !== "null" && foto !== "undefined") ? foto : null,
+        fotoBase64: foto,
         fotoMime
       });
     } catch (e) {
@@ -1770,8 +1771,9 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       // 2. Se não carregou por token, tentar buscar por clienteId
-      if (!gotData && clienteId) {
-        const urls = bases.map(b => (b ? b : '') + `/api/cliente/${clienteId}`);
+      const cleanId = String(clienteId || '').replace(/^#/, '');
+      if (!gotData && cleanId) {
+        const urls = bases.map(b => (b ? b : '') + `/api/cliente/${cleanId}`);
         const pubResp = await tryFetchUrls(urls);
         if (pubResp) {
           try {
@@ -1914,35 +1916,83 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     const fallback = generateInitialsAvatar((cliente.nome || '') + ' ' + (cliente.sobrenome || ''));
 
-    if (rawFoto && rawFoto !== 'null' && rawFoto !== 'undefined') {
-      let dataUrl = '';
-      if (rawFoto.startsWith('data:') || rawFoto.startsWith('http') || rawFoto.startsWith('/')) {
-        dataUrl = rawFoto;
-      } else {
-        const mime = cliente.fotoMime || localStorage.getItem('fotoMime') || 'image/jpeg';
-        dataUrl = `data:${mime};base64,${rawFoto}`;
+    function formatarUrlFoto(fotoStr, mimePadrao = 'image/jpeg') {
+      if (!fotoStr || typeof fotoStr !== 'string') return null;
+      const str = fotoStr.trim();
+      if (!str || str === 'null' || str === 'undefined') return null;
+
+      // 1. Se já for um Data URL completo
+      if (str.startsWith('data:image/') || str.startsWith('data:application/')) {
+        return str;
       }
-      localStorage.setItem('foto', rawFoto);
-      ['fotoCliente','mp-avatar','fotoClienteResumo','fotoClienteSidebar','fotoClienteSidebarImg'].forEach(id => {
+
+      // 2. Se for uma URL web ou caminho relativo existente no servidor
+      if (str.startsWith('http://') || str.startsWith('https://') || str.startsWith('/uploads/') || str.startsWith('/api/') || str.startsWith('./') || str.startsWith('../')) {
+        return str;
+      }
+
+      // 3. Se for uma string Base64 (incluindo JPEGs que começam com "/9j/", PNGs com "iVBOR", etc.)
+      if (str.length > 20) {
+        let mime = mimePadrao;
+        if (str.startsWith('/9j/')) mime = 'image/jpeg';
+        else if (str.startsWith('iVBOR')) mime = 'image/png';
+        else if (str.startsWith('R0lG')) mime = 'image/gif';
+        else if (str.startsWith('UklG')) mime = 'image/webp';
+        return `data:${mime};base64,${str}`;
+      }
+
+      return null;
+    }
+
+    const fotoFinalUrl = formatarUrlFoto(rawFoto, cliente.fotoMime || localStorage.getItem('fotoMime') || 'image/jpeg');
+    const idsAvatares = ['fotoCliente', 'mp-avatar', 'fotoClienteResumo', 'fotoClienteSidebar', 'fotoClienteSidebarImg'];
+
+    if (fotoFinalUrl) {
+      try {
+        localStorage.setItem('foto', fotoFinalUrl);
+        if (cliente.fotoMime) localStorage.setItem('fotoMime', cliente.fotoMime);
+      } catch (e) {}
+
+      idsAvatares.forEach(id => {
         const el = document.getElementById(id);
         if (el) {
-          el.onerror = function () { try { this.onerror = null; this.src = fallback; } catch (e) {} };
-          el.src = dataUrl;
+          el.onerror = function () {
+            try {
+              this.onerror = null;
+              if (cliente.id || clienteId) {
+                const cleanId = String(cliente.id || clienteId).replace(/^#/, '');
+                const serverUrl = (typeof apiBase !== 'undefined' && apiBase) ? apiBase : '';
+                this.src = `${serverUrl}/api/cliente/${cleanId}/foto?cb=${Date.now()}`;
+                this.onerror = function () {
+                  try { this.onerror = null; this.src = fallback; } catch (err) {}
+                };
+                return;
+              }
+            } catch (err) {}
+            try { this.src = fallback; } catch (err) {}
+          };
+          el.src = fotoFinalUrl;
         }
       });
-    } else if (cliente.id || clienteId) {
-      const targetId = cliente.id || clienteId;
+    } else if (cliente.id || clienteId || cliente.email || localStorage.getItem('email')) {
+      const cleanId = String(cliente.id || clienteId || '').replace(/^#/, '');
+      const email = cliente.email || localStorage.getItem('email');
       const serverUrl = (typeof apiBase !== 'undefined' && apiBase) ? apiBase : '';
-      const fotoUrl = `${serverUrl}/api/cliente/${targetId}/foto?cb=${Date.now()}`;
-      ['fotoCliente','mp-avatar','fotoClienteResumo','fotoClienteSidebar','fotoClienteSidebarImg'].forEach(id => {
+      const fotoUrl = cleanId
+        ? `${serverUrl}/api/cliente/${cleanId}/foto?cb=${Date.now()}`
+        : `${serverUrl}/api/cliente/foto-por-email?email=${encodeURIComponent(email)}&cb=${Date.now()}`;
+
+      idsAvatares.forEach(id => {
         const el = document.getElementById(id);
         if (el) {
-          el.onerror = function () { try { this.onerror = null; this.src = fallback; } catch (e) {} };
+          el.onerror = function () {
+            try { this.onerror = null; this.src = fallback; } catch (e) {}
+          };
           el.src = fotoUrl;
         }
       });
     } else {
-      ['fotoCliente','mp-avatar','fotoClienteResumo','fotoClienteSidebar','fotoClienteSidebarImg'].forEach(id => {
+      idsAvatares.forEach(id => {
         const el = document.getElementById(id);
         if (el) {
           el.src = fallback;
