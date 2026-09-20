@@ -170,10 +170,19 @@ document.addEventListener('DOMContentLoaded', function () {
         preview = 'Atendimento concluído e arquivado';
       }
 
+      const fotoUrl = c.foto_url || (c.cliente_id ? `${apiBase}/api/cliente/${c.cliente_id}/foto` : (c.cliente_email ? `${apiBase}/api/cliente/foto-por-email?email=${encodeURIComponent(c.cliente_email)}` : null));
+      let avatarInner = initials;
+      if (fotoUrl) {
+        avatarInner = `
+          <img src="${escapeHtml(fotoUrl)}" alt="Foto de ${escapeHtml(nomeLimpo)}" class="avatar-img" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='flex';" />
+          <span class="avatar-fallback" style="display:none; width:100%; height:100%; align-items:center; justify-content:center;">${initials}</span>
+        `;
+      }
+
       return `
         <div class="historico-card ${isSelected ? 'active' : ''}" data-id="${c.id}">
           <div class="historico-card-avatar">
-            ${initials}
+            ${avatarInner}
           </div>
           <div class="historico-card-info">
             <div class="historico-card-top">
@@ -193,9 +202,9 @@ document.addEventListener('DOMContentLoaded', function () {
     }).join("");
 
     // Eventos de clique nas cartas
-    historicoListScroll.querySelectorAll('.historico-card').forEach(card => {
-      card.addEventListener('click', () => {
-        const id = card.dataset.id;
+    historicoListScroll.querySelectorAll('.historico-card').forEach(el => {
+      el.addEventListener('click', () => {
+        const id = el.dataset.id;
         abrirDetalheChamado(id);
       });
     });
@@ -219,6 +228,20 @@ document.addEventListener('DOMContentLoaded', function () {
     if (detailCustomerName) detailCustomerName.textContent = nomeLimpo;
     if (detailSubtitle) {
       detailSubtitle.innerHTML = `Protocolo: <strong style="color:#38bdf8;">${escapeHtml(proto)}</strong> • Finalizado em ${dataHora}`;
+    }
+
+    const historicoAvatarBox = document.getElementById('historicoAvatarBox');
+    if (historicoAvatarBox) {
+      const initials = extrairIniciaisCliente(chamado.name);
+      const fotoUrl = chamado.foto_url || (chamado.cliente_id ? `${apiBase}/api/cliente/${chamado.cliente_id}/foto` : (chamado.cliente_email ? `${apiBase}/api/cliente/foto-por-email?email=${encodeURIComponent(chamado.cliente_email)}` : null));
+      if (fotoUrl) {
+        historicoAvatarBox.innerHTML = `
+          <img src="${escapeHtml(fotoUrl)}" alt="Foto de ${escapeHtml(nomeLimpo)}" class="avatar-img" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='flex';" />
+          <span class="avatar-fallback" style="display:none; width:100%; height:100%; align-items:center; justify-content:center; font-weight:800; font-size:1.15rem; color:#fff;">${initials}</span>
+        `;
+      } else {
+        historicoAvatarBox.innerHTML = `<strong>${initials}</strong>`;
+      }
     }
 
     if (historicoMessagesViewer) {

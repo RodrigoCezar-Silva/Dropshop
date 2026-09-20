@@ -796,23 +796,51 @@ app.get('/api/conversations', (req, res) => {
       const protocol = req.query && req.query.protocol ? String(req.query.protocol).trim() : null;
       const statusFilter = req.query && req.query.status ? String(req.query.status).trim() : null;
 
-      let query = `SELECT id, name, protocol, status, unread, last_message_preview as lastMessagePreview, online, cliente_email, UNIX_TIMESTAMP(created_at)*1000 AS createdAt, UNIX_TIMESTAMP(updated_at)*1000 AS updatedAt FROM chat_conversations WHERE 1=1`;
+      let query = `
+        SELECT 
+          c.id, 
+          c.name, 
+          c.protocol, 
+          c.status, 
+          c.unread, 
+          c.last_message_preview as lastMessagePreview, 
+          c.online, 
+          c.cliente_email, 
+          UNIX_TIMESTAMP(c.created_at)*1000 AS createdAt, 
+          UNIX_TIMESTAMP(c.updated_at)*1000 AS updatedAt,
+          MAX(cli.id) AS cliente_id,
+          MAX(CASE WHEN cli.foto IS NOT NULL OR cli.foto_path IS NOT NULL THEN 1 ELSE 0 END) AS tem_foto
+        FROM chat_conversations c
+        LEFT JOIN clientes cli ON (
+          (c.cliente_email IS NOT NULL AND c.cliente_email != '' AND LOWER(TRIM(c.cliente_email)) = LOWER(TRIM(cli.email)))
+          OR (
+            (c.cliente_email IS NULL OR c.cliente_email = '')
+            AND c.name IS NOT NULL
+            AND TRIM(c.name) != ''
+            AND (
+              LOWER(cli.nome) LIKE CONCAT(LOWER(TRIM(REPLACE(REPLACE(c.name, 'Atendimento - ', ''), ' null', ''))), '%')
+              OR LOWER(CONCAT(COALESCE(cli.nome,''), ' ', COALESCE(cli.sobrenome,''))) LIKE CONCAT(LOWER(TRIM(REPLACE(REPLACE(c.name, 'Atendimento - ', ''), ' null', ''))), '%')
+            )
+          )
+        )
+        WHERE 1=1
+      `;
       const params = [];
 
       if (protocol) {
-        query += ` AND protocol = ?`;
+        query += ` AND c.protocol = ?`;
         params.push(protocol);
       }
       if (clienteEmail) {
-        query += ` AND cliente_email = ?`;
+        query += ` AND c.cliente_email = ?`;
         params.push(clienteEmail);
       }
       if (statusFilter) {
-        query += ` AND status = ?`;
+        query += ` AND c.status = ?`;
         params.push(statusFilter);
       }
 
-      query += ` ORDER BY updated_at DESC`;
+      query += ` GROUP BY c.id ORDER BY c.updated_at DESC`;
       const [rows] = await conn.execute(query, params);
       await conn.end();
 
@@ -826,6 +854,8 @@ app.get('/api/conversations', (req, res) => {
           lastMessagePreview: r.lastMessagePreview || '',
           online: !!r.online,
           cliente_email: r.cliente_email || null,
+          cliente_id: r.cliente_id || null,
+          foto_url: (r.cliente_id && r.tem_foto) ? `/api/cliente/${r.cliente_id}/foto` : null,
           createdAt: r.createdAt || Date.now(),
           updatedAt: r.updatedAt || Date.now()
         })));
@@ -842,7 +872,10 @@ app.get('/api/conversations', (req, res) => {
       if (protocol) {
         list = list.filter(c => c.protocol === protocol);
       }
-      return res.json(list);
+      return res.json(list.map(c => ({
+        ...c,
+        foto_url: c.foto_url || (c.cliente_id ? `/api/cliente/${c.cliente_id}/foto` : (c.cliente_email ? `/api/cliente/foto-por-email?email=${encodeURIComponent(c.cliente_email)}` : null))
+      })));
     } catch (e) {
       return res.status(500).json({ sucesso: false, mensagem: 'Erro ao ler conversas.' });
     }
@@ -865,6 +898,21 @@ app.post('/api/conversations', express.json(), (req, res) => {
     // 1. Tentar localizar conversa existente por protocolo no DB
     try {
       const conn = await createDbConnection();
+
+      // Buscar cliente_id e foto no banco para vincular ao chamado
+      let clienteId = null;
+      let temFoto = false;
+      try {
+        const [cliRows] = await conn.execute(
+          `SELECT id, (foto IS NOT NULL OR foto_path IS NOT NULL) AS tem_foto FROM clientes WHERE (email IS NOT NULL AND LOWER(TRIM(email)) = ?) OR (nome IS NOT NULL AND LOWER(TRIM(nome)) LIKE ?) LIMIT 1`,
+          [clienteEmail ? clienteEmail.toLowerCase() : '', `${name.toLowerCase()}%`]
+        );
+        if (cliRows && cliRows.length > 0) {
+          clienteId = cliRows[0].id;
+          temFoto = !!cliRows[0].tem_foto;
+        }
+      } catch (_) {}
+
       const [existing] = await conn.execute(`SELECT id, name, protocol, status, unread, last_message_preview as lastMessagePreview, online, cliente_email, UNIX_TIMESTAMP(updated_at)*1000 AS updatedAt FROM chat_conversations WHERE protocol = ? LIMIT 1`, [protocol]);
       if (Array.isArray(existing) && existing.length > 0) {
         const found = existing[0];
@@ -879,6 +927,9 @@ app.post('/api/conversations', express.json(), (req, res) => {
           unread: found.unread,
           lastMessagePreview: found.lastMessagePreview,
           online: true,
+          cliente_email: found.cliente_email || clienteEmail,
+          cliente_id: clienteId,
+          foto_url: (clienteId && temFoto) ? `/api/cliente/${clienteId}/foto` : null,
           updatedAt: found.updatedAt
         });
       }
@@ -910,6 +961,9 @@ app.post('/api/conversations', express.json(), (req, res) => {
         lastMessagePreview: lastPreview,
         unread: initialUnread,
         online: true,
+        cliente_email: clienteEmail,
+        cliente_id: clienteId,
+        foto_url: (clienteId && temFoto) ? `/api/cliente/${clienteId}/foto` : null,
         createdAt: Date.now(),
         updatedAt: Date.now()
       };
@@ -935,6 +989,7 @@ app.post('/api/conversations', express.json(), (req, res) => {
         protocol,
         status: initialStatus,
         cliente_email: clienteEmail,
+        foto_url: clienteEmail ? `/api/cliente/foto-por-email?email=${encodeURIComponent(clienteEmail)}` : null,
         messages: [{ id: now, from: 'system', fromName: 'Sistema', text: sysText, time: now }],
         lastMessagePreview: lastPreview,
         unread: initialUnread,
@@ -2437,6 +2492,52 @@ app.get("/api/cliente/:id/foto", async (req, res) => {
     res.send(fotoBuffer);
   } catch (error) {
     console.error('Erro ao buscar foto do cliente:', error && error.message);
+    res.status(500).json({ sucesso: false, mensagem: 'Erro no servidor!' });
+  }
+});
+
+// Rota pública para buscar a foto de perfil do cliente por email ou id via query param
+app.get(["/api/cliente/foto-por-email", "/api/cliente/foto"], async (req, res) => {
+  try {
+    const email = req.query && req.query.email ? String(req.query.email).trim().toLowerCase() : null;
+    const id = req.query && req.query.id ? Number(req.query.id) : null;
+    if (!email && !id) {
+      return res.status(400).json({ sucesso: false, mensagem: 'Email ou ID obrigatório.' });
+    }
+
+    const connection = await createDbConnection();
+    let rows = [];
+    if (id) {
+      [rows] = await connection.execute("SELECT id, foto, foto_mime, foto_path FROM clientes WHERE id = ? LIMIT 1", [id]);
+    } else {
+      [rows] = await connection.execute("SELECT id, foto, foto_mime, foto_path FROM clientes WHERE LOWER(TRIM(email)) = ? LIMIT 1", [email]);
+    }
+    await connection.end();
+
+    if (!rows.length) return res.status(404).json({ sucesso: false, mensagem: 'Foto não encontrada.' });
+
+    const row = rows[0];
+    if (row.foto_path) {
+      const uploadsDir = path.join(__dirname, 'public', 'uploads');
+      const filePath = path.join(uploadsDir, row.foto_path);
+      if (fs.existsSync(filePath)) {
+        return res.sendFile(filePath);
+      }
+    }
+
+    const fotoBuffer = row.foto;
+    if (!fotoBuffer) return res.status(404).json({ sucesso: false, mensagem: 'Foto não encontrada.' });
+    let contentType = row.foto_mime || 'image/jpeg';
+    if (!row.foto_mime) {
+      if (fotoBuffer && fotoBuffer[0] === 0x89 && fotoBuffer[1] === 0x50) contentType = 'image/png';
+      else if (fotoBuffer && fotoBuffer[0] === 0xFF && fotoBuffer[1] === 0xD8) contentType = 'image/jpeg';
+      else if (fotoBuffer && fotoBuffer.slice(0,4).toString() === 'RIFF' && fotoBuffer.slice(8,12).toString() === 'WEBP') contentType = 'image/webp';
+    }
+
+    res.setHeader('Content-Type', contentType);
+    res.send(fotoBuffer);
+  } catch (error) {
+    console.error('Erro ao buscar foto por email:', error && error.message);
     res.status(500).json({ sucesso: false, mensagem: 'Erro no servidor!' });
   }
 });

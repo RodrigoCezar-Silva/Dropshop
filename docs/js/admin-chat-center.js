@@ -418,11 +418,20 @@
         lastMsg = 'Solicitação de atendimento';
       }
       const unreadCount = Number(c.unread) || 0;
+      const fotoUrl = c.foto_url || (c.cliente_id ? `${apiBase}/api/cliente/${c.cliente_id}/foto` : (c.cliente_email ? `${apiBase}/api/cliente/foto-por-email?email=${encodeURIComponent(c.cliente_email)}` : null));
+
+      let avatarInner = initials;
+      if (fotoUrl) {
+        avatarInner = `
+          <img src="${escapeHtml(fotoUrl)}" alt="Foto de ${escapeHtml(nomeLimpo)}" class="avatar-img" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='flex';" />
+          <span class="avatar-fallback" style="display:none; width:100%; height:100%; align-items:center; justify-content:center;">${initials}</span>
+        `;
+      }
 
       return `
         <div class="conv-item ${isSelected ? 'active' : ''}" data-id="${c.id}">
           <div class="conv-avatar" style="${isAguardando ? 'background:linear-gradient(135deg,#f59e0b,#d97706);' : ''}">
-            ${initials}
+            ${avatarInner}
           </div>
           <div class="conv-info">
             <div class="name">
@@ -513,7 +522,15 @@
 
     if (clientAvatarBox) {
       const initials = extrairIniciaisCliente(c.name);
-      clientAvatarBox.innerHTML = `<strong>${initials}</strong>`;
+      const fotoUrl = c.foto_url || (c.cliente_id ? `${apiBase}/api/cliente/${c.cliente_id}/foto` : (c.cliente_email ? `${apiBase}/api/cliente/foto-por-email?email=${encodeURIComponent(c.cliente_email)}` : null));
+      if (fotoUrl) {
+        clientAvatarBox.innerHTML = `
+          <img src="${escapeHtml(fotoUrl)}" alt="Foto de ${escapeHtml(nomeLimpo)}" class="avatar-img" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='flex';" />
+          <span class="avatar-fallback" style="display:none; width:100%; height:100%; align-items:center; justify-content:center; font-weight:800; font-size:1.15rem; color:#fff;">${initials}</span>
+        `;
+      } else {
+        clientAvatarBox.innerHTML = `<strong>${initials}</strong>`;
+      }
     }
   }
 
