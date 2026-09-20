@@ -116,9 +116,14 @@
         
         <!-- Cabeçalho do Visualizador -->
         <div id="historicoDetailHeader" class="historico-detail-header" style="display:none;">
-          <div class="historico-detail-title">
-            <h3 id="detailCustomerName">Nome do Cliente</h3>
-            <p id="detailSubtitle">Protocolo #CLI-2026 • Encerrado em --/--/----</p>
+          <div style="display:flex; align-items:center; gap:12px;">
+            <div class="attendant-avatar" id="historicoAvatarBox" style="background:linear-gradient(135deg,#0284c7,#00c6ff);">
+              <i class="fa-solid fa-user"></i>
+            </div>
+            <div class="historico-detail-title">
+              <h3 id="detailCustomerName">Nome do Cliente</h3>
+              <p id="detailSubtitle">Protocolo #CLI-2026 • Encerrado em --/--/----</p>
+            </div>
           </div>
           <div>
             <button id="btnExportDetailChat" class="chat-btn-action" type="button" title="Baixar histórico em arquivo de texto">
