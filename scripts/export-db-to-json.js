@@ -92,7 +92,11 @@ async function main() {
     const tables = await getTables(connection, configuredTables);
 
     if (tables.length === 0) {
-      console.log('No tables configured for export.');
+      console.log(
+        configuredTables.length > 0
+          ? 'No configured tables are available for export.'
+          : 'No tables were found in the database for export.'
+      );
       return;
     }
 
