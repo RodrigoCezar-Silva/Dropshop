@@ -14,7 +14,12 @@ function splitCsv(value) {
 }
 
 function hasRequiredCiConfig() {
-  return Boolean(process.env.DB_HOST && process.env.DB_USER && process.env.DB_NAME);
+  return Boolean(
+    process.env.DB_HOST &&
+    process.env.DB_USER &&
+    process.env.DB_NAME &&
+    (process.env.DB_PASSWORD || process.env.DB_PASS)
+  );
 }
 
 function shouldSkipInCi() {
@@ -76,7 +81,7 @@ async function exportTable(connection, tableName, sensitiveFields) {
 
 async function main() {
   if (shouldSkipInCi()) {
-    console.log('Skipping DB export because the required database secrets are not configured for this workflow run.');
+    console.log('Skipping DB export because the required database connection secrets are not configured for this workflow run.');
     return;
   }
 
