@@ -67,7 +67,13 @@ async function getTables(connection, configuredTables) {
   }
 
   const [rows] = await connection.query('SHOW TABLES');
-  return rows.map((row) => Object.values(row)[0]).filter(Boolean);
+  const firstColumnName = rows[0] ? Object.keys(rows[0])[0] : null;
+
+  if (!firstColumnName) {
+    return [];
+  }
+
+  return rows.map((row) => row[firstColumnName]).filter(Boolean);
 }
 
 async function exportTable(connection, tableName, sensitiveFields) {
